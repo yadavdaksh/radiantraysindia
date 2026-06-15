@@ -7,8 +7,7 @@ import { apiFetch } from "../lib/api";
 import {
   IconUsers, IconMapPin, IconHeart, IconTarget, IconMail,
   IconNews, IconMessageCircle, IconCheck, IconX, IconRefresh,
-  IconSearch, IconChevronDown, IconChevronRight, IconTrash,
-  IconAlertCircle, IconPhoneCall, IconBuildingStore,
+  IconSearch, IconChevronDown, IconChevronRight, IconTrash, IconPhoneCall, IconBuildingStore,
   IconShoppingCart, IconStar, IconEye, IconLock,
 } from "@tabler/icons-react";
 
@@ -27,7 +26,7 @@ function Badge({ color, children }: { color: string; children: React.ReactNode }
 function Skeleton() {
   return (
     <div className="space-y-3 animate-pulse">
-      {[1,2,3,4,5].map(i => <div key={i} className="h-16 rounded-xl bg-slate-100" />)}
+      {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 rounded-xl bg-slate-100" />)}
     </div>
   );
 }
@@ -63,7 +62,7 @@ function PageHeader({ title, count, onRefresh, refreshing, children }: {
 
 // ── CUSTOMERS ───────────────────────────────────────────────────────────────
 
-export function CustomersPage({ showToast }: { showToast: (m: string, t?: "success"|"error"|"info") => void }) {
+export function CustomersPage({ showToast }: { showToast: (m: string, t?: "success" | "error" | "info") => void }) {
   const [items, setItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -269,26 +268,26 @@ export function AddressesPage({ showToast }: { showToast: (m: string, t?: any) =
           <tbody className="divide-y divide-slate-100">
             {loading ? <tr><td colSpan={5} className="p-6"><Skeleton /></td></tr>
               : items.length === 0 ? <tr><td colSpan={5}><Empty icon={IconMapPin} msg="No addresses yet" /></td></tr>
-              : items.map(a => (
-                <tr key={a.id} className="hover:bg-slate-50 transition">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-slate-900">{a.customer?.name || "—"}</p>
-                    <p className="text-[10px] text-slate-400">{a.customer?.email}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge color="bg-slate-100 text-slate-700">{a.label}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-600 hidden md:table-cell max-w-48 truncate">
-                    {a.addressLine1}{a.addressLine2 ? `, ${a.addressLine2}` : ""}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-500 hidden sm:table-cell">
-                    {a.city}, {a.state} — {a.postalCode}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {a.isDefault ? <IconCheck size={14} className="text-emerald-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                  </td>
-                </tr>
-              ))}
+                : items.map(a => (
+                  <tr key={a.id} className="hover:bg-slate-50 transition">
+                    <td className="px-4 py-3">
+                      <p className="font-semibold text-slate-900">{a.customer?.name || "—"}</p>
+                      <p className="text-[10px] text-slate-400">{a.customer?.email}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge color="bg-slate-100 text-slate-700">{a.label}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 hidden md:table-cell max-w-48 truncate">
+                      {a.addressLine1}{a.addressLine2 ? `, ${a.addressLine2}` : ""}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-500 hidden sm:table-cell">
+                      {a.city}, {a.state} — {a.postalCode}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {a.isDefault ? <IconCheck size={14} className="text-emerald-600 mx-auto" /> : <span className="text-slate-300">—</span>}
+                    </td>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>
@@ -328,31 +327,31 @@ export function WishlistPage({ showToast }: { showToast: (m: string, t?: any) =>
           <tbody className="divide-y divide-slate-100">
             {loading ? <tr><td colSpan={4} className="p-6"><Skeleton /></td></tr>
               : items.length === 0 ? <tr><td colSpan={4}><Empty icon={IconHeart} msg="No wishlist items" /></td></tr>
-              : items.map((w: any) => {
-                const img = w.product?.images?.find((i: any) => i.isPrimary)?.url || w.product?.images?.[0]?.url;
-                return (
-                  <tr key={w.id} className="hover:bg-slate-50 transition">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {img && <img src={img} alt="" className="h-10 w-10 rounded-lg object-contain bg-slate-50 border border-slate-100" />}
-                        <p className="font-semibold text-slate-900 max-w-48 truncate">{w.product?.name || "—"}</p>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge color={w.product?.productType === "B2C" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-700"}>
-                        {w.product?.productType || "—"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-800">{w.customer?.name || "—"}</p>
-                      <p className="text-[10px] text-slate-400">{w.customer?.email}</p>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-slate-400 hidden sm:table-cell">
-                      {new Date(w.createdAt).toLocaleDateString("en-IN")}
-                    </td>
-                  </tr>
-                );
-              })}
+                : items.map((w: any) => {
+                  const img = w.product?.images?.find((i: any) => i.isPrimary)?.url || w.product?.images?.[0]?.url;
+                  return (
+                    <tr key={w.id} className="hover:bg-slate-50 transition">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {img && <img src={img} alt="" className="h-10 w-10 rounded-lg object-contain bg-slate-50 border border-slate-100" />}
+                          <p className="font-semibold text-slate-900 max-w-48 truncate">{w.product?.name || "—"}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge color={w.product?.productType === "B2C" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-700"}>
+                          {w.product?.productType || "—"}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="font-semibold text-slate-800">{w.customer?.name || "—"}</p>
+                        <p className="text-[10px] text-slate-400">{w.customer?.email}</p>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-400 hidden sm:table-cell">
+                        {new Date(w.createdAt).toLocaleDateString("en-IN")}
+                      </td>
+                    </tr>
+                  );
+                })}
           </tbody>
         </table>
       </div>
@@ -402,49 +401,49 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
       <div className="space-y-3">
         {loading ? <Skeleton />
           : items.length === 0 ? <Empty icon={IconTarget} msg="No leads yet" />
-          : items.map((lead: any) => (
-            <div key={lead.id} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="flex items-start justify-between gap-4 p-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-slate-900">{lead.name}</p>
-                    <Badge color={statusColors[lead.status] || "bg-slate-100 text-slate-600"}>{lead.status}</Badge>
-                    {lead.source && <Badge color="bg-slate-100 text-slate-500">{lead.source}</Badge>}
+            : items.map((lead: any) => (
+              <div key={lead.id} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <div className="flex items-start justify-between gap-4 p-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-bold text-slate-900">{lead.name}</p>
+                      <Badge color={statusColors[lead.status] || "bg-slate-100 text-slate-600"}>{lead.status}</Badge>
+                      {lead.source && <Badge color="bg-slate-100 text-slate-500">{lead.source}</Badge>}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 flex-wrap">
+                      {lead.email && <span className="flex items-center gap-1"><IconMail size={11} />{lead.email}</span>}
+                      {lead.phone && <span className="flex items-center gap-1"><IconPhoneCall size={11} />{lead.phone}</span>}
+                      {lead.company && <span className="flex items-center gap-1"><IconBuildingStore size={11} />{lead.company}</span>}
+                    </div>
+                    {lead.product && (
+                      <p className="text-[10px] text-sky-700 font-bold mt-1">Product: {lead.product.name}</p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 flex-wrap">
-                    {lead.email && <span className="flex items-center gap-1"><IconMail size={11} />{lead.email}</span>}
-                    {lead.phone && <span className="flex items-center gap-1"><IconPhoneCall size={11} />{lead.phone}</span>}
-                    {lead.company && <span className="flex items-center gap-1"><IconBuildingStore size={11} />{lead.company}</span>}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <select
+                      value={lead.status}
+                      onChange={e => updateStatus(lead.id, e.target.value)}
+                      className="text-xs rounded-lg border border-slate-200 bg-white px-2 py-1.5 outline-none focus:border-sky-500"
+                    >
+                      {["NEW", "CONTACTED", "QUALIFIED", "QUOTED", "WON", "LOST", "CLOSED"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <button onClick={() => setExpanded(expanded === lead.id ? null : lead.id)}
+                      className="text-slate-400 hover:text-slate-700">
+                      {expanded === lead.id ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+                    </button>
                   </div>
-                  {lead.product && (
-                    <p className="text-[10px] text-sky-700 font-bold mt-1">Product: {lead.product.name}</p>
-                  )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <select
-                    value={lead.status}
-                    onChange={e => updateStatus(lead.id, e.target.value)}
-                    className="text-xs rounded-lg border border-slate-200 bg-white px-2 py-1.5 outline-none focus:border-sky-500"
-                  >
-                    {["NEW","CONTACTED","QUALIFIED","QUOTED","WON","LOST","CLOSED"].map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <button onClick={() => setExpanded(expanded === lead.id ? null : lead.id)}
-                    className="text-slate-400 hover:text-slate-700">
-                    {expanded === lead.id ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
-                  </button>
-                </div>
+                {expanded === lead.id && lead.message && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Message</p>
+                    <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3">{lead.message}</p>
+                    <p className="text-[10px] text-slate-400 mt-2">{new Date(lead.createdAt).toLocaleString("en-IN")}</p>
+                  </div>
+                )}
               </div>
-              {expanded === lead.id && lead.message && (
-                <div className="px-4 pb-4 border-t border-slate-100 pt-3">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Message</p>
-                  <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3">{lead.message}</p>
-                  <p className="text-[10px] text-slate-400 mt-2">{new Date(lead.createdAt).toLocaleString("en-IN")}</p>
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
       </div>
     </div>
   );
@@ -473,34 +472,34 @@ export function ContactFormsPage({ showToast }: { showToast: (m: string, t?: any
       <PageHeader title="Contact Form Submissions" count={total} onRefresh={load} refreshing={loading} />
       {loading ? <Skeleton />
         : items.length === 0 ? <Empty icon={IconMail} msg="No contact submissions yet" />
-        : (
-          <div className="space-y-3">
-            {items.map((c: any) => (
-              <div key={c.id} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div className="flex items-start justify-between gap-4 p-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-slate-900">{c.name}</p>
-                    <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-500 flex-wrap">
-                      {c.email && <span>{c.email}</span>}
-                      {c.phone && <span>{c.phone}</span>}
-                      {c.company && <span className="font-semibold">{c.company}</span>}
+          : (
+            <div className="space-y-3">
+              {items.map((c: any) => (
+                <div key={c.id} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                  <div className="flex items-start justify-between gap-4 p-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-900">{c.name}</p>
+                      <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-500 flex-wrap">
+                        {c.email && <span>{c.email}</span>}
+                        {c.phone && <span>{c.phone}</span>}
+                        {c.company && <span className="font-semibold">{c.company}</span>}
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">{new Date(c.createdAt).toLocaleString("en-IN")}</p>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1">{new Date(c.createdAt).toLocaleString("en-IN")}</p>
+                    <button onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                      className="text-slate-400 hover:text-slate-700">
+                      {expanded === c.id ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+                    </button>
                   </div>
-                  <button onClick={() => setExpanded(expanded === c.id ? null : c.id)}
-                    className="text-slate-400 hover:text-slate-700">
-                    {expanded === c.id ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
-                  </button>
+                  {expanded === c.id && (
+                    <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+                      <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3">{c.message || "No message"}</p>
+                    </div>
+                  )}
                 </div>
-                {expanded === c.id && (
-                  <div className="px-4 pb-4 border-t border-slate-100 pt-3">
-                    <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3">{c.message || "No message"}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
     </div>
   );
 }
@@ -558,26 +557,26 @@ export function NewsletterPage({ showToast }: { showToast: (m: string, t?: any) 
           <tbody className="divide-y divide-slate-100">
             {loading ? <tr><td colSpan={5} className="p-6"><Skeleton /></td></tr>
               : items.length === 0 ? <tr><td colSpan={5}><Empty icon={IconNews} msg="No subscribers yet" /></td></tr>
-              : items.map((s: any, i: number) => (
-                <tr key={s.id} className="hover:bg-slate-50 transition">
-                  <td className="px-4 py-3 text-xs text-slate-400 font-mono">{i + 1}</td>
-                  <td className="px-4 py-3 font-semibold text-slate-900">{s.email}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500 hidden sm:table-cell">
-                    {new Date(s.createdAt).toLocaleDateString("en-IN")}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge color={s.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}>
-                      {s.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button onClick={() => del(s.id)}
-                      className="text-slate-300 hover:text-rose-500 transition">
-                      <IconTrash size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                : items.map((s: any, i: number) => (
+                  <tr key={s.id} className="hover:bg-slate-50 transition">
+                    <td className="px-4 py-3 text-xs text-slate-400 font-mono">{i + 1}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-900">{s.email}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500 hidden sm:table-cell">
+                      {new Date(s.createdAt).toLocaleDateString("en-IN")}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge color={s.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}>
+                        {s.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => del(s.id)}
+                        className="text-slate-300 hover:text-rose-500 transition">
+                        <IconTrash size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>
@@ -655,40 +654,40 @@ export function TestimonialsPage({ showToast }: { showToast: (m: string, t?: any
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {loading ? [1,2,3].map(i => <div key={i} className="h-48 rounded-xl bg-slate-100 animate-pulse" />) :
+        {loading ? [1, 2, 3].map(i => <div key={i} className="h-48 rounded-xl bg-slate-100 animate-pulse" />) :
           items.length === 0 ? <Empty icon={IconMessageCircle} msg="No testimonials yet" /> :
-          items.map((t: any) => (
-            <div key={t.id} className={`rounded-xl border bg-white p-5 shadow-sm space-y-3 ${!t.isActive ? "opacity-60" : ""}`}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-extrabold text-slate-900">{t.name}</p>
-                  <p className="text-xs text-slate-400">{t.designation}{t.company ? ` · ${t.company}` : ""}</p>
+            items.map((t: any) => (
+              <div key={t.id} className={`rounded-xl border bg-white p-5 shadow-sm space-y-3 ${!t.isActive ? "opacity-60" : ""}`}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-extrabold text-slate-900">{t.name}</p>
+                    <p className="text-xs text-slate-400">{t.designation}{t.company ? ` · ${t.company}` : ""}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => toggle(t)} title={t.isActive ? "Hide" : "Publish"}
+                      className={`h-7 w-7 flex items-center justify-center rounded-lg transition ${t.isActive ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-50"}`}>
+                      {t.isActive ? <IconCheck size={13} /> : <IconX size={13} />}
+                    </button>
+                    <button onClick={() => openEdit(t)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition">
+                      <IconStar size={13} />
+                    </button>
+                    <button onClick={() => del(t.id)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition">
+                      <IconTrash size={13} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <button onClick={() => toggle(t)} title={t.isActive ? "Hide" : "Publish"}
-                    className={`h-7 w-7 flex items-center justify-center rounded-lg transition ${t.isActive ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-50"}`}>
-                    {t.isActive ? <IconCheck size={13} /> : <IconX size={13} />}
-                  </button>
-                  <button onClick={() => openEdit(t)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition">
-                    <IconStar size={13} />
-                  </button>
-                  <button onClick={() => del(t.id)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition">
-                    <IconTrash size={13} />
-                  </button>
+                {/* Stars */}
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <IconStar key={n} size={12} className={n <= (t.rating || 5) ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"} />
+                  ))}
                 </div>
+                <p className="text-xs text-slate-600 leading-relaxed line-clamp-3 italic">"{t.quote}"</p>
+                <Badge color={t.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}>
+                  {t.isActive ? "Published" : "Hidden"}
+                </Badge>
               </div>
-              {/* Stars */}
-              <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(n => (
-                  <IconStar key={n} size={12} className={n <= (t.rating || 5) ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"} />
-                ))}
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3 italic">"{t.quote}"</p>
-              <Badge color={t.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}>
-                {t.isActive ? "Published" : "Hidden"}
-              </Badge>
-            </div>
-          ))}
+            ))}
       </div>
 
       {/* Modal */}
@@ -715,7 +714,7 @@ export function TestimonialsPage({ showToast }: { showToast: (m: string, t?: any
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase text-slate-500">Rating</label>
                 <div className="flex gap-1">
-                  {[1,2,3,4,5].map(n => (
+                  {[1, 2, 3, 4, 5].map(n => (
                     <button key={n} type="button" onClick={() => setForm(p => ({ ...p, rating: n }))}>
                       <IconStar size={20} className={n <= form.rating ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"} />
                     </button>

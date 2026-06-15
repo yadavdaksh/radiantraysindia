@@ -2,13 +2,13 @@
  * MorePages.tsx — Industries, Gallery, Banners, Roles, Users
  * All real API, no mock data.
  */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { apiFetch } from "../lib/api";
 import { ImageUploadField } from "../components/Views";
 import {
   IconBuildingFactory, IconPhoto, IconFlag, IconShieldHalf,
   IconUser, IconPlus, IconEdit, IconTrash, IconX, IconRefresh,
-  IconSearch, IconCheck, IconKey, IconLock, IconEye, IconEyeOff,
+  IconSearch, IconCheck, IconKey, IconEye, IconEyeOff,
 } from "@tabler/icons-react";
 
 const inp = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-sky-500 focus:bg-white transition";
@@ -17,7 +17,7 @@ function Badge({ color, children }: { color: string; children: React.ReactNode }
   return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${color}`}>{children}</span>;
 }
 function Skeleton() {
-  return <div className="space-y-3 animate-pulse">{[1,2,3,4].map(i => <div key={i} className="h-14 rounded-xl bg-slate-100" />)}</div>;
+  return <div className="space-y-3 animate-pulse">{[1, 2, 3, 4].map(i => <div key={i} className="h-14 rounded-xl bg-slate-100" />)}</div>;
 }
 function Empty({ icon: Icon, msg }: { icon: any; msg: string }) {
   return (
@@ -119,7 +119,7 @@ export function IndustriesPage({ showToast }: { showToast: (m: string, t?: any) 
           {items.map((item: any) => (
             <div key={item.id} className="rounded-xl border border-slate-200 bg-white shadow-sm p-4 flex items-start gap-3">
               {item.imageUrl ? (
-                <img src={item.imageUrl} alt={item.name} className="h-12 w-12 rounded-xl object-cover shrink-0 border border-slate-100" onError={e => { (e.target as HTMLImageElement).style.display="none"; }} />
+                <img src={item.imageUrl} alt={item.name} className="h-12 w-12 rounded-xl object-cover shrink-0 border border-slate-100" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
               ) : (
                 <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
                   <IconBuildingFactory size={20} className="text-brand" />
@@ -216,7 +216,7 @@ export function GalleryPage({ showToast }: { showToast: (m: string, t?: any) => 
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1,2,3].map(i => <div key={i} className="aspect-[4/3] rounded-xl bg-slate-100 animate-pulse" />)}
+          {[1, 2, 3].map(i => <div key={i} className="aspect-[4/3] rounded-xl bg-slate-100 animate-pulse" />)}
         </div>
       ) : items.length === 0 ? <Empty icon={IconPhoto} msg="No gallery images yet" /> : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -335,7 +335,7 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
             <div key={item.id} className={`rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden ${!item.isActive ? "opacity-60" : ""}`}>
               {item.desktopImageUrl && (
                 <div className="h-28 overflow-hidden bg-slate-100">
-                  <img src={item.desktopImageUrl} alt={item.title} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display="none"; }} />
+                  <img src={item.desktopImageUrl} alt={item.title} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
               )}
               {!item.desktopImageUrl && (
@@ -647,8 +647,7 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
     catch (e: any) { showToast(e.message, "error"); }
   };
 
-  // Current user's role determines what pages they can see
-  const myRole = session?.role;
+
   const userRole = (u: any) => roles.find((r: any) => r.id === u.roleId);
   const filtered = users.filter(u =>
     !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
@@ -684,80 +683,80 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
           <tbody className="divide-y divide-slate-100">
             {loading ? <tr><td colSpan={6} className="p-6"><Skeleton /></td></tr>
               : filtered.length === 0 ? <tr><td colSpan={6}><Empty icon={IconUser} msg="No users found" /></td></tr>
-              : filtered.map((u: any) => {
-                const role = userRole(u);
-                const isMe = u.id === session?.id;
-                const isSuperAdmin = u.role?.name === "SUPER_ADMIN" || role?.name === "SUPER_ADMIN";
-                // Pages this user can access based on their role permissions
-                const accessiblePages = isSuperAdmin ? ["All pages"] : [
-                  ...new Set((role?.permissions || []).map((p: any) => {
-                    const r = p.permission?.resource || "";
-                    const map: Record<string, string> = {
-                      product: "Products", category: "Categories", order: "Orders",
-                      lead: "Leads", customer: "Customers", coupon: "Coupons",
-                      gallery: "Gallery", testimonial: "Testimonials", industry: "Industries",
-                      user: "Users", role: "Roles", setting: "Settings",
-                    };
-                    return map[r] || r;
-                  }))
-                ].filter(Boolean) as string[];
+                : filtered.map((u: any) => {
+                  const role = userRole(u);
+                  const isMe = u.id === session?.id;
+                  const isSuperAdmin = u.role?.name === "SUPER_ADMIN" || role?.name === "SUPER_ADMIN";
+                  // Pages this user can access based on their role permissions
+                  const accessiblePages = isSuperAdmin ? ["All pages"] : [
+                    ...new Set((role?.permissions || []).map((p: any) => {
+                      const r = p.permission?.resource || "";
+                      const map: Record<string, string> = {
+                        product: "Products", category: "Categories", order: "Orders",
+                        lead: "Leads", customer: "Customers", coupon: "Coupons",
+                        gallery: "Gallery", testimonial: "Testimonials", industry: "Industries",
+                        user: "Users", role: "Roles", setting: "Settings",
+                      };
+                      return map[r] || r;
+                    }))
+                  ].filter(Boolean) as string[];
 
-                return (
-                  <tr key={u.id} className={`hover:bg-slate-50 transition ${isMe ? "bg-sky-50/30" : ""}`}>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 text-xs font-extrabold shrink-0">
-                          {u.name?.[0] || "?"}
+                  return (
+                    <tr key={u.id} className={`hover:bg-slate-50 transition ${isMe ? "bg-sky-50/30" : ""}`}>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 text-xs font-extrabold shrink-0">
+                            {u.name?.[0] || "?"}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-900">{u.name}{isMe && <span className="ml-1 text-[9px] text-sky-600 font-bold">(you)</span>}</p>
+                            <p className="text-[10px] text-slate-400">{u.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{u.name}{isMe && <span className="ml-1 text-[9px] text-sky-600 font-bold">(you)</span>}</p>
-                          <p className="text-[10px] text-slate-400">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-slate-500 hidden md:table-cell">{u.phone || "—"}</td>
-                    <td className="px-4 py-3">
-                      <Badge color={isSuperAdmin ? "bg-violet-100 text-violet-800" : "bg-sky-100 text-sky-800"}>
-                        {role?.label || u.role?.label || "—"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <div className="flex flex-wrap gap-1 max-w-xs">
-                        {isSuperAdmin ? (
-                          <Badge color="bg-violet-100 text-violet-700">All pages</Badge>
-                        ) : accessiblePages.slice(0, 5).map((p: string) => (
-                          <Badge key={p} color="bg-slate-100 text-slate-600">{p}</Badge>
-                        ))}
-                        {!isSuperAdmin && accessiblePages.length > 5 && (
-                          <Badge color="bg-slate-100 text-slate-400">+{accessiblePages.length - 5} more</Badge>
-                        )}
-                        {!isSuperAdmin && accessiblePages.length === 0 && (
-                          <Badge color="bg-rose-50 text-rose-600">No permissions</Badge>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge color={u.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}>
-                        {u.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </td>
-                    {can("user", "update") && (
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => openEdit(u)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition">
-                            <IconEdit size={13} />
-                          </button>
-                          {can("user", "delete") && !isMe && (
-                            <button onClick={() => archive(u)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition">
-                              <IconTrash size={13} />
-                            </button>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-500 hidden md:table-cell">{u.phone || "—"}</td>
+                      <td className="px-4 py-3">
+                        <Badge color={isSuperAdmin ? "bg-violet-100 text-violet-800" : "bg-sky-100 text-sky-800"}>
+                          {role?.label || u.role?.label || "—"}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {isSuperAdmin ? (
+                            <Badge color="bg-violet-100 text-violet-700">All pages</Badge>
+                          ) : accessiblePages.slice(0, 5).map((p: string) => (
+                            <Badge key={p} color="bg-slate-100 text-slate-600">{p}</Badge>
+                          ))}
+                          {!isSuperAdmin && accessiblePages.length > 5 && (
+                            <Badge color="bg-slate-100 text-slate-400">+{accessiblePages.length - 5} more</Badge>
+                          )}
+                          {!isSuperAdmin && accessiblePages.length === 0 && (
+                            <Badge color="bg-rose-50 text-rose-600">No permissions</Badge>
                           )}
                         </div>
                       </td>
-                    )}
-                  </tr>
-                );
-              })}
+                      <td className="px-4 py-3">
+                        <Badge color={u.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}>
+                          {u.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </td>
+                      {can("user", "update") && (
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => openEdit(u)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition">
+                              <IconEdit size={13} />
+                            </button>
+                            {can("user", "delete") && !isMe && (
+                              <button onClick={() => archive(u)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition">
+                                <IconTrash size={13} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
           </tbody>
         </table>
       </div>

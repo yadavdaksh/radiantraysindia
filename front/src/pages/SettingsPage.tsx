@@ -7,8 +7,8 @@ import React, { useState, useEffect } from "react";
 import { apiFetch } from "../lib/api";
 import {
   IconBuilding, IconMail, IconCloud, IconCreditCard, IconTruck,
-  IconChartBar, IconCheck, IconX, IconEye, IconEyeOff,
-  IconRefresh, IconAlertCircle, IconCircleCheck,
+  IconChartBar, IconEye, IconEyeOff,
+  IconAlertCircle, IconCircleCheck,
 } from "@tabler/icons-react";
 
 const inp = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-500 focus:bg-white transition";
@@ -60,21 +60,21 @@ function TestResult({ status }: { status: "idle" | "testing" | "ok" | "fail"; ms
   );
   return (
     <div className="flex items-center gap-2 text-xs text-rose-700 font-semibold bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
-      <IconAlertCircle size={14} /> {msg || "Connection failed"}
+      <IconAlertCircle size={14} /> {"Connection failed"}
     </div>
   );
 }
 
 const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
-  { key: "company",    label: "Company",    icon: IconBuilding },
-  { key: "smtp",       label: "SMTP Email", icon: IconMail },
-  { key: "r2",         label: "R2 Storage", icon: IconCloud },
-  { key: "razorpay",   label: "Razorpay",   icon: IconCreditCard },
+  { key: "company", label: "Company", icon: IconBuilding },
+  { key: "smtp", label: "SMTP Email", icon: IconMail },
+  { key: "r2", label: "R2 Storage", icon: IconCloud },
+  { key: "razorpay", label: "Razorpay", icon: IconCreditCard },
   { key: "shiprocket", label: "Shiprocket", icon: IconTruck },
-  { key: "analytics",  label: "Analytics",  icon: IconChartBar },
+  { key: "analytics", label: "Analytics", icon: IconChartBar },
 ];
 
-export default function SettingsPage({ showToast }: { showToast: (m: string, t?: "success"|"error"|"info") => void }) {
+export default function SettingsPage({ showToast }: { showToast: (m: string, t?: "success" | "error" | "info") => void }) {
   const [tab, setTab] = useState<Tab>("company");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -100,11 +100,11 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
   const [analytics, setAnalytics] = useState({ gaId: "", metaPixelId: "", gtagId: "" });
 
   // Test states
-  const [smtpTest, setSmtpTest] = useState<"idle"|"testing"|"ok"|"fail">("idle");
+  const [smtpTest, setSmtpTest] = useState<"idle" | "testing" | "ok" | "fail">("idle");
   const [smtpTestMsg, setSmtpTestMsg] = useState("");
-  const [rzpTest, setRzpTest] = useState<"idle"|"testing"|"ok"|"fail">("idle");
+  const [rzpTest, setRzpTest] = useState<"idle" | "testing" | "ok" | "fail">("idle");
   const [rzpTestMsg, setRzpTestMsg] = useState("");
-  const [srTest, setSrTest] = useState<"idle"|"testing"|"ok"|"fail">("idle");
+  const [srTest, setSrTest] = useState<"idle" | "testing" | "ok" | "fail">("idle");
   const [srTestMsg, setSrTestMsg] = useState("");
 
   // Load all settings from DB on mount
@@ -123,7 +123,7 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
         setShiprocket(get("shiprocket_config", shiprocket));
         setAnalytics(get("analytics_config", analytics));
       })
-      .catch(() => {}) // use defaults if no settings yet
+      .catch(() => { }) // use defaults if no settings yet
       .finally(() => setLoading(false));
   }, []);
 
@@ -181,9 +181,8 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
       <div className="flex border-b border-slate-200 gap-0.5 overflow-x-auto">
         {TABS.map(t => (
           <button key={t.key} type="button" onClick={() => setTab(t.key)}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold whitespace-nowrap -mb-px border-b-2 transition ${
-              tab === t.key ? "border-sky-700 text-sky-700" : "border-transparent text-slate-400 hover:text-slate-700"
-            }`}>
+            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold whitespace-nowrap -mb-px border-b-2 transition ${tab === t.key ? "border-sky-700 text-sky-700" : "border-transparent text-slate-400 hover:text-slate-700"
+              }`}>
             {React.createElement(t.icon, { size: 13 })} {t.label}
           </button>
         ))}
