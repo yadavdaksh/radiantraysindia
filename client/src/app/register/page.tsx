@@ -1,198 +1,177 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as zod from "zod";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
-import { SiteShell } from "@/components/site-shell";
-import { AlertCircle, ArrowRight, Loader2, Lock, Mail, Phone, User } from "lucide-react";
+import { toast } from "sonner";
+import { Eye, EyeOff, Mail, Lock, Phone, User, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 
-const registerSchema = zod
-  .object({
-    name: zod.string().min(2, "Name must be at least 2 characters long"),
-    email: zod.string().email("Please enter a valid email address"),
-    phone: zod.string().min(10, "Phone number must be at least 10 digits"),
-    password: zod.string().min(6, "Password must be at least 6 characters long"),
-    confirmPassword: zod.string().min(6, "Please confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type RegisterFormValues = zod.infer<typeof registerSchema>;
+type Errs = { name?: string; email?: string; phone?: string; password?: string; confirm?: string; general?: string };
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Errs>({});
+  const [success, setSuccess] = useState(false);
 
-  const {
-    register: registerField,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-  });
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm(p => ({ ...p, [k]: e.target.value }));
+    setErrors(p => ({ ...p, [k]: undefined, general: undefined }));
+  };
 
-  const onSubmit = async (data: RegisterFormValues) => {
+  const validate = (): boolean => {
+    const e: Errs = {};
+    if (!form.name.trim() || form.name.trim().length < 2) e.name = "Name must be at least 2 characters";
+    if (!form.email) e.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email";
+    if (!form.phone) e.phone = "Phone is required";
+    else if (form.phone.replace(/\D/g, "").length < 10) e.phone = "Enter a valid 10-digit number";
+    if (!form.password) e.password = "Password is required";
+    else if (form.password.length < 6) e.password = "Minimum 6 characters";
+    if (form.password !== form.confirm) e.confirm = "Passwords do not match";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
-    setError(null);
     try {
-      await register(data.name, data.email, data.password, data.phone);
-      // Save email for OTP and redirect
-      localStorage.setItem("rr_pending_verify_email", data.email);
-      router.push("/auth/verify-otp");
+      await register(form.name.trim(), form.email.toLowerCase().trim(), form.password, form.phone.trim());
+      setSuccess(true);
+      toast.success("Account created! Check your email for OTP.");
+      setTimeout(() => router.push("/auth/verify-otp"), 1500);
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      const msg = err.response?.data?.message || err.message || "Registration failed";
+      if (msg.toLowerCase().includes("already")) {
+        setErrors({ email: "This email is already registered" });
+      } else {
+        setErrors({ general: msg });
+      }
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <SiteShell
-      title="Create Customer Account"
-      subtitle="Join Radiant Rays as a customer. Buy cleanroom components directly and track shipping in real time."
-    >
-      <div className="mx-auto max-w-md my-8">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-100">
-          <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Get Started</h2>
-            <p className="text-sm text-slate-500">
-              Create your account to unlock shopping features
-            </p>
+  if (success) {
+    return (
+      <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_rgba(3,95,150,0.08),_transparent_60%)] flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-xl p-10 text-center space-y-5">
+          <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
+          <h2 className="text-xl font-extrabold text-slate-950">Account Created!</h2>
+          <p className="text-sm text-slate-500">We sent a 6-digit OTP to <strong className="text-slate-800">{form.email}</strong>. Redirecting to verification…</p>
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-brand animate-[grow_1.5s_linear_forwards] rounded-full" style={{ width: 0 }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
-            {error && (
-              <div className="flex items-center gap-2 rounded-xl bg-rose-50 p-4 text-sm font-semibold text-rose-600">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span>{error}</span>
+  return (
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_rgba(3,95,150,0.08),_transparent_60%)] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex flex-col items-center gap-1">
+            <span className="text-2xl font-extrabold tracking-tight text-slate-950">Radiant Rays</span>
+            <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-brand">India · Cleanroom</span>
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-100/80 p-8">
+          <h1 className="text-2xl font-extrabold text-slate-950 mb-1">Create account</h1>
+          <p className="text-sm text-slate-500 mb-8">Join Radiant Rays to shop and track orders</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {errors.general && (
+              <div className="flex items-start gap-2.5 rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700">
+                <span className="mt-0.5 shrink-0">✕</span>{errors.general}
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  {...registerField("name")}
-                  placeholder="John Doe"
-                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
+            {/* Fields */}
+            {([
+              { key: "name", label: "Full Name", type: "text", ph: "Your full name", icon: User, auto: "name" },
+              { key: "email", label: "Email Address", type: "email", ph: "you@company.com", icon: Mail, auto: "email" },
+              { key: "phone", label: "Phone Number", type: "tel", ph: "9876543210", icon: Phone, auto: "tel" },
+            ] as { key: keyof typeof form; label: string; type: string; ph: string; icon: any; auto: string }[]).map(f => (
+              <div key={f.key} className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{f.label}</label>
+                <div className="relative">
+                  <f.icon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input
+                    type={f.type}
+                    value={form[f.key]}
+                    onChange={set(f.key)}
+                    placeholder={f.ph}
+                    autoComplete={f.auto}
+                    className={`w-full rounded-xl border pl-10 pr-4 py-3 text-sm outline-none transition ${errors[f.key] ? "border-rose-400 bg-rose-50 focus:ring-1 focus:ring-rose-400" : "border-slate-300 bg-slate-50 focus:border-brand focus:bg-white focus:ring-1 focus:ring-brand"}`}
+                  />
+                </div>
+                {errors[f.key] && <p className="text-xs font-medium text-rose-600">{errors[f.key]}</p>}
               </div>
-              {errors.name && (
-                <p className="text-xs font-medium text-rose-600">{errors.name.message}</p>
-              )}
+            ))}
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={form.password}
+                  onChange={set("password")}
+                  placeholder="Min 6 characters"
+                  autoComplete="new-password"
+                  className={`w-full rounded-xl border pl-10 pr-11 py-3 text-sm outline-none transition ${errors.password ? "border-rose-400 bg-rose-50" : "border-slate-300 bg-slate-50 focus:border-brand focus:bg-white focus:ring-1 focus:ring-brand"}`}
+                />
+                <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition">
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-xs font-medium text-rose-600">{errors.password}</p>}
             </div>
 
+            {/* Confirm */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Email Address
-              </label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Confirm Password</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="email"
-                  {...registerField("email")}
-                  placeholder="name@example.com"
-                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
-              </div>
-              {errors.email && (
-                <p className="text-xs font-medium text-rose-600">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="tel"
-                  {...registerField("phone")}
-                  placeholder="9876543210"
-                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
-              </div>
-              {errors.phone && (
-                <p className="text-xs font-medium text-rose-600">{errors.phone.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="password"
-                  {...registerField("password")}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                  value={form.confirm}
+                  onChange={set("confirm")}
+                  placeholder="Repeat password"
+                  autoComplete="new-password"
+                  className={`w-full rounded-xl border pl-10 pr-4 py-3 text-sm outline-none transition ${errors.confirm ? "border-rose-400 bg-rose-50" : "border-slate-300 bg-slate-50 focus:border-brand focus:bg-white focus:ring-1 focus:ring-brand"}`}
                 />
               </div>
-              {errors.password && (
-                <p className="text-xs font-medium text-rose-600">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="password"
-                  {...registerField("confirmPassword")}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-xs font-medium text-rose-600">{errors.confirmPassword.message}</p>
-              )}
+              {errors.confirm && <p className="text-xs font-medium text-rose-600">{errors.confirm}</p>}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark disabled:opacity-75"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-brand py-3.5 text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark disabled:opacity-60 mt-2"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                <>
-                  Register
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating account…</> : <>Create Account <ArrowRight className="h-4 w-4" /></>}
             </button>
           </form>
 
-          <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-500">
+          <div className="mt-7 border-t border-slate-100 pt-6 text-center text-sm text-slate-500">
             Already have an account?{" "}
-            <Link href="/login" className="font-bold text-brand hover:underline">
-              Sign in
-            </Link>
+            <Link href="/login" className="font-bold text-brand hover:underline">Sign in</Link>
           </div>
         </div>
       </div>
-    </SiteShell>
+    </div>
   );
 }
