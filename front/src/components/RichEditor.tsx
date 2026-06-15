@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Jodit } from "jodit";
 import "jodit/es2021/jodit.min.css";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
 
 interface RichEditorProps {
   value: string;
@@ -16,9 +16,9 @@ const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").trim();
 
 export function RichEditor({ value, onChange, placeholder = "Write content here...", height = 280 }: RichEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef    = useRef<Jodit | null>(null);
-  const skipRef      = useRef(false);
-  const readyRef     = useRef(false);
+  const editorRef = useRef<Jodit | null>(null);
+  const skipRef = useRef(false);
+  const readyRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -88,7 +88,7 @@ export function RichEditor({ value, onChange, placeholder = "Write content here.
 
     return () => {
       readyRef.current = false;
-      try { editor.destruct(); } catch {}
+      try { editor.destruct(); } catch { }
       editorRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -99,7 +99,7 @@ export function RichEditor({ value, onChange, placeholder = "Write content here.
     const apply = () => {
       if (!editorRef.current) return;
       const currentText = stripHtml(editorRef.current.value || "");
-      const newText     = stripHtml(value || "");
+      const newText = stripHtml(value || "");
       if (currentText !== newText) {
         skipRef.current = true;
         editorRef.current.value = value || "";

@@ -9,7 +9,7 @@ import { RichEditorLazy as SimpleEditor } from "../components/RichEditorLazy";
 
 import { apiFetch } from "../lib/api";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
 
 function Label({ children }: { children: React.ReactNode }) {
   return <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">{children}</span>;
@@ -642,8 +642,8 @@ export default function ProductForm({ showToast }: {
                 <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3">
                   <p className="font-extrabold text-emerald-800 text-[10px] uppercase tracking-wider mb-1">How to use together:</p>
                   <p className="text-emerald-700 leading-relaxed">
-                    1. Enable "Has Multiple Variants" → go to Variants tab → create each variant (e.g. "2ft SS304", "3ft SS316").<br/>
-                    2. Use the "Manage Attributes" panel on the right to create attributes + values.<br/>
+                    1. Enable "Has Multiple Variants" → go to Variants tab → create each variant (e.g. "2ft SS304", "3ft SS316").<br />
+                    2. Use the "Manage Attributes" panel on the right to create attributes + values.<br />
                     3. In each variant, click attribute values to tag that variant (e.g. tag "2ft" + "SS304" on Variant 1).
                   </p>
                 </div>
@@ -965,11 +965,10 @@ export default function ProductForm({ showToast }: {
                                           : [...v.attributeValueIds, val.id];
                                         updateVariant(i, "attributeValueIds", ids);
                                       }}
-                                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
-                                        selected
+                                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${selected
                                           ? "bg-sky-700 text-white border-sky-700"
                                           : "border-slate-200 text-slate-600 hover:border-sky-300 hover:text-sky-600"
-                                      }`}
+                                        }`}
                                     >
                                       {val.value}
                                     </button>
@@ -1096,7 +1095,7 @@ export default function ProductForm({ showToast }: {
           <AttributesManager
             attributes={allAttributes}
             onRefresh={() =>
-              apiFetch("/attributes").then(j => setAllAttributes(Array.isArray(j.data) ? j.data : [])).catch(() => {})
+              apiFetch("/attributes").then(j => setAllAttributes(Array.isArray(j.data) ? j.data : [])).catch(() => { })
             }
           />
 

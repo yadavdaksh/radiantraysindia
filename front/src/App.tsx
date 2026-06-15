@@ -88,7 +88,7 @@ type SidebarSection = {
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
 
 async function apiFetch<T>(
   path: string,
@@ -957,24 +957,24 @@ function App() {
 
           {/* ── Routed pages ── */}
           <Routes>
-            <Route path="/products"           element={<ProductsPage showToast={showToast} />} />
-            <Route path="/products/add"        element={<ProductForm  showToast={showToast} can={can} />} />
-            <Route path="/products/edit/:id"   element={<ProductForm  showToast={showToast} can={can} />} />
-            <Route path="/categories"          element={<CategoriesPage showToast={showToast} />} />
-            <Route path="/subcategories"       element={<CategoriesPage showToast={showToast} />} />
-            <Route path="/customers"           element={<CustomersPage  showToast={showToast} />} />
-            <Route path="/addresses"           element={<AddressesPage  showToast={showToast} />} />
-            <Route path="/wishlist"            element={<WishlistPage   showToast={showToast} />} />
-            <Route path="/leads"               element={<LeadsPage      showToast={showToast} />} />
-            <Route path="/contactForms"        element={<ContactFormsPage showToast={showToast} />} />
-            <Route path="/newsletter"          element={<NewsletterPage showToast={showToast} />} />
-            <Route path="/testimonials"        element={<TestimonialsPage showToast={showToast} />} />
-            <Route path="/industries"          element={<IndustriesPage  showToast={showToast} />} />
-            <Route path="/gallery"             element={<GalleryPage     showToast={showToast} />} />
-            <Route path="/banners"             element={<BannersPage     showToast={showToast} />} />
-            <Route path="/roles"               element={<RolesPage       showToast={showToast} can={can} />} />
-            <Route path="/users"               element={<UsersPage       showToast={showToast} can={can} session={session} />} />
-            <Route path="/settings"            element={<SettingsPage    showToast={showToast} />} />
+            <Route path="/products" element={<ProductsPage showToast={showToast} />} />
+            <Route path="/products/add" element={<ProductForm showToast={showToast} can={can} />} />
+            <Route path="/products/edit/:id" element={<ProductForm showToast={showToast} can={can} />} />
+            <Route path="/categories" element={<CategoriesPage showToast={showToast} />} />
+            <Route path="/subcategories" element={<CategoriesPage showToast={showToast} />} />
+            <Route path="/customers" element={<CustomersPage showToast={showToast} />} />
+            <Route path="/addresses" element={<AddressesPage showToast={showToast} />} />
+            <Route path="/wishlist" element={<WishlistPage showToast={showToast} />} />
+            <Route path="/leads" element={<LeadsPage showToast={showToast} />} />
+            <Route path="/contactForms" element={<ContactFormsPage showToast={showToast} />} />
+            <Route path="/newsletter" element={<NewsletterPage showToast={showToast} />} />
+            <Route path="/testimonials" element={<TestimonialsPage showToast={showToast} />} />
+            <Route path="/industries" element={<IndustriesPage showToast={showToast} />} />
+            <Route path="/gallery" element={<GalleryPage showToast={showToast} />} />
+            <Route path="/banners" element={<BannersPage showToast={showToast} />} />
+            <Route path="/roles" element={<RolesPage showToast={showToast} can={can} />} />
+            <Route path="/users" element={<UsersPage showToast={showToast} can={can} session={session} />} />
+            <Route path="/settings" element={<SettingsPage showToast={showToast} />} />
           </Routes>
 
           {/* ── Dashboard ── */}

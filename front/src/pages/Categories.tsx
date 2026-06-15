@@ -6,7 +6,7 @@ import {
 } from "@tabler/icons-react";
 import { ImageUploadField } from "../components/Views";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
 
 async function api(path: string, opts: RequestInit = {}) {
   const r = await fetch(`${API_BASE}${path}`, {
@@ -68,11 +68,11 @@ function CategoryForm({ initial, onSave, onClose, showToast }: {
   onSave: () => void; onClose: () => void;
   showToast: (m: string, t?: "success" | "error") => void;
 }) {
-  const [name, setName]   = useState(initial?.name || "");
-  const [desc, setDesc]   = useState(initial?.description || "");
-  const [img, setImg]     = useState(initial?.imageUrl || "");
+  const [name, setName] = useState(initial?.name || "");
+  const [desc, setDesc] = useState(initial?.description || "");
+  const [img, setImg] = useState(initial?.imageUrl || "");
   const [saving, setSaving] = useState(false);
-  const [err, setErr]     = useState("");
+  const [err, setErr] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,11 +132,11 @@ function SubCategoryForm({ initial, categories, defaultCatId, onSave, onClose, s
   showToast: (m: string, t?: "success" | "error") => void;
 }) {
   const [catId, setCatId] = useState(initial?.categoryId || defaultCatId || (categories[0]?.id ?? ""));
-  const [name, setName]   = useState(initial?.name || "");
-  const [desc, setDesc]   = useState(initial?.description || "");
-  const [img, setImg]     = useState(initial?.imageUrl || "");
+  const [name, setName] = useState(initial?.name || "");
+  const [desc, setDesc] = useState(initial?.description || "");
+  const [img, setImg] = useState(initial?.imageUrl || "");
   const [saving, setSaving] = useState(false);
-  const [err, setErr]     = useState("");
+  const [err, setErr] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,21 +205,21 @@ function SubCategoryForm({ initial, categories, defaultCatId, onSave, onClose, s
 export default function CategoriesPage({ showToast }: {
   showToast: (m: string, t?: "success" | "error" | "info") => void;
 }) {
-  const [cats, setCats]         = useState<Cat[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [cats, setCats] = useState<Cat[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<string | null>(null);
 
   type CatModal = null | "create" | Cat;
   type SubModal = null | "create" | SubCat;
-  const [catModal, setCatModal]           = useState<CatModal>(null);
-  const [subModal, setSubModal]           = useState<SubModal>(null);
-  const [subDefaultCatId, setSubDefault]  = useState<string | undefined>();
+  const [catModal, setCatModal] = useState<CatModal>(null);
+  const [subModal, setSubModal] = useState<SubModal>(null);
+  const [subDefaultCatId, setSubDefault] = useState<string | undefined>();
 
   const load = async () => {
     setLoading(true);
     try {
-      const j   = await api("/categories?limit=100");
+      const j = await api("/categories?limit=100");
       const list: Cat[] = j.data?.items || j.data || [];
       setCats(list);
       setExpanded(new Set(list.map((c: Cat) => c.id)));
@@ -255,7 +255,7 @@ export default function CategoriesPage({ showToast }: {
   };
 
   const openAddSub = (catId?: string) => { setSubDefault(catId); setSubModal("create"); };
-  const totalSubs  = cats.reduce((s, c) => s + (c.subCategories?.length || 0), 0);
+  const totalSubs = cats.reduce((s, c) => s + (c.subCategories?.length || 0), 0);
 
   return (
     <div className="space-y-5">
@@ -293,7 +293,7 @@ export default function CategoriesPage({ showToast }: {
 
         {loading ? (
           <div className="divide-y divide-slate-100">
-            {[1,2,3,4,5].map(i => (
+            {[1, 2, 3, 4, 5].map(i => (
               <div key={i} className="flex items-center gap-4 px-5 py-4 animate-pulse">
                 <div className="h-12 w-12 rounded-xl bg-slate-100 shrink-0" />
                 <div className="flex-1 space-y-2">
@@ -319,7 +319,7 @@ export default function CategoriesPage({ showToast }: {
           <div className="divide-y divide-slate-100">
             {cats.map(cat => {
               const isExp = expanded.has(cat.id);
-              const subs  = cat.subCategories || [];
+              const subs = cat.subCategories || [];
               const isDeleting = deleting === cat.id;
 
               return (

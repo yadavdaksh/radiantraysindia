@@ -18,7 +18,7 @@ type ApiResponse<T> = {
 };
 
 // --- API R2 Upload Helpers ---
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
 
 async function uploadToR2(file: File): Promise<{ url: string; key: string }> {
   const formData = new FormData();
@@ -130,7 +130,7 @@ export function ImageUploadField({ label, value, onChange, showToast, dimensions
       // Delete existing R2 image before uploading replacement
       if (value && !value.startsWith("blob:")) {
         const oldKey = value.split("/").pop() || "";
-        if (oldKey) deleteFromR2(oldKey).catch(() => {}); // non-blocking
+        if (oldKey) deleteFromR2(oldKey).catch(() => { }); // non-blocking
       }
       const data = await uploadToR2(file);
       onChange(data.url);
@@ -197,11 +197,10 @@ export function ImageUploadField({ label, value, onChange, showToast, dimensions
       ) : (
         <div
           {...getRootProps()}
-          className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-36 cursor-pointer transition p-4 text-center ${
-            isDragActive
+          className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-36 cursor-pointer transition p-4 text-center ${isDragActive
               ? "border-sky-500 bg-sky-50/30"
               : "border-slate-300 hover:border-sky-500 hover:bg-sky-50/10"
-          }`}
+            }`}
         >
           <input {...getInputProps()} />
           {uploading ? (
@@ -303,7 +302,7 @@ export function ProductImageUploader({ images, onChange, showToast }: ProductIma
     const img = images[idx];
     if (!img.url.startsWith("blob:")) {
       const key = img.url.split("/").pop() || "";
-      if (key) deleteFromR2(key).catch(() => {});
+      if (key) deleteFromR2(key).catch(() => { });
     }
     const updated = images.filter((_, i) => i !== idx);
     updated.forEach((img, i) => { img.sortOrder = i; img.isPrimary = i === 0; });
@@ -698,11 +697,10 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                               showToast("Status changed successfully");
                             }
                           }}
-                          className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
-                            item.isActive !== false
+                          className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${item.isActive !== false
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                               : "bg-rose-50 text-rose-700 border border-rose-200"
-                          }`}
+                            }`}
                         >
                           <option value="active">Active</option>
                           <option value="inactive">Inactive</option>
@@ -761,9 +759,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                 <button
                   key={idx}
                   onClick={() => setPage(idx + 1)}
-                  className={`rounded-xl px-3 py-1.5 font-bold transition ${
-                    page === idx + 1 ? "bg-sky-700 text-white" : "border border-slate-300 bg-white text-slate-700"
-                  }`}
+                  className={`rounded-xl px-3 py-1.5 font-bold transition ${page === idx + 1 ? "bg-sky-700 text-white" : "border border-slate-300 bg-white text-slate-700"
+                    }`}
                 >
                   {idx + 1}
                 </button>
@@ -821,9 +818,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                         type="text"
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${
-                          hasErr ? "border-rose-500" : "border-slate-300"
-                        }`}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${hasErr ? "border-rose-500" : "border-slate-300"
+                          }`}
                       />
                     )}
 
@@ -832,9 +828,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                         type="number"
                         value={formState[field.key] ?? 0}
                         onChange={(e) => setFormState({ ...formState, [field.key]: Number(e.target.value) })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${
-                          hasErr ? "border-rose-500" : "border-slate-300"
-                        }`}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${hasErr ? "border-rose-500" : "border-slate-300"
+                          }`}
                       />
                     )}
 
@@ -842,9 +837,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                       <textarea
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${
-                          hasErr ? "border-rose-500" : "border-slate-300"
-                        }`}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${hasErr ? "border-rose-500" : "border-slate-300"
+                          }`}
                       />
                     )}
 
@@ -853,9 +847,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
                         placeholder='{"key": "value"}'
-                        className={`w-full rounded-2xl border p-3.5 text-sm font-mono outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${
-                          hasErr ? "border-rose-500" : "border-slate-300"
-                        }`}
+                        className={`w-full rounded-2xl border p-3.5 text-sm font-mono outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${hasErr ? "border-rose-500" : "border-slate-300"
+                          }`}
                       />
                     )}
 
@@ -863,9 +856,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                       <select
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${
-                          hasErr ? "border-rose-500" : "border-slate-300"
-                        }`}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${hasErr ? "border-rose-500" : "border-slate-300"
+                          }`}
                       >
                         <option value="">Select Option</option>
                         {field.options?.map((opt) => (
@@ -1661,13 +1653,12 @@ export function ModuleView({
               label: "Return Status",
               render: (item: any) => (
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${
-                    item.status === "PENDING"
+                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${item.status === "PENDING"
                       ? "bg-amber-100 text-amber-800"
                       : item.status === "APPROVED"
-                      ? "bg-sky-100 text-sky-800"
-                      : "bg-emerald-100 text-emerald-800"
-                  }`}
+                        ? "bg-sky-100 text-sky-800"
+                        : "bg-emerald-100 text-emerald-800"
+                    }`}
                 >
                   {item.status}
                 </span>
@@ -1721,9 +1712,8 @@ export function ModuleView({
               label: "Gateway Response Status",
               render: (item: any) => (
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${
-                    item.status === "SUCCESS" ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
-                  }`}
+                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${item.status === "SUCCESS" ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
+                    }`}
                 >
                   {item.status}
                 </span>
@@ -1896,9 +1886,8 @@ export function ModuleView({
               label: "Workflow Status",
               render: (item: any) => (
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${
-                    item.status === "NEW" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"
-                  }`}
+                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${item.status === "NEW" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"
+                    }`}
                 >
                   {item.status}
                 </span>
@@ -2154,15 +2143,14 @@ export function ModuleView({
                       <td className="py-3.5 px-2 text-slate-400">{new Date(log.createdAt).toLocaleString()}</td>
                       <td className="py-3.5 px-2">
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${
-                            log.type === "LOGIN" || log.type === "LOGOUT"
+                          className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${log.type === "LOGIN" || log.type === "LOGOUT"
                               ? "bg-sky-100 text-sky-800"
                               : log.type === "CREATE"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : log.type === "DELETE"
-                              ? "bg-rose-100 text-rose-800"
-                              : "bg-slate-200 text-slate-700"
-                          }`}
+                                ? "bg-emerald-100 text-emerald-800"
+                                : log.type === "DELETE"
+                                  ? "bg-rose-100 text-rose-800"
+                                  : "bg-slate-200 text-slate-700"
+                            }`}
                         >
                           {log.type}
                         </span>
