@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Layers, Tag } from "lucide-react";
 import { categories as mockCategories } from "@/lib/site-data";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4002/api/v1";
 
 async function getCategories() {
   try {
