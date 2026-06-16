@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { createSlug } from "../helpers/Slug.js";
 import { getPaginationParams, formatPaginatedResponse } from "../helpers/pagination.js";
 import { emailService } from "./email.service.js";
+import { deleteR2Image } from "../utils/r2.js";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.SMTP_SENDER || "admin@radiantraysindia.com";
 const LOW_STOCK_THRESHOLD = 5;
@@ -326,6 +327,41 @@ export const productService = {
         await tx.productIndustry.createMany({
           data: industryIds.map((industryId) => ({ productId: id, industryId })),
         });
+      }
+
+      // R2 cleanup for deleted/replaced product images & variant images
+      try {
+        const newImageUrls = new Set(images.map(img => img.url).filter(Boolean));
+        const newVariantImageUrls = new Set([
+          ...variants.map(v => v.imageUrl).filter(Boolean),
+          ...variants.flatMap(v => v.images || []).map(img => img.url).filter(Boolean)
+        ]);
+
+        const currentProductImages = await tx.productImage.findMany({
+          where: { productId: id }
+        });
+        for (const img of currentProductImages) {
+          if (!newImageUrls.has(img.url)) {
+            await deleteR2Image(img.url);
+          }
+        }
+
+        const currentVariants = await tx.productVariant.findMany({
+          where: { productId: id },
+          include: { images: true }
+        });
+        for (const v of currentVariants) {
+          if (v.imageUrl && !newVariantImageUrls.has(v.imageUrl)) {
+            await deleteR2Image(v.imageUrl);
+          }
+          for (const img of v.images) {
+            if (!newVariantImageUrls.has(img.url)) {
+              await deleteR2Image(img.url);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Failed R2 cleanup during product update:", err.message);
       }
 
       // Reset variants, images, and documents

@@ -2,6 +2,7 @@ import { prisma } from "../config/db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { deleteR2Image } from "../utils/r2.js";
 
 const paged = async (model, where = {}, orderBy = { updatedAt: "desc" }, page = 1, limit = 20) => {
   const skip = (page - 1) * limit;
@@ -62,7 +63,18 @@ export const updateGalleryItem = updateFactory("gallery", (body, existing) => ({
   isActive: body.isActive ?? existing.isActive,
 }));
 
-export const deleteGalleryItem = archiveFactory("gallery");
+export const deleteGalleryItem = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const existing = await prisma.gallery.findUnique({ where: { id } });
+  if (!existing) throw new ApiError(404, "Gallery item not found");
+
+  if (existing.imageUrl) {
+    await deleteR2Image(existing.imageUrl);
+  }
+
+  await prisma.gallery.delete({ where: { id } });
+  res.json(new ApiResponsive(200, null, "Gallery item deleted"));
+});
 
 export const listTestimonials = asyncHandler(async (req, res) => {
   const page = Math.max(Number(req.query.page || 1), 1);
@@ -195,6 +207,16 @@ export const updateBanner = updateFactory("banner", (body, existing) => ({
 
 export const deleteBanner = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const existing = await prisma.banner.findUnique({ where: { id } });
+  if (!existing) throw new ApiError(404, "Banner not found");
+
+  if (existing.desktopImageUrl) {
+    await deleteR2Image(existing.desktopImageUrl);
+  }
+  if (existing.mobileImageUrl) {
+    await deleteR2Image(existing.mobileImageUrl);
+  }
+
   await prisma.banner.delete({ where: { id } });
   res.json(new ApiResponsive(200, null, "Banner deleted"));
 });

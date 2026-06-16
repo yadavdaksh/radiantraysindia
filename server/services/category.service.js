@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { createSlug } from "../helpers/Slug.js";
+import { deleteR2Image } from "../utils/r2.js";
 
 export const categoryService = {
   list: async () => {
@@ -65,6 +66,10 @@ export const categoryService = {
     const existing = await prisma.category.findUnique({ where: { id } });
     if (!existing) throw new ApiError(404, "Category not found");
 
+    if (existing.imageUrl) {
+      await deleteR2Image(existing.imageUrl);
+    }
+
     await prisma.category.delete({ where: { id } });
     return { success: true };
   },
@@ -119,6 +124,10 @@ export const categoryService = {
   deleteSub: async (subId) => {
     const existing = await prisma.subCategory.findUnique({ where: { id: subId } });
     if (!existing) throw new ApiError(404, "Subcategory not found");
+
+    if (existing.imageUrl) {
+      await deleteR2Image(existing.imageUrl);
+    }
 
     await prisma.subCategory.delete({ where: { id: subId } });
     return { success: true };

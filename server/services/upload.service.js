@@ -1,9 +1,7 @@
-import { createR2Key, deleteObjectFromR2, getOptimizedImageUrl, isR2Configured, uploadBufferToR2, r2Client } from "../utils/r2.js";
+import { createR2Key, deleteObjectFromR2, getOptimizedImageUrl, isR2Configured, uploadBufferToR2, getR2Client } from "../utils/r2.js";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ApiError } from "../utils/ApiError.js";
-
-const bucket = process.env.R2_BUCKET_NAME;
 
 export const uploadService = {
   upload: async ({ file, folder = "assets" }) => {
@@ -59,16 +57,14 @@ export const uploadService = {
   },
 
   getPresignedUrl: async (key, expiresInSeconds = 3600) => {
-    if (!isR2Configured) {
-      throw new ApiError(500, "Cloudflare R2 is not configured");
-    }
+    const { client, bucket: dynamicBucket } = await getR2Client();
 
     try {
       const command = new GetObjectCommand({
-        Bucket: bucket,
+        Bucket: dynamicBucket,
         Key: key,
       });
-      const signed = await getSignedUrl(r2Client, command, { expiresIn: expiresInSeconds });
+      const signed = await getSignedUrl(client, command, { expiresIn: expiresInSeconds });
       return signed;
     } catch (err) {
       console.error("Presigned URL generation error:", err);
