@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 
 // --- Types ---
@@ -198,8 +198,8 @@ export function ImageUploadField({ label, value, onChange, showToast, dimensions
         <div
           {...getRootProps()}
           className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-36 cursor-pointer transition p-4 text-center ${isDragActive
-              ? "border-sky-500 bg-sky-50/30"
-              : "border-slate-300 hover:border-sky-500 hover:bg-sky-50/10"
+            ? "border-sky-500 bg-sky-50/30"
+            : "border-slate-300 hover:border-sky-500 hover:bg-sky-50/10"
             }`}
         >
           <input {...getInputProps()} />
@@ -698,8 +698,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                             }
                           }}
                           className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${item.isActive !== false
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-rose-50 text-rose-700 border border-rose-200"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-rose-50 text-rose-700 border border-rose-200"
                             }`}
                         >
                           <option value="active">Active</option>
@@ -1343,11 +1343,12 @@ export function ModuleView({
   const bannersList = data?.items || data || [];
 
   const handleSaveBanner = async (item: any) => {
+    const mainImg = item.desktopImageUrl || item.mobileImageUrl || "";
     const payload = {
-      title: item.title,
+      title: (item.title || "").trim(),
       subtitle: item.subtitle || "",
-      desktopImageUrl: item.desktopImageUrl || "",
-      mobileImageUrl: item.mobileImageUrl || "",
+      desktopImageUrl: item.desktopImageUrl || mainImg,
+      mobileImageUrl: item.mobileImageUrl || mainImg,
       linkUrl: item.linkUrl || "",
       sortOrder: Number(item.sortOrder || 0),
       isActive: item.isActive !== false,
@@ -1654,10 +1655,10 @@ export function ModuleView({
               render: (item: any) => (
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${item.status === "PENDING"
-                      ? "bg-amber-100 text-amber-800"
-                      : item.status === "APPROVED"
-                        ? "bg-sky-100 text-sky-800"
-                        : "bg-emerald-100 text-emerald-800"
+                    ? "bg-amber-100 text-amber-800"
+                    : item.status === "APPROVED"
+                      ? "bg-sky-100 text-sky-800"
+                      : "bg-emerald-100 text-emerald-800"
                     }`}
                 >
                   {item.status}
@@ -1956,7 +1957,7 @@ export function ModuleView({
             { key: "sortOrder", label: "Slide Order Weight" },
           ]}
           formFields={[
-            { key: "title", label: "Banner Title Header", type: "text", required: true },
+            { key: "title", label: "Banner Title Header", type: "text", },
             { key: "subtitle", label: "Banner Subtitle Description", type: "text" },
             {
               key: "desktopImageUrl",
@@ -2144,12 +2145,12 @@ export function ModuleView({
                       <td className="py-3.5 px-2">
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${log.type === "LOGIN" || log.type === "LOGOUT"
-                              ? "bg-sky-100 text-sky-800"
-                              : log.type === "CREATE"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : log.type === "DELETE"
-                                  ? "bg-rose-100 text-rose-800"
-                                  : "bg-slate-200 text-slate-700"
+                            ? "bg-sky-100 text-sky-800"
+                            : log.type === "CREATE"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : log.type === "DELETE"
+                                ? "bg-rose-100 text-rose-800"
+                                : "bg-slate-200 text-slate-700"
                             }`}
                         >
                           {log.type}

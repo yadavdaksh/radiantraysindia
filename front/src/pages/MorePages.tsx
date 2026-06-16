@@ -297,7 +297,7 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
     
     const payload = {
       ...form,
-      title: form.title.trim() || "Banner",
+      title: form.title.trim(),
       desktopImageUrl: form.desktopImageUrl || form.mobileImageUrl,
       mobileImageUrl: form.mobileImageUrl || form.desktopImageUrl,
     };

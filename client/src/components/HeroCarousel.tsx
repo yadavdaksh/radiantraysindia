@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Banner {
@@ -118,131 +118,119 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
               exit="exit"
               className="absolute inset-0"
             >
-              {/* ── With image: fill card ── */}
-              {(hasDesktop || hasMobile) ? (
-                <>
-                  {/* Desktop image */}
-                  {hasDesktop && (
-                    <img
-                      src={slide.desktopImageUrl}
-                      alt={slide.title}
-                      className="hidden md:block absolute inset-0 w-full h-full object-cover object-center select-none"
-                    />
-                  )}
-                  {/* Mobile image */}
-                  {hasMobile && (
-                    <img
-                      src={slide.mobileImageUrl}
-                      alt={slide.title}
-                      className="block md:hidden absolute inset-0 w-full h-full object-cover object-center select-none"
-                    />
-                  )}
-                  {/* Fallback to desktop on mobile if no mobile image */}
-                  {hasDesktop && !hasMobile && (
-                    <img
-                      src={slide.desktopImageUrl}
-                      alt={slide.title}
-                      className="block md:hidden absolute inset-0 w-full h-full object-cover object-center select-none"
-                    />
-                  )}
+              {(() => {
+                const SlideContent = () => (
+                  <>
+                    {/* ── With image: fill card ── */}
+                    {(hasDesktop || hasMobile) ? (
+                      <>
+                        {/* Desktop image */}
+                        {hasDesktop && (
+                          <img
+                            src={slide.desktopImageUrl}
+                            alt={slide.title}
+                            className="hidden md:block absolute inset-0 w-full h-full object-cover object-center select-none"
+                          />
+                        )}
+                        {/* Mobile image */}
+                        {hasMobile && (
+                          <img
+                            src={slide.mobileImageUrl}
+                            alt={slide.title}
+                            className="block md:hidden absolute inset-0 w-full h-full object-cover object-center select-none"
+                          />
+                        )}
+                        {/* Fallback to desktop on mobile if no mobile image */}
+                        {hasDesktop && !hasMobile && (
+                          <img
+                            src={slide.desktopImageUrl}
+                            alt={slide.title}
+                            className="block md:hidden absolute inset-0 w-full h-full object-cover object-center select-none"
+                          />
+                        )}
 
-                  {/* Centered text */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 sm:px-16 space-y-3 sm:space-y-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
-                      className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white uppercase tracking-widest"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand animate-ping" />
-                      Radiant Rays
-                    </motion.div>
-                    <motion.h2
-                      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
-                      className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-3xl"
-                    >
-                      {slide.title}
-                    </motion.h2>
-                    {slide.subtitle && (
-                      <motion.p
-                        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
-                        className="text-xs sm:text-sm text-white/80 max-w-xl leading-relaxed hidden sm:block"
-                      >
-                        {slide.subtitle}
-                      </motion.p>
-                    )}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.4 }}
-                      className="flex flex-wrap items-center justify-center gap-3 pt-1"
-                    >
-                      <Link
-                        href={slide.linkUrl || "/products"}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-white text-brand font-bold px-5 py-2.5 text-xs sm:text-sm shadow-lg hover:bg-brand hover:text-white transition duration-200"
-                      >
-                        Explore <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                      <Link
-                        href="/contact"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-white/50 text-white font-bold px-5 py-2.5 text-xs sm:text-sm hover:bg-white/15 transition duration-200"
-                      >
-                        Get Quote
-                      </Link>
-                    </motion.div>
-                  </div>
-                </>
-              ) : (
-                /* ── No image: styled gradient card like screenshot ── */
-                <>
-                  {/* Subtle pattern */}
-                  <div className="absolute inset-0 opacity-10"
-                    style={{ backgroundImage: "radial-gradient(circle at 25% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 75% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)" }}
-                  />
-                  {/* Dot grid */}
-                  <div className="absolute inset-0 opacity-[0.06]"
-                    style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "28px 28px" }}
-                  />
+                        {/* Title and subtitle overlay: only show if explicitly set and not default "Banner" or empty */}
+                        {slide.title && slide.title !== "Banner" && slide.title.trim() !== "" && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 sm:px-16 space-y-3 sm:space-y-4 bg-black/10">
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
+                              className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white uppercase tracking-widest"
+                            >
+                              <span className="h-1.5 w-1.5 rounded-full bg-brand animate-ping" />
+                              Radiant Rays
+                            </motion.div>
+                            <motion.h2
+                              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
+                              className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-3xl"
+                            >
+                              {slide.title}
+                            </motion.h2>
+                            {slide.subtitle && (
+                              <motion.p
+                                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
+                                className="text-xs sm:text-sm text-white/80 max-w-xl leading-relaxed hidden sm:block"
+                              >
+                                {slide.subtitle}
+                              </motion.p>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      /* ── No image: styled gradient card like screenshot ── */
+                      <>
+                        {/* Subtle pattern */}
+                        <div className="absolute inset-0 opacity-10"
+                          style={{ backgroundImage: "radial-gradient(circle at 25% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 75% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)" }}
+                        />
+                        {/* Dot grid */}
+                        <div className="absolute inset-0 opacity-[0.06]"
+                          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+                        />
 
-                  {/* Centered content — mirrors screenshot layout */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 sm:px-20 space-y-3 sm:space-y-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
-                      className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white/90 uppercase tracking-widest"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
-                      Radiant Rays
-                    </motion.div>
-                    <motion.h2
-                      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
-                      className="text-xl sm:text-3xl lg:text-[2.6rem] font-extrabold text-white tracking-tight leading-tight max-w-3xl"
-                    >
-                      {slide.title}
-                    </motion.h2>
-                    {slide.subtitle && (
-                      <motion.p
-                        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
-                        className="text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed hidden sm:block"
-                      >
-                        {slide.subtitle}
-                      </motion.p>
+                        {/* Centered content */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 sm:px-20 space-y-3 sm:space-y-4">
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
+                            className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white/90 uppercase tracking-widest"
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                            Radiant Rays
+                          </motion.div>
+                          <motion.h2
+                            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
+                            className="text-xl sm:text-3xl lg:text-[2.6rem] font-extrabold text-white tracking-tight leading-tight max-w-3xl"
+                          >
+                            {slide.title}
+                          </motion.h2>
+                          {slide.subtitle && (
+                            <motion.p
+                              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
+                              className="text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed hidden sm:block"
+                            >
+                              {slide.subtitle}
+                            </motion.p>
+                          )}
+                        </div>
+                      </>
                     )}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.4 }}
-                      className="flex flex-wrap items-center justify-center gap-3 pt-1"
-                    >
-                      <Link
-                        href={slide.linkUrl || "/products"}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-white text-brand font-bold px-5 py-2.5 text-xs sm:text-sm shadow-lg hover:shadow-xl hover:scale-105 transition duration-200"
-                      >
-                        {slide.linkUrl === "/contact" ? "Contact Us" : "Explore Products"} <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                      <Link
-                        href="/contact"
-                        className="inline-flex items-center rounded-full border border-white/40 text-white/90 font-bold px-5 py-2.5 text-xs sm:text-sm hover:bg-white/15 transition duration-200"
-                      >
-                        Request Quote
-                      </Link>
-                    </motion.div>
+                  </>
+                );
+
+                if (slide.linkUrl) {
+                  return (
+                    <Link href={slide.linkUrl} className="absolute inset-0 block cursor-pointer">
+                      <SlideContent />
+                    </Link>
+                  );
+                }
+
+                return (
+                  <div className="absolute inset-0">
+                    <SlideContent />
                   </div>
-                </>
-              )}
+                );
+              })()}
             </motion.div>
           </AnimatePresence>
 

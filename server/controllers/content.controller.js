@@ -195,7 +195,7 @@ export const createBanner = asyncHandler(async (req, res) => {
 
   const record = await prisma.banner.create({
     data: {
-      title: body.title || "Banner",
+      title: body.title !== undefined ? body.title : "Banner",
       subtitle: body.subtitle || null,
       desktopImageUrl: body.desktopImageUrl,
       mobileImageUrl: body.mobileImageUrl,
@@ -214,10 +214,46 @@ export const updateBanner = asyncHandler(async (req, res) => {
   const existing = await prisma.banner.findUnique({ where: { id } });
   if (!existing) throw new ApiError(404, "Banner not found");
 
+  // If desktopImageUrl is being updated/replaced, clean up the old one
+  if (body.desktopImageUrl !== undefined && body.desktopImageUrl !== existing.desktopImageUrl) {
+    if (existing.desktopImageUrl) {
+      const newMobileUrl = body.mobileImageUrl !== undefined ? body.mobileImageUrl : existing.mobileImageUrl;
+      const isStillUsedByThisBanner = (newMobileUrl === existing.desktopImageUrl);
+      
+      const inOther = await prisma.banner.count({
+        where: {
+          OR: [{ desktopImageUrl: existing.desktopImageUrl }, { mobileImageUrl: existing.desktopImageUrl }],
+          NOT: { id }
+        }
+      });
+      if (inOther === 0 && !isStillUsedByThisBanner) {
+        await deleteR2Image(existing.desktopImageUrl);
+      }
+    }
+  }
+
+  // If mobileImageUrl is being updated/replaced, clean up the old one
+  if (body.mobileImageUrl !== undefined && body.mobileImageUrl !== existing.mobileImageUrl) {
+    if (existing.mobileImageUrl) {
+      const newDesktopUrl = body.desktopImageUrl !== undefined ? body.desktopImageUrl : existing.desktopImageUrl;
+      const isStillUsedByThisBanner = (newDesktopUrl === existing.mobileImageUrl);
+      
+      const inOther = await prisma.banner.count({
+        where: {
+          OR: [{ desktopImageUrl: existing.mobileImageUrl }, { mobileImageUrl: existing.mobileImageUrl }],
+          NOT: { id }
+        }
+      });
+      if (inOther === 0 && !isStillUsedByThisBanner) {
+        await deleteR2Image(existing.mobileImageUrl);
+      }
+    }
+  }
+
   const record = await prisma.banner.update({
     where: { id },
     data: {
-      title: body.title !== undefined ? (body.title || "Banner") : existing.title,
+      title: body.title !== undefined ? body.title : existing.title,
       subtitle: body.subtitle !== undefined ? (body.subtitle || null) : existing.subtitle,
       desktopImageUrl: body.desktopImageUrl !== undefined ? body.desktopImageUrl : existing.desktopImageUrl,
       mobileImageUrl: body.mobileImageUrl !== undefined ? body.mobileImageUrl : existing.mobileImageUrl,
@@ -235,11 +271,20 @@ export const deleteBanner = asyncHandler(async (req, res) => {
   const existing = await prisma.banner.findUnique({ where: { id } });
   if (!existing) throw new ApiError(404, "Banner not found");
 
-  if (existing.desktopImageUrl) {
-    await deleteR2Image(existing.desktopImageUrl);
-  }
-  if (existing.mobileImageUrl) {
-    await deleteR2Image(existing.mobileImageUrl);
+  const urlsToDelete = new Set();
+  if (existing.desktopImageUrl) urlsToDelete.add(existing.desktopImageUrl);
+  if (existing.mobileImageUrl) urlsToDelete.add(existing.mobileImageUrl);
+
+  for (const url of urlsToDelete) {
+    const inOther = await prisma.banner.count({
+      where: {
+        OR: [{ desktopImageUrl: url }, { mobileImageUrl: url }],
+        NOT: { id }
+      }
+    });
+    if (inOther === 0) {
+      await deleteR2Image(url);
+    }
   }
 
   await prisma.banner.delete({ where: { id } });
