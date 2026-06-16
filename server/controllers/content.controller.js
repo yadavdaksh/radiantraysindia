@@ -185,25 +185,50 @@ export const listBanners = asyncHandler(async (req, res) => {
   res.json(new ApiResponsive(200, { items, page, limit, total, pages: Math.ceil(total / limit) }));
 });
 
-export const createBanner = createFactory("banner", (body) => ({
-  title: body.title,
-  subtitle: body.subtitle || null,
-  desktopImageUrl: body.desktopImageUrl,
-  mobileImageUrl: body.mobileImageUrl,
-  linkUrl: body.linkUrl || null,
-  sortOrder: body.sortOrder ? Number(body.sortOrder) : 0,
-  isActive: body.isActive !== false,
-}));
+export const createBanner = asyncHandler(async (req, res) => {
+  const body = req.body;
+  const maxBanner = await prisma.banner.findFirst({
+    orderBy: { sortOrder: "desc" },
+    select: { sortOrder: true }
+  });
+  const nextSortOrder = maxBanner ? maxBanner.sortOrder + 1 : 0;
 
-export const updateBanner = updateFactory("banner", (body, existing) => ({
-  title: body.title ?? existing.title,
-  subtitle: body.subtitle ?? existing.subtitle,
-  desktopImageUrl: body.desktopImageUrl ?? existing.desktopImageUrl,
-  mobileImageUrl: body.mobileImageUrl ?? existing.mobileImageUrl,
-  linkUrl: body.linkUrl ?? existing.linkUrl,
-  sortOrder: body.sortOrder !== undefined ? Number(body.sortOrder) : existing.sortOrder,
-  isActive: body.isActive ?? existing.isActive,
-}));
+  const record = await prisma.banner.create({
+    data: {
+      title: body.title || "Banner",
+      subtitle: body.subtitle || null,
+      desktopImageUrl: body.desktopImageUrl,
+      mobileImageUrl: body.mobileImageUrl,
+      linkUrl: body.linkUrl || null,
+      sortOrder: body.sortOrder !== undefined ? Number(body.sortOrder) : nextSortOrder,
+      isActive: body.isActive !== false,
+    }
+  });
+
+  res.status(201).json(new ApiResponsive(201, record, "Banner created"));
+});
+
+export const updateBanner = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const body = req.body;
+  const existing = await prisma.banner.findUnique({ where: { id } });
+  if (!existing) throw new ApiError(404, "Banner not found");
+
+  const record = await prisma.banner.update({
+    where: { id },
+    data: {
+      title: body.title !== undefined ? (body.title || "Banner") : existing.title,
+      subtitle: body.subtitle !== undefined ? (body.subtitle || null) : existing.subtitle,
+      desktopImageUrl: body.desktopImageUrl !== undefined ? body.desktopImageUrl : existing.desktopImageUrl,
+      mobileImageUrl: body.mobileImageUrl !== undefined ? body.mobileImageUrl : existing.mobileImageUrl,
+      linkUrl: body.linkUrl !== undefined ? (body.linkUrl || null) : existing.linkUrl,
+      sortOrder: body.sortOrder !== undefined ? Number(body.sortOrder) : existing.sortOrder,
+      isActive: body.isActive !== undefined ? Boolean(body.isActive) : existing.isActive,
+    }
+  });
+
+  res.json(new ApiResponsive(200, record, "Banner updated"));
+});
 
 export const deleteBanner = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -218,6 +243,18 @@ export const deleteBanner = asyncHandler(async (req, res) => {
   }
 
   await prisma.banner.delete({ where: { id } });
-  res.json(new ApiResponsive(200, null, "Banner deleted"));
+
+  const remaining = await prisma.banner.findMany({
+    orderBy: { sortOrder: "asc" }
+  });
+
+  for (let i = 0; i < remaining.length; i++) {
+    await prisma.banner.update({
+      where: { id: remaining[i].id },
+      data: { sortOrder: i }
+    });
+  }
+
+  res.json(new ApiResponsive(200, null, "Banner deleted and ordering adjusted"));
 });
 

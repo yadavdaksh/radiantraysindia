@@ -9,8 +9,8 @@ import { apiClient } from "@/lib/api-client";
 import { getProductImage } from "@/lib/site-data";
 import { toast } from "sonner";
 import {
-  Loader2, CheckCircle2, Plus, ShieldCheck, MapPin,
-  ArrowLeft, Package, ChevronRight, Edit2,
+  Loader2, Plus, ShieldCheck, MapPin,
+  ArrowLeft, Package, ChevronRight,
 } from "lucide-react";
 import Script from "next/script";
 

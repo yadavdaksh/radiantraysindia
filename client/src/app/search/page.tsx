@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
 import { apiClient } from "@/lib/api-client";
 import { products as mockProducts } from "@/lib/site-data";
-import { ArrowRight, Tag, CircleAlert, Search, Heart } from "lucide-react";
+import { ArrowRight, Search, Heart } from "lucide-react";
 import { useWishlist } from "@/contexts/wishlist-context";
 
 export default function SearchResultsPage() {

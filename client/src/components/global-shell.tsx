@@ -9,7 +9,7 @@ import { useWishlist } from "@/contexts/wishlist-context";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ShoppingBag, User, Heart, Search, LogOut,
-  MapPin, Mail, Phone, ChevronDown, Sparkles, Layers,
+  MapPin, Mail, Phone, ChevronDown, Layers,
   ArrowRight, Tag,
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";

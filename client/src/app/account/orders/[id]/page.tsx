@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
@@ -10,8 +10,8 @@ import { getProductImage } from "@/lib/site-data";
 import { toast } from "sonner";
 import {
   ArrowLeft, Printer, Truck, CheckCircle2, Clock,
-  XCircle, Package, MapPin, User, CreditCard,
-  ExternalLink, RotateCcw, AlertTriangle, Loader2,
+  XCircle, MapPin, User, CreditCard,
+  ExternalLink, RotateCcw, Loader2,
 } from "lucide-react";
 
 function statusColor(s: string) {
@@ -81,17 +81,17 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   const [returnModal, setReturnModal] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
 
-  const loadOrder = () => {
+  const loadOrder = useCallback(() => {
     apiClient.get(`/orders/mine/${params.id}`)
       .then(r => setOrder(r.data.data))
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
-  };
+  }, [params.id]);
 
   useEffect(() => {
     if (!customer) { router.push(`/login?redirect=/account/orders/${params.id}`); return; }
     loadOrder();
-  }, [customer, params.id]);
+  }, [customer, params.id, loadOrder, router]);
 
   const handleCancel = async (reason: string) => {
     setActionBusy(true);

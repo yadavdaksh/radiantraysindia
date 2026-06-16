@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { apiClient } from "@/lib/api-client";
 import {
   ArrowLeft, Truck, Eye, Package, CheckCircle2,
-  Clock, XCircle, RotateCcw,
+  Clock, XCircle,
 } from "lucide-react";
 
 function statusColor(s: string) {

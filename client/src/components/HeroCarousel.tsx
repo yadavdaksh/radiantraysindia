@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -69,14 +69,14 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
   const [isHovered, setIsHovered] = useState(false);
   const timer = useRef<NodeJS.Timeout | null>(null);
 
-  const stop = () => { if (timer.current) clearInterval(timer.current); };
-  const start = () => { stop(); timer.current = setInterval(next, 5000); };
-
-  const next = () => { setDirection(1); setCurrentIndex((p) => (p + 1) % slides.length); };
+  const next = useCallback(() => { setDirection(1); setCurrentIndex((p) => (p + 1) % slides.length); }, [slides.length]);
   const prev = () => { setDirection(-1); setCurrentIndex((p) => (p - 1 + slides.length) % slides.length); };
   const dot = (i: number) => { setDirection(i > currentIndex ? 1 : -1); setCurrentIndex(i); };
 
-  useEffect(() => { if (!isHovered) start(); else stop(); return stop; }, [currentIndex, isHovered]);
+  const stop = useCallback(() => { if (timer.current) clearInterval(timer.current); }, []);
+  const start = useCallback(() => { stop(); timer.current = setInterval(next, 5000); }, [next, stop]);
+
+  useEffect(() => { if (!isHovered) start(); else stop(); return stop; }, [currentIndex, isHovered, start, stop]);
 
   const variants = {
     enter: (d: number) => ({ x: d > 0 ? "100%" : "-100%", opacity: 0 }),

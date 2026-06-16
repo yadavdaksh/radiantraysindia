@@ -10,8 +10,7 @@ import { toast } from "sonner";
 import { getProductImage } from "@/lib/site-data";
 import {
   User, MapPin, Heart, Shield, Package, Loader2, Plus, Trash2,
-  Edit2, Check, X, Star, ArrowRight, Eye, EyeOff, ShoppingCart,
-  CheckCircle2, Clock, Truck, XCircle, RotateCcw,
+  Edit2, Check, X, Star, ArrowRight, Eye, EyeOff,
 } from "lucide-react";
 
 const STATES = ["Andhra Pradesh","Assam","Bihar","Chhattisgarh","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Jammu & Kashmir","Ladakh","Arunachal Pradesh"];
@@ -116,7 +115,7 @@ export default function AccountPage() {
     if (tab === "addresses") loadAddresses();
     if (tab === "inquiries") loadInquiries();
     if (tab === "wishlist") loadWishlist();
-  }, [tab, customer]);
+  }, [tab, customer, loadOrders, loadAddresses, loadInquiries, loadWishlist]);
 
   if (!customer) return null;
 

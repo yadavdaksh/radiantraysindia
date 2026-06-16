@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SiteShell } from "@/components/site-shell";
 import { apiClient } from "@/lib/api-client";
 import { getIndustryBySlug, products as mockProducts } from "@/lib/site-data";
-import { ArrowRight, Tag, CircleAlert, Sparkles, Heart } from "lucide-react";
+import { ArrowRight, CircleAlert, Heart } from "lucide-react";
 import { useWishlist } from "@/contexts/wishlist-context";
 
 export default function IndustryDetailPage({ params }: { params: { slug: string } }) {

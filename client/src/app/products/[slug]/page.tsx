@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
