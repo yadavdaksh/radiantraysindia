@@ -105,7 +105,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(3,95,150,0.06),_transparent_30%),linear-gradient(180deg,#f8fbff_0%,#ffffff_45%,#eef7fd_100%)] text-slate-800 antialiased flex flex-col justify-between">
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-brand-dark to-brand py-2 text-center text-xs font-semibold tracking-wider text-white px-4">
+      <div className="bg-gradient-to-r from-brand-dark to-brand py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold tracking-wider text-white px-4">
         <span>Cleanroom Manufacturing Excellence & B2B Solutions | Direct Shopping for Cleanroom Furniture</span>
       </div>
 
@@ -256,7 +256,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
             </nav>
 
             {/* Header Right Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {/* Search Toggle */}
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
@@ -300,16 +300,16 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                   <div className="relative">
                     <button
                       onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                      className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white py-1.5 pl-3 pr-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300"
+                      className="flex items-center gap-1 sm:gap-1.5 rounded-full border border-slate-200 bg-white p-2 sm:py-1.5 sm:pl-3 sm:pr-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300"
                     >
                       <User className="h-4 w-4 text-brand" />
-                      <span className="max-w-24 truncate">{customer.name}</span>
-                      <ChevronDown className="h-3 w-3 text-slate-400" />
+                      <span className="max-w-24 truncate hidden sm:inline">{customer.name}</span>
+                      <ChevronDown className="h-3 w-3 text-slate-400 hidden sm:inline" />
                     </button>
                     {profileDropdownOpen && (
                       <div className="absolute right-0 mt-2.5 w-48 origin-top-right rounded-2xl border border-slate-200 bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                         <div className="border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
-                          Account Menu
+                           Account Menu
                         </div>
                         <Link
                           href="/account"
@@ -348,10 +348,10 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 ) : (
                   <Link
                     href="/login"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-800 shadow-md"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 p-2 sm:px-4 sm:py-2 text-xs font-bold text-white transition hover:bg-slate-800 shadow-md whitespace-nowrap"
                   >
-                    <User className="h-3.5 w-3.5" />
-                    Sign In
+                    <User className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                    <span className="hidden sm:inline">Sign In</span>
                   </Link>
                 )}
               </div>
