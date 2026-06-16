@@ -90,6 +90,7 @@ type SidebarSection = {
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
+let refreshPromise: Promise<boolean> | null = null;
 
 async function apiFetch<T>(
   path: string,
@@ -103,11 +104,21 @@ async function apiFetch<T>(
   });
 
   if (response.status === 401 && retry && !path.includes("/auth/refresh")) {
-    const refreshed = await fetch(`${API_BASE}/auth/refresh`, {
-      method: "POST",
-      credentials: "include",
-    });
-    if (refreshed.ok) {
+    if (!refreshPromise) {
+      refreshPromise = fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      }).then(res => {
+        refreshPromise = null;
+        return res.ok;
+      }).catch(() => {
+        refreshPromise = null;
+        return false;
+      });
+    }
+
+    const isRefreshed = await refreshPromise;
+    if (isRefreshed) {
       return apiFetch<T>(path, options, false);
     }
   }
