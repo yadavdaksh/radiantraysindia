@@ -150,7 +150,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
                         )}
 
                         {/* Title and subtitle overlay: only show if explicitly set and not default "Banner" or empty */}
-                        {slide.title && slide.title !== "Banner" && slide.title.trim() !== "" && (
+                        {/* {slide.title && slide.title !== "Banner" && slide.title.trim() !== "" && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 sm:px-16 space-y-3 sm:space-y-4 bg-black/10">
                             <motion.div
                               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
@@ -174,7 +174,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
                               </motion.p>
                             )}
                           </div>
-                        )}
+                        )} */}
                       </>
                     ) : (
                       /* ── No image: styled gradient card like screenshot ── */
