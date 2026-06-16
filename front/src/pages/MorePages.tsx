@@ -292,14 +292,23 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
   };
 
   const save = async () => {
-    if (!form.title.trim()) { showToast("Title required", "error"); return; }
+    const mainImg = form.desktopImageUrl || form.mobileImageUrl;
+    if (!mainImg) { showToast("At least one image is required", "error"); return; }
+    
+    const payload = {
+      ...form,
+      title: form.title.trim() || "Banner",
+      desktopImageUrl: form.desktopImageUrl || form.mobileImageUrl,
+      mobileImageUrl: form.mobileImageUrl || form.desktopImageUrl,
+    };
+
     setSaving(true);
     try {
       if (modal === "create") {
-        await apiFetch("/content/banners", { method: "POST", body: JSON.stringify(form) });
+        await apiFetch("/content/banners", { method: "POST", body: JSON.stringify(payload) });
         showToast("Banner created");
       } else {
-        await apiFetch(`/content/banners/${modal.id}`, { method: "PUT", body: JSON.stringify(form) });
+        await apiFetch(`/content/banners/${modal.id}`, { method: "PUT", body: JSON.stringify(payload) });
         showToast("Banner updated");
       }
       setModal(null); load();
@@ -323,7 +332,7 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
   return (
     <div className="space-y-5">
       <PageHeader title="Hero Banners" count={items.length} onRefresh={load} refreshing={loading}>
-        <div className="text-[10px] text-slate-400 font-semibold hidden sm:block">Desktop: 1600×560px · Mobile: 768×400px</div>
+        <div className="text-[10px] text-slate-400 font-semibold hidden sm:block">Desktop: 1920×600px · Mobile: 600×800px</div>
         <button onClick={openCreate} className="inline-flex items-center gap-1.5 rounded-xl bg-sky-700 hover:bg-sky-800 px-4 py-2 text-xs font-bold text-white transition">
           <IconPlus size={14} /> Add Banner
         </button>
@@ -378,9 +387,9 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
         <Modal title={modal === "create" ? "Add Banner" : "Edit Banner"} onClose={() => setModal(null)}>
           <div className="space-y-4">
             {([
-              { label: "Title *", key: "title", ph: "Precision Cleanroom Systems" },
-              { label: "Subtitle", key: "subtitle", ph: "Supporting headline text..." },
-              { label: "Link URL", key: "linkUrl", ph: "/products" },
+              { label: "Title (Optional)", key: "title", ph: "Precision Cleanroom Systems" },
+              { label: "Subtitle (Optional)", key: "subtitle", ph: "Supporting headline text..." },
+              { label: "Link URL (Optional)", key: "linkUrl", ph: "/products" },
             ] as any[]).map(f => (
               <div key={f.key} className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase text-slate-500">{f.label}</label>
@@ -392,11 +401,11 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
               <input type="number" value={form.sortOrder} onChange={e => setForm(p => ({ ...p, sortOrder: Number(e.target.value) }))} className={inp} />
             </div>
             <div className="rounded-xl bg-sky-50 border border-sky-100 px-3 py-2 text-[10px] text-sky-700 font-semibold space-y-0.5">
-              <p>🖥 Desktop image: <strong>1600 × 560 px</strong></p>
-              <p>📱 Mobile image: <strong>768 × 400 px</strong> (optional — uses desktop if blank)</p>
+              <p>🖥 Desktop image: <strong>1920 × 600 px</strong></p>
+              <p>📱 Mobile image: <strong>600 × 800 px</strong> (optional — uses desktop if blank)</p>
             </div>
-            <ImageUploadField label="Desktop Image (1600×560px) *" value={form.desktopImageUrl} onChange={url => setForm(p => ({ ...p, desktopImageUrl: url }))} showToast={showToast} dimensions="1600 × 560 px" />
-            <ImageUploadField label="Mobile Image (768×400px) — optional" value={form.mobileImageUrl} onChange={url => setForm(p => ({ ...p, mobileImageUrl: url }))} showToast={showToast} dimensions="768 × 400 px" />
+            <ImageUploadField label="Desktop Image (1920×600px) *" value={form.desktopImageUrl} onChange={url => setForm(p => ({ ...p, desktopImageUrl: url }))} showToast={showToast} dimensions="1920 × 600 px" />
+            <ImageUploadField label="Mobile Image (600×800px) — optional" value={form.mobileImageUrl} onChange={url => setForm(p => ({ ...p, mobileImageUrl: url }))} showToast={showToast} dimensions="600 × 800 px" />
             <div className="flex gap-3 pt-1">
               <button onClick={() => setModal(null)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
               <button onClick={save} disabled={saving} className="flex-1 rounded-xl bg-sky-700 hover:bg-sky-800 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition">
