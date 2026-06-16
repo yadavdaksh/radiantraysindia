@@ -22,6 +22,7 @@ import CategoriesPage from "./pages/Categories";
 import {
   CustomersPage, AddressesPage, WishlistPage,
   LeadsPage, ContactFormsPage, NewsletterPage, TestimonialsPage,
+  OrdersPage,
 } from "./pages/AdminPages";
 import {
   IndustriesPage, GalleryPage, BannersPage, RolesPage, UsersPage,
@@ -974,6 +975,7 @@ function App() {
             <Route path="/banners" element={<BannersPage showToast={showToast} />} />
             <Route path="/roles" element={<RolesPage showToast={showToast} can={can} />} />
             <Route path="/users" element={<UsersPage showToast={showToast} can={can} session={session} />} />
+            <Route path="/orders" element={<OrdersPage showToast={showToast} />} />
             <Route path="/settings" element={<SettingsPage showToast={showToast} />} />
           </Routes>
 

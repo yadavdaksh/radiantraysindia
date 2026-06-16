@@ -2,7 +2,7 @@
  * AdminPages.tsx — real-API pages for:
  * customers, addresses, wishlist, leads, contactForms, newsletter, testimonials
  */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { apiFetch } from "../lib/api";
 import {
   IconUsers, IconMapPin, IconHeart, IconTarget, IconMail,
@@ -739,3 +739,247 @@ export function TestimonialsPage({ showToast }: { showToast: (m: string, t?: any
     </div>
   );
 }
+
+// ── ORDERS ──────────────────────────────────────────────────────────────────
+
+export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => void }) {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    let url = `/orders?limit=100`;
+    if (statusFilter) {
+      url += `&status=${statusFilter}`;
+    }
+    apiFetch(url)
+      .then(j => {
+        setItems(j.data?.items || []);
+      })
+      .catch(e => showToast(e.message, "error"))
+      .finally(() => setLoading(false));
+  }, [statusFilter, showToast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const updateStatus = async (id: string, newStatus: string, newPaymentStatus: string) => {
+    setUpdatingId(id);
+    try {
+      await apiFetch(`/orders/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          status: newStatus,
+          paymentStatus: newPaymentStatus,
+          reason: `Updated via Admin Console`
+        })
+      });
+      showToast("Order updated successfully");
+      load();
+    } catch (e: any) {
+      showToast(e.message, "error");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const filteredItems = useMemo(() => {
+    if (!search.trim()) return items;
+    const q = search.toLowerCase();
+    return items.filter(item =>
+      item.orderNumber.toLowerCase().includes(q) ||
+      item.customerName.toLowerCase().includes(q) ||
+      (item.customerEmail && item.customerEmail.toLowerCase().includes(q)) ||
+      item.customerPhone.includes(q)
+    );
+  }, [items, search]);
+
+  const statusColors: Record<string, string> = {
+    PENDING: "bg-amber-100 text-amber-800 border-amber-250",
+    PAID: "bg-emerald-100 text-emerald-800 border-emerald-250",
+    PROCESSING: "bg-blue-100 text-blue-800 border-blue-200",
+    SHIPPED: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    DELIVERED: "bg-teal-100 text-teal-800 border-teal-200",
+    CANCELLED: "bg-rose-100 text-rose-800 border-rose-200",
+    REFUNDED: "bg-slate-100 text-slate-700 border-slate-200",
+  };
+
+  const paymentStatusColors: Record<string, string> = {
+    PENDING: "bg-amber-50 text-amber-700 border border-amber-200",
+    SUCCESS: "bg-emerald-50 text-emerald-700 border border-emerald-250",
+    FAILED: "bg-rose-50 text-rose-700 border border-rose-200",
+    REFUNDED: "bg-slate-50 text-slate-600 border border-slate-200",
+  };
+
+  return (
+    <div className="space-y-5">
+      <PageHeader title="Orders Management" count={filteredItems.length} onRefresh={load} refreshing={loading}>
+        <div className="flex gap-2">
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="text-xs rounded-xl border border-slate-200 bg-white px-3 py-2 outline-none focus:border-sky-500 transition"
+          >
+            <option value="">All Statuses</option>
+            {["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"].map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <div className="relative">
+            <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search order #, customer..."
+              className="pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 bg-white outline-none focus:border-sky-500 w-56 transition"
+            />
+          </div>
+        </div>
+      </PageHeader>
+
+      <div className="space-y-3">
+        {loading ? (
+          <Skeleton />
+        ) : filteredItems.length === 0 ? (
+          <Empty icon={IconShoppingCart} msg="No orders found" />
+        ) : (
+          filteredItems.map((order: any) => (
+            <div key={order.id} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden transition hover:shadow-md">
+              <div className="flex items-start justify-between gap-4 p-4 flex-wrap sm:flex-nowrap">
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <p className="font-extrabold text-slate-900 text-sm sm:text-base">{order.orderNumber}</p>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${statusColors[order.status] || "bg-slate-100 text-slate-650"}`}>
+                      {order.status}
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${paymentStatusColors[order.paymentStatus] || "bg-slate-150 text-slate-600"}`}>
+                      Payment: {order.paymentStatus}
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-500 space-y-0.5 mt-1">
+                    <p className="font-semibold text-slate-800">{order.customerName}</p>
+                    <p>{order.customerEmail || "No Email"} · {order.customerPhone}</p>
+                    <p className="text-[10px] text-slate-450">Date: {new Date(order.createdAt).toLocaleString("en-IN")}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:items-end justify-between gap-3 min-w-[200px]">
+                  <p className="text-sm font-extrabold text-sky-700 sm:text-right">
+                    Total: ₹{Number(order.total || 0).toLocaleString("en-IN")}
+                  </p>
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <select
+                      value={order.status}
+                      disabled={updatingId === order.id}
+                      onChange={e => updateStatus(order.id, e.target.value, order.paymentStatus)}
+                      className="text-xs rounded-lg border border-slate-200 bg-white px-2 py-1.5 outline-none focus:border-sky-500 disabled:opacity-50 transition"
+                    >
+                      {["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={order.paymentStatus}
+                      disabled={updatingId === order.id}
+                      onChange={e => updateStatus(order.id, order.status, e.target.value)}
+                      className="text-xs rounded-lg border border-slate-200 bg-white px-2 py-1.5 outline-none focus:border-sky-500 disabled:opacity-50 transition"
+                    >
+                      {["PENDING", "SUCCESS", "FAILED", "REFUNDED"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+
+                    <button
+                      onClick={() => setExpanded(expanded === order.id ? null : order.id)}
+                      className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
+                    >
+                      {expanded === order.id ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {expanded === order.id && (
+                <div className="px-4 pb-4 border-t border-slate-100 pt-4 bg-slate-50/50 space-y-4">
+                  {/* Items list */}
+                  <div>
+                    <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Order Items</h4>
+                    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                      <table className="w-full text-xs">
+                        <thead className="bg-slate-50 border-b border-slate-200 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+                          <tr>
+                            <th className="px-4 py-2 text-left">Product</th>
+                            <th className="px-4 py-2 text-center">Qty</th>
+                            <th className="px-4 py-2 text-right">Unit Price</th>
+                            <th className="px-4 py-2 text-right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {order.items?.map((item: any) => (
+                            <tr key={item.id}>
+                              <td className="px-4 py-2.5">
+                                <p className="font-bold text-slate-800">{item.productName}</p>
+                                {item.variantName && <p className="text-[10px] text-slate-450">{item.variantName}</p>}
+                                <p className="text-[9px] font-mono text-slate-400">{item.sku}</p>
+                              </td>
+                              <td className="px-4 py-2.5 text-center font-semibold text-slate-700">{item.quantity}</td>
+                              <td className="px-4 py-2.5 text-right text-slate-600">₹{Number(item.unitPrice || 0).toLocaleString("en-IN")}</td>
+                              <td className="px-4 py-2.5 text-right font-semibold text-slate-800">₹{Number(item.totalPrice || 0).toLocaleString("en-IN")}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Address Grid */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {order.shippingAddress && (
+                      <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1">
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Shipping Address</p>
+                        <div className="text-xs text-slate-700 space-y-0.5">
+                          <p className="font-semibold">{(order.shippingAddress as any).name || order.customerName}</p>
+                          <p>{(order.shippingAddress as any).addressLine1}</p>
+                          {(order.shippingAddress as any).addressLine2 && <p>{(order.shippingAddress as any).addressLine2}</p>}
+                          <p>{(order.shippingAddress as any).city}, {(order.shippingAddress as any).state} - {(order.shippingAddress as any).postalCode}</p>
+                          <p>{(order.shippingAddress as any).country || "India"}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {order.billingAddress && (
+                      <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1">
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Billing Address</p>
+                        <div className="text-xs text-slate-700 space-y-0.5">
+                          <p className="font-semibold">{(order.billingAddress as any).name || order.customerName}</p>
+                          <p>{(order.billingAddress as any).addressLine1}</p>
+                          {(order.billingAddress as any).addressLine2 && <p>{(order.billingAddress as any).addressLine2}</p>}
+                          <p>{(order.billingAddress as any).city}, {(order.billingAddress as any).state} - {(order.billingAddress as any).postalCode}</p>
+                          <p>{(order.billingAddress as any).country || "India"}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {order.notes && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-3">
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Customer Order Notes</p>
+                      <p className="text-xs text-slate-700 italic">{order.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
