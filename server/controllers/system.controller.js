@@ -218,6 +218,15 @@ export const updateCustomerAdmin = asyncHandler(async (req, res) => {
   res.json(new ApiResponsive(200, updated, "Customer updated"));
 });
 
+export const deleteCustomerAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const existing = await prisma.customer.findUnique({ where: { id } });
+  if (!existing) throw new ApiError(404, "Customer not found");
+
+  await prisma.customer.delete({ where: { id } });
+  res.json(new ApiResponsive(200, null, "Customer deleted successfully"));
+});
+
 // ── Admin Newsletter subscribers ──────────────────────────────────────────────
 
 export const listNewsletterSubscribers = asyncHandler(async (req, res) => {

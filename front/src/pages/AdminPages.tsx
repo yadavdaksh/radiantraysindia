@@ -91,12 +91,26 @@ export function CustomersPage({ showToast }: { showToast: (m: string, t?: "succe
     } catch (e: any) { showToast(e.message, "error"); }
     finally { setSaving(false); }
   };
-
   const resetPassword = async () => {
     if (!resetPw.trim() || resetPw.length < 6) { showToast("Password must be 6+ chars", "error"); return; }
     await update(selected.id, { newPassword: resetPw });
     setResetPw("");
     showToast("Password reset successfully");
+  };
+
+  const deleteCustomer = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this customer? This action is permanent!")) return;
+    setSaving(true);
+    try {
+      await apiFetch(`/system/customers/${id}`, { method: "DELETE" });
+      showToast("Customer deleted successfully");
+      setSelected(null);
+      load();
+    } catch (e: any) {
+      showToast(e.message, "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -224,6 +238,19 @@ export function CustomersPage({ showToast }: { showToast: (m: string, t?: "succe
                       Reset
                     </button>
                   </div>
+                </div>
+
+                <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-3 space-y-2">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
+                    <IconTrash size={11} /> Danger Zone
+                  </p>
+                  <button
+                    onClick={() => deleteCustomer(selected.id)}
+                    disabled={saving}
+                    className="w-full rounded-xl py-2 text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition disabled:opacity-50"
+                  >
+                    Delete Customer Account
+                  </button>
                 </div>
               </div>
             </div>

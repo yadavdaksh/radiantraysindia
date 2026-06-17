@@ -15,6 +15,7 @@ import {
   listCustomers,
   getCustomerDetail,
   updateCustomerAdmin,
+  deleteCustomerAdmin,
   listNewsletterSubscribers,
   deleteNewsletterSubscriber,
   listAllWishlists,
@@ -52,6 +53,8 @@ router.get("/activity-logs", requireAuth, requirePermission("dashboard", "read")
 router.get("/customers",         requireAuth, requirePermission("customer", "read"),   listCustomers);
 router.get("/customers/:id",     requireAuth, requirePermission("customer", "read"),   getCustomerDetail);
 router.put("/customers/:id",     requireAuth, requirePermission("customer", "update"), updateCustomerAdmin);
+router.delete("/customers/:id",  requireAuth, requirePermission("customer", "delete"), deleteCustomerAdmin);
+
 
 // Newsletter subscribers
 router.get("/newsletter",        requireAuth, requirePermission("newsletter", "read"),   listNewsletterSubscribers);

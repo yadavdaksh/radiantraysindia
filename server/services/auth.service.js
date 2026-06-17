@@ -256,7 +256,17 @@ export const customerAuthService = {
     console.log(`\n--- [DEV ONLY] OTP Code for customer registration of ${email}: ${otp} ---\n`);
 
     // Send verify email OTP
-    await emailService.sendVerificationOtp(customer.email, customer.name, otp);
+    try {
+      await emailService.sendVerificationOtp(customer.email, customer.name, otp);
+    } catch (error) {
+      console.error("Failed to send verification email. Rolling back customer creation in database.");
+      await prisma.customer.delete({
+        where: { id: customer.id }
+      }).catch(deleteError => {
+        console.error("Failed to rollback customer creation:", deleteError);
+      });
+      throw error;
+    }
 
     return { id: customer.id, name: customer.name, email: customer.email, isVerified: false };
   },
