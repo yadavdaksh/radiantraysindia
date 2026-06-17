@@ -120,6 +120,35 @@ export default function ProductForm({ showToast }: {
     apiFetch(`/products/id/${id}`)
       .then((j: any) => {
         const p = j.data;
+        const variants = (p.variants?.length ? p.variants : [emptyVariant()]).map((v: any) => ({
+          id: v.id,
+          name: v.name || "",
+          sku: v.sku || "",
+          price: v.price ? String(v.price) : "",
+          salePrice: v.salePrice ? String(v.salePrice) : "",
+          attributeValueIds: (v.attributes || []).map((a: any) => a.attributeValueId),
+          stock: v.stock ?? 0,
+          imageUrl: v.imageUrl || "",
+          images: v.images || [],
+          specification: v.specification || {},
+          isDefault: v.isDefault,
+          isActive: v.isActive !== false,
+          weight: String(v.weight || 1.0),
+          length: String(v.length || 10.0),
+          width: String(v.width || 10.0),
+          height: String(v.height || 10.0),
+          hsn: v.hsn || "9403",
+          packageDetails: v.packageDetails || "",
+        }));
+        const selectedAttributeIds = Array.from(
+          new Set(
+            (p.variants || []).flatMap((variant: any) =>
+              (variant.attributes || [])
+                .map((attr: any) => attr.attributeValue?.attribute?.id || attr.attributeValue?.attributeId || null)
+                .filter(Boolean)
+            )
+          )
+        );
         setForm({
           id: p.id,
           name: p.name, slug: p.slug, sku: p.sku || "",
@@ -141,32 +170,14 @@ export default function ProductForm({ showToast }: {
           canonicalUrl: p.canonicalUrl || "",
           images: p.images || [],
           documents: p.documents || [],
-          variants: (p.variants?.length ? p.variants : [emptyVariant()]).map((v: any) => ({
-            id: v.id,
-            name: v.name || "",
-            sku: v.sku || "",
-            price: v.price ? String(v.price) : "",
-            salePrice: v.salePrice ? String(v.salePrice) : "",
-            attributeValueIds: (v.attributes || []).map((a: any) => a.attributeValueId),
-            stock: v.stock ?? 0,
-            imageUrl: v.imageUrl || "",
-            images: v.images || [],
-            specification: v.specification || {},
-            isDefault: v.isDefault,
-            isActive: v.isActive !== false,
-            weight: String(v.weight || 1.0),
-            length: String(v.length || 10.0),
-            width: String(v.width || 10.0),
-            height: String(v.height || 10.0),
-            hsn: v.hsn || "9403",
-            packageDetails: v.packageDetails || "",
-          })),
+          variants,
           weight: String(p.weight || 1.0),
           length: String(p.length || 10.0),
           width: String(p.width || 10.0),
           height: String(p.height || 10.0),
           hsn: p.hsn || "9403",
           packageDetails: p.packageDetails || "",
+          selectedAttributeIds,
         });
       })
       .catch((e) => setError(e.message))
@@ -735,13 +746,20 @@ export default function ProductForm({ showToast }: {
               setForm(f => ({ ...f, selectedAttributeIds: ids } as any));
             };
 
-            // Selected attributes (full objects)
-            const selectedAttrs = allAttributes.filter((a: any) => selectedAttrIds.includes(a.id));
+          // Selected attributes (full objects)
+          const selectedAttrs = allAttributes.filter((a: any) => selectedAttrIds.includes(a.id));
+          const slugPrefix = (form.slug || form.name)
+            .toUpperCase()
+            .replace(/[^A-Z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 12) || "PROD";
 
-            // Generate all variant combinations from selected attributes
-            const generateVariants = () => {
-              if (!selectedAttrs.length) {
-                showToast("Select at least one attribute first", "error");
+          const getComboKey = (ids: string[]) => ids.slice().sort().join("|");
+
+          // Generate all variant combinations from selected attributes
+          const generateVariants = () => {
+            if (!selectedAttrs.length) {
+              showToast("Select at least one attribute first", "error");
                 return;
               }
               const valArrays: { attrName: string; valueId: string; valueName: string }[][] =
@@ -755,17 +773,29 @@ export default function ProductForm({ showToast }: {
               }
 
               const combinations = cartesian(valArrays as any[][]);
-              const slugBase = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+              const existingByKey = new Map(
+                form.variants.map((variant) => [getComboKey(variant.attributeValueIds || []), variant])
+              );
 
               const newVariants: Variant[] = combinations.map((combo: any[], ci: number) => {
                 const name = combo.map((c: any) => c.valueName).join(" / ");
-                const skuSuffix = combo.map((c: any) => c.valueName.toUpperCase().replace(/[^A-Z0-9]/g, "")).join("-");
-                const sku = `${slugBase.toUpperCase().replace(/-/g, "").slice(0, 8)}-${skuSuffix}`;
                 const attrValueIds = combo.map((c: any) => c.valueId);
+                const skuSuffix = combo
+                  .map((c: any) => c.valueName.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+                  .filter(Boolean)
+                  .join("-");
+                const sku = `${slugPrefix}-${skuSuffix || "VAR"}`;
+                const existing = existingByKey.get(getComboKey(attrValueIds));
 
-                // Preserve existing variant data if name matches
-                const existing = form.variants.find(v => v.name === name);
-                if (existing) return { ...existing, name, sku: existing.sku || sku, attributeValueIds: attrValueIds };
+                if (existing) {
+                  return {
+                    ...existing,
+                    name,
+                    sku: existing.sku || sku,
+                    attributeValueIds: attrValueIds,
+                    isDefault: ci === 0 ? existing.isDefault : existing.isDefault,
+                  };
+                }
 
                 return {
                   ...emptyVariant(),
@@ -861,7 +891,7 @@ export default function ProductForm({ showToast }: {
                         className="inline-flex items-center gap-2 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold px-4 py-2.5 transition"
                       >
                         <IconCheck size={14} />
-                        Generate Variants
+                        Generate Variants from Attributes
                       </button>
                     </div>
                   )}

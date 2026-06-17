@@ -181,10 +181,17 @@ export default function AccountPage() {
   };
 
   // ── Wishlist remove ───────────────────────────────────────────────────────
-  const removeWishlist = async (productId: string) => {
+  const removeWishlist = async (productId: string, variantId: string | null = null) => {
     try {
-      await apiClient.delete(`/wishlist/${productId}`);
-      setWishlist(w => w.filter(i => i.productId !== productId && i.product?.id !== productId));
+      await apiClient.delete(`/wishlist/${productId}`, { data: { variantId } });
+      setWishlist(w => w.filter((i) => {
+        const itemProductId = i.productId || i.product?.id;
+        const itemVariantId = i.variantId || i.variant?.id || null;
+        if (variantId != null) {
+          return !(itemProductId === productId && itemVariantId === variantId);
+        }
+        return !(itemProductId === productId && itemVariantId == null);
+      }));
       toast.success("Removed from wishlist");
     } catch { toast.error("Failed to remove"); }
   };
@@ -458,7 +465,14 @@ export default function AccountPage() {
                     {wishlist.map((w: any) => {
                       const prod = w.product || w;
                       const isB2C = prod.productType === "B2C";
-                      const img = getProductImage(prod.slug, prod.images, prod.variants);
+                      const variant = w.variant || null;
+                      const img = variant?.images?.[0]?.url
+                        || variant?.imageUrl
+                        || getProductImage(prod.slug, prod.images, prod.variants);
+                      const variantChips = variant?.attributes?.map((attr: any) => ({
+                        label: attr?.attributeValue?.attribute?.name,
+                        value: attr?.attributeValue?.value,
+                      })).filter((chip: any) => chip.label && chip.value) || [];
                       return (
                         <div key={w.id || prod.id} className="py-4 flex items-center gap-4">
                           <div className="h-14 w-14 shrink-0 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center p-1">
@@ -467,6 +481,19 @@ export default function AccountPage() {
                           <div className="flex-1 min-w-0">
                             <Link href={`/products/${prod.slug}`} className="font-bold text-sm text-slate-900 hover:text-brand transition truncate block">{prod.name}</Link>
                             <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{prod.shortDescription}</p>
+                            {variant && (
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                {variantChips.length > 0 ? variantChips.map((chip: any, idx: number) => (
+                                  <span key={idx} className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[9px] font-bold">
+                                    <span className="opacity-70">{chip.label}:</span> {chip.value}
+                                  </span>
+                                )) : (
+                                  <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[9px] font-bold">
+                                    {variant.name}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase mt-1 inline-block ${isB2C ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
                               {isB2C ? "B2C" : "B2B Quote"}
                             </span>
@@ -476,7 +503,7 @@ export default function AccountPage() {
                               className="text-xs font-bold bg-brand text-white px-3 py-1.5 rounded-lg hover:bg-brand-dark transition">
                               {isB2C ? "Buy" : "Enquire"}
                             </Link>
-                            <button onClick={() => removeWishlist(prod.id || prod.slug)}
+                            <button onClick={() => removeWishlist(prod.id || prod.slug, variant?.id || w.variantId || null)}
                               className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition">
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>

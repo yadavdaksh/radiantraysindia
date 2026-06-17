@@ -426,7 +426,7 @@ export function ProductDocUploader({ documents, onChange, showToast }: ProductDo
       // Delete old file from R2 if replacing
       const existing = documents[idx];
       if (existing?.key) {
-        deleteFromR2(existing.key).catch(() => {});
+        deleteFromR2(existing.key).catch(() => { });
       }
       const data = await uploadPdfToR2(file);
       const updated = [...documents];
@@ -447,7 +447,7 @@ export function ProductDocUploader({ documents, onChange, showToast }: ProductDo
   const handleRemove = async (idx: number) => {
     const doc = documents[idx];
     if (doc?.key) {
-      deleteFromR2(doc.key).catch(() => {});
+      deleteFromR2(doc.key).catch(() => { });
     }
     onChange(documents.filter((_, i) => i !== idx));
   };
@@ -499,7 +499,7 @@ export function ProductDocUploader({ documents, onChange, showToast }: ProductDo
 
           {doc.url ? (
             <div className="flex items-center gap-2 rounded-lg bg-white border border-emerald-200 px-3 py-2">
-              <svg className="h-4 w-4 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM11 18v-4l-1.5 1.5-.7-.7 2.7-2.7 2.7 2.7-.7.7L12 14v4h-1z"/></svg>
+              <svg className="h-4 w-4 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM11 18v-4l-1.5 1.5-.7-.7 2.7-2.7 2.7 2.7-.7.7L12 14v4h-1z" /></svg>
               <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-slate-700 hover:text-sky-700 truncate flex-1">
                 {doc.url.split("/").pop() || "View PDF"}
               </a>
@@ -1571,7 +1571,7 @@ export function ModuleView({
       )}
 
       {/* 2. ATTRIBUTES VIEW */}
-      {active === "attributes" && (
+      {/* {active === "attributes" && (
         <CRUDTable
           title="Attribute"
           eyebrow="Configuration Specifications"
@@ -1593,7 +1593,7 @@ export function ModuleView({
           searchPlaceholder="Search attribute configurations..."
           showToast={showToast}
         />
-      )}
+      )} */}
 
       {/* 3. VARIANTS VIEW */}
       {active === "variants" && (

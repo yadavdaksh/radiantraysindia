@@ -179,9 +179,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     : null;
   const displayPrice = salePrice || basePrice;
   const discount = salePrice && basePrice > 0 ? Math.round((1 - salePrice / basePrice) * 100) : 0;
-  const inWishlist = isInWishlist(product.slug || product.id);
+  const inWishlist = isInWishlist(product.id || product.slug, selectedVariant?.id || null);
   const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
   const ratingCounts = [5, 4, 3, 2, 1].map((n) => ({ star: n, count: reviews.filter((r) => r.rating === n).length }));
+
+  const getVariantChips = (variant: any) => {
+    const chips =
+      variant?.attributes?.map((attr: any) => {
+        const attribute = attr?.attributeValue?.attribute;
+        const value = attr?.attributeValue?.value;
+        if (!attribute || !value) return null;
+        return { label: attribute.name, value };
+      }).filter(Boolean) || [];
+
+    if (chips.length > 0) return chips;
+
+    if (variant?.name) {
+      return [{ label: "Variant", value: variant.name }];
+    }
+
+    return [];
+  };
 
   const handleAddToCart = () => {
     addToCart(product, selectedVariant, qty);
@@ -295,8 +313,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               </span>
             )}
             {/* Wishlist */}
-            <button
-              onClick={() => toggleWishlist(product.slug || product.id)}
+              <button
+              onClick={() => toggleWishlist(product.id || product.slug, selectedVariant?.id || null)}
               className="absolute bottom-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-white shadow border border-slate-200 hover:border-rose-300 transition"
             >
               <Heart className={`h-5 w-5 ${inWishlist ? "fill-rose-600 text-rose-600" : "text-slate-400"}`} />
@@ -430,13 +448,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                             const varImg = v.images?.find((i: any) => i.isPrimary)?.url || v.images?.[0]?.url || v.imageUrl;
                             if (varImg) setActiveImage(varImg);
                           }}
-                          className={`rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
+                          className={`flex flex-col items-center justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
                             selectedVariant?.id === v.id
                               ? "border-brand bg-brand text-white shadow-sm"
                               : "border-slate-200 bg-white hover:border-brand/40 text-slate-700"
                           }`}
                         >
-                          {v.name}
+                          <span className="block text-[11px] font-extrabold">{v.name}</span>
+                          <span className="mt-1 flex flex-wrap justify-center gap-1">
+                            {getVariantChips(v).slice(0, 3).map((chip: any, idx: number) => (
+                              <span
+                                key={idx}
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                                  selectedVariant?.id === v.id
+                                    ? "bg-white/15 text-white"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                <span className="opacity-70">{chip.label}:</span> {chip.value}
+                              </span>
+                            ))}
+                          </span>
                           {v.stock > 0 && v.stock <= 5 && <span className="ml-1 opacity-70">({v.stock})</span>}
                           {v.stock === 0 && <span className="ml-1 opacity-60">(Out)</span>}
                         </button>
@@ -494,13 +526,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                             const varImg = v.images?.find((i: any) => i.isPrimary)?.url || v.images?.[0]?.url || v.imageUrl;
                             if (varImg) setActiveImage(varImg);
                           }}
-                          className={`rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
+                          className={`flex flex-col items-center justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
                             selectedVariant?.id === v.id
                               ? "border-brand bg-brand text-white"
                               : "border-slate-200 bg-white hover:border-brand/40 text-slate-700"
                           }`}
                         >
-                          {v.name}
+                          <span className="block text-[11px] font-extrabold">{v.name}</span>
+                          <span className="mt-1 flex flex-wrap justify-center gap-1">
+                            {getVariantChips(v).slice(0, 3).map((chip: any, idx: number) => (
+                              <span
+                                key={idx}
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                                  selectedVariant?.id === v.id
+                                    ? "bg-white/15 text-white"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                <span className="opacity-70">{chip.label}:</span> {chip.value}
+                              </span>
+                            ))}
+                          </span>
                         </button>
                       ))}
                     </div>

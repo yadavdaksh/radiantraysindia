@@ -239,6 +239,7 @@ export const listAllWishlists = asyncHandler(async (req, res) => {
     include: {
       customer: { select: { name: true, email: true } },
       product: { select: { name: true, slug: true, images: true, productType: true } },
+      variant: { select: { id: true, name: true, sku: true, price: true, salePrice: true } },
     },
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -287,4 +288,3 @@ export const deleteContactSubmissionAdmin = asyncHandler(async (req, res) => {
   await leadService.deleteContactSubmission(req.params.id);
   res.json(new ApiResponsive(200, null, "Contact submission deleted successfully"));
 });
-
