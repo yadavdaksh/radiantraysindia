@@ -27,9 +27,8 @@ const sendEmail = async (options) => {
               pass: cfg.pass,
             },
           });
-
           if (cfg.fromName) fromName = cfg.fromName;
-          if (cfg.fromEmail) fromEmail = cfg.fromEmail;
+          if (cfg.from) fromEmail = cfg.from;
           
           console.log("Using dynamic database SMTP configuration for email delivery");
         }
