@@ -855,7 +855,7 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
   const fetchRates = async (orderId: string) => {
     setLoadingRates(prev => ({ ...prev, [orderId]: true }));
     try {
-      const res = await apiFetch<any>(`/shipments/rates/${orderId}`);
+      const res = await apiFetch(`/shipments/rates/${orderId}`);
       setRates(prev => ({ ...prev, [orderId]: res.data?.available_courier_companies || [] }));
     } catch (err: any) {
       showToast(err.message, "error");
@@ -1221,4 +1221,3 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
     </div>
   );
 }
-

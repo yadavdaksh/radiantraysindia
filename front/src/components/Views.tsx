@@ -563,6 +563,7 @@ interface CRUDTableProps<T> {
   title: string;
   eyebrow: string;
   description: string;
+  moduleKey?: string;
   items: T[];
   columns: ColumnDef<T>[];
   formFields: FormFieldDef[];
@@ -581,6 +582,7 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
   title,
   eyebrow,
   description,
+  moduleKey,
   items,
   columns,
   formFields,
@@ -995,7 +997,7 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                     )}
 
                     {field.type === "textarea" && (
-                      field.key === "message" && active === "contactForms" ? (
+                      field.key === "message" && moduleKey === "contactForms" ? (
                         <div className="w-full rounded-2xl border border-slate-200 p-4 text-sm bg-slate-50 text-slate-700 whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed shadow-inner font-normal">
                           {formState[field.key]}
                         </div>
