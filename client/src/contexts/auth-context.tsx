@@ -61,7 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             setCustomer(JSON.parse(localCust));
             setToken(localTok);
-          } catch (_) {}
+          } catch {
+            // Ignore malformed local session data.
+          }
         }
       }
       setIsLoading(false);

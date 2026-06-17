@@ -555,6 +555,7 @@ interface FormFieldDef {
   type: "text" | "number" | "select" | "textarea" | "image" | "checkbox" | "json";
   options?: { value: string; label: string }[];
   required?: boolean;
+  disabled?: boolean;
   dimensions?: string;
 }
 
@@ -962,6 +963,7 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
 
               {formFields.map((field) => {
                 const hasErr = formErrors[field.key];
+                const isDisabled = field.disabled === true;
                 return (
                   <div key={field.key} className="space-y-1">
                     {field.type !== "image" && field.type !== "checkbox" && (
@@ -975,7 +977,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                         type="text"
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${hasErr ? "border-rose-500" : "border-slate-300"
+                        disabled={isDisabled}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition disabled:opacity-60 disabled:bg-slate-100 ${hasErr ? "border-rose-500" : "border-slate-300"
                           }`}
                       />
                     )}
@@ -985,7 +988,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                         type="number"
                         value={formState[field.key] ?? 0}
                         onChange={(e) => setFormState({ ...formState, [field.key]: Number(e.target.value) })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${hasErr ? "border-rose-500" : "border-slate-300"
+                        disabled={isDisabled}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition disabled:opacity-60 disabled:bg-slate-100 ${hasErr ? "border-rose-500" : "border-slate-300"
                           }`}
                       />
                     )}
@@ -999,7 +1003,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                         <textarea
                           value={formState[field.key] || ""}
                           onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                          className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${hasErr ? "border-rose-500" : "border-slate-300"
+                          disabled={isDisabled}
+                          className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 disabled:opacity-60 disabled:bg-slate-100 ${hasErr ? "border-rose-500" : "border-slate-300"
                             }`}
                         />
                       )
@@ -1009,8 +1014,9 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                       <textarea
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
+                        disabled={isDisabled}
                         placeholder='{"key": "value"}'
-                        className={`w-full rounded-2xl border p-3.5 text-sm font-mono outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${hasErr ? "border-rose-500" : "border-slate-300"
+                        className={`w-full rounded-2xl border p-3.5 text-sm font-mono outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 disabled:opacity-60 disabled:bg-slate-100 ${hasErr ? "border-rose-500" : "border-slate-300"
                           }`}
                       />
                     )}
@@ -1019,7 +1025,8 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                       <select
                         value={formState[field.key] || ""}
                         onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition ${hasErr ? "border-rose-500" : "border-slate-300"
+                        disabled={isDisabled}
+                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition disabled:opacity-60 disabled:bg-slate-100 ${hasErr ? "border-rose-500" : "border-slate-300"
                           }`}
                       >
                         <option value="">Select Option</option>
@@ -1032,11 +1039,12 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                     )}
 
                     {field.type === "checkbox" && (
-                      <label className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50 cursor-pointer text-xs font-semibold text-slate-700">
+                      <label className={`flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 ${isDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}>
                         <input
                           type="checkbox"
                           checked={!!formState[field.key]}
                           onChange={(e) => setFormState({ ...formState, [field.key]: e.target.checked })}
+                          disabled={isDisabled}
                           className="rounded border-slate-300 text-sky-700 focus:ring-sky-500 h-4 w-4"
                         />
                         <span>{field.label}</span>
@@ -1166,44 +1174,8 @@ export function ModuleView({
     }
   }, [active]);
 
-  // ==========================================
-  // 2. ATTRIBUTES VIEW (Mock)
-  // ==========================================
-  const [attributes, setAttributes] = useState<any[]>(() =>
-    getMockData("rr_adm_attributes", [
-      { id: "attr-1", name: "Sash Type", values: "Automatic, Manual", isActive: true },
-      { id: "attr-2", name: "MOC (Material)", values: "Stainless Steel 304, Stainless Steel 316", isActive: true },
-    ])
-  );
 
-  const handleSaveAttribute = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = attributes.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...attributes, { ...item, id: `attr-${Date.now()}`, isActive: true }];
-    }
-    setAttributes(updated);
-    saveMockData("rr_adm_attributes", updated);
-  };
 
-  const handleDeleteAttribute = async (id: string) => {
-    const updated = attributes.filter((x) => x.id !== id);
-    setAttributes(updated);
-    saveMockData("rr_adm_attributes", updated);
-  };
-
-  const handleBulkDeleteAttribute = async (ids: string[]) => {
-    const updated = attributes.filter((x) => !ids.includes(x.id));
-    setAttributes(updated);
-    saveMockData("rr_adm_attributes", updated);
-  };
-
-  const handleStatusChangeAttribute = async (id: string, activeStatus: boolean) => {
-    const updated = attributes.map((x) => (x.id === id ? { ...x, isActive: activeStatus } : x));
-    setAttributes(updated);
-    saveMockData("rr_adm_attributes", updated);
-  };
 
   // ==========================================
   // 3. VARIANTS VIEW (Mock)
@@ -1308,220 +1280,13 @@ export function ModuleView({
     saveMockData("rr_adm_refunds", updated);
   };
 
-  // ==========================================
-  // 7. CUSTOMERS VIEW (Mock)
-  // ==========================================
-  const [customers, setCustomers] = useState<any[]>(() =>
-    getMockData("rr_adm_customers", [
-      { id: "cust-1", name: "Alice Bio Labs", email: "alice@biolabs.com", phone: "9876543210", isVerified: true, status: "Active" },
-      { id: "cust-2", name: "Bob Clinic Equipments", email: "bob@clinic.com", phone: "9876543211", isVerified: false, status: "Inactive" },
-    ])
-  );
 
-  const [activeCustomerDetail, setActiveCustomerDetail] = useState<any>(null);
 
-  const handleSaveCustomer = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = customers.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...customers, { ...item, id: `cust-${Date.now()}`, isVerified: true }];
-    }
-    setCustomers(updated);
-    saveMockData("rr_adm_customers", updated);
-  };
 
-  const handleDeleteCustomer = async (id: string) => {
-    const updated = customers.filter((x) => x.id !== id);
-    setCustomers(updated);
-    saveMockData("rr_adm_customers", updated);
-  };
 
-  const handleBulkDeleteCustomer = async (ids: string[]) => {
-    const updated = customers.filter((x) => !ids.includes(x.id));
-    setCustomers(updated);
-    saveMockData("rr_adm_customers", updated);
-  };
 
-  // ==========================================
-  // 8. ADDRESSES VIEW (Mock)
-  // ==========================================
-  const [addresses, setAddresses] = useState<any[]>(() =>
-    getMockData("rr_adm_addresses", [
-      { id: "addr-1", customerName: "Alice Bio Labs", label: "Warehouse", addressLine1: "Plot 42, Sector 5", city: "Hyderabad", state: "Telangana", pincode: "500081", country: "India", isDefault: true },
-    ])
-  );
 
-  const handleSaveAddress = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = addresses.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...addresses, { ...item, id: `addr-${Date.now()}` }];
-    }
-    setAddresses(updated);
-    saveMockData("rr_adm_addresses", updated);
-  };
 
-  const handleDeleteAddress = async (id: string) => {
-    const updated = addresses.filter((x) => x.id !== id);
-    setAddresses(updated);
-    saveMockData("rr_adm_addresses", updated);
-  };
-
-  const handleBulkDeleteAddress = async (ids: string[]) => {
-    const updated = addresses.filter((x) => !ids.includes(x.id));
-    setAddresses(updated);
-    saveMockData("rr_adm_addresses", updated);
-  };
-
-  // ==========================================
-  // 9. WISHLIST VIEW (Mock)
-  // ==========================================
-  const [wishlists, setWishlists] = useState<any[]>(() =>
-    getMockData("rr_adm_wishlists", [
-      { id: "wish-1", customerName: "Alice Bio Labs", productName: "Horizontal Laminar Air Flow", dateAdded: new Date().toLocaleDateString() },
-    ])
-  );
-
-  const handleSaveWishlist = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = wishlists.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...wishlists, { ...item, id: `wish-${Date.now()}`, dateAdded: new Date().toLocaleDateString() }];
-    }
-    setWishlists(updated);
-    saveMockData("rr_adm_wishlists", updated);
-  };
-
-  const handleDeleteWishlist = async (id: string) => {
-    const updated = wishlists.filter((x) => x.id !== id);
-    setWishlists(updated);
-    saveMockData("rr_adm_wishlists", updated);
-  };
-
-  const handleBulkDeleteWishlist = async (ids: string[]) => {
-    const updated = wishlists.filter((x) => !ids.includes(x.id));
-    setWishlists(updated);
-    saveMockData("rr_adm_wishlists", updated);
-  };
-
-  // ==========================================
-  // ==========================================
-  // 10. CONTACT FORMS VIEW (Connected to API)
-  // ==========================================
-  const contactsList = data || [];
-
-  const handleSaveContact = async (item: any) => {
-    const payload = {
-      name: item.name,
-      email: item.email,
-      phone: item.phone || "",
-      subject: item.subject || "General Inquiry",
-      message: item.message,
-      status: item.status || "NEW",
-    };
-    if (item.id && !item.id.startsWith("temp-") && !item.id.startsWith("con-")) {
-      await apiFetch(`/system/contact-submissions/${item.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-    } else {
-      await apiFetch("/contact", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-    }
-    loadResource("contactForms", "/system/contact-submissions?limit=50");
-  };
-
-  const handleDeleteContact = async (id: string) => {
-    await apiFetch(`/system/contact-submissions/${id}`, { method: "DELETE" });
-    loadResource("contactForms", "/system/contact-submissions?limit=50");
-  };
-
-  const handleBulkDeleteContact = async (ids: string[]) => {
-    for (const id of ids) {
-      await apiFetch(`/system/contact-submissions/${id}`, { method: "DELETE" });
-    }
-    loadResource("contactForms", "/system/contact-submissions?limit=50");
-  };
-
-  // ==========================================
-  // 11. NEWSLETTER VIEW (Mock)
-  // ==========================================
-  const [subscribers, setSubscribers] = useState<any[]>(() =>
-    getMockData("rr_adm_subscribers", [
-      { id: "sub-1", email: "marketing@zyduspharma.in", dateSubscribed: new Date().toLocaleDateString(), isActive: true },
-      { id: "sub-2", email: "purchase@drreddys.com", dateSubscribed: new Date().toLocaleDateString(), isActive: true },
-    ])
-  );
-
-  const handleSaveSubscriber = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = subscribers.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...subscribers, { ...item, id: `sub-${Date.now()}`, dateSubscribed: new Date().toLocaleDateString(), isActive: true }];
-    }
-    setSubscribers(updated);
-    saveMockData("rr_adm_subscribers", updated);
-  };
-
-  const handleDeleteSubscriber = async (id: string) => {
-    const updated = subscribers.filter((x) => x.id !== id);
-    setSubscribers(updated);
-    saveMockData("rr_adm_subscribers", updated);
-  };
-
-  const handleBulkDeleteSubscriber = async (ids: string[]) => {
-    const updated = subscribers.filter((x) => !ids.includes(x.id));
-    setSubscribers(updated);
-    saveMockData("rr_adm_subscribers", updated);
-  };
-
-  // ==========================================
-  // 12. BANNERS VIEW (Connected to API)
-  // ==========================================
-  const bannersList = data?.items || data || [];
-
-  const handleSaveBanner = async (item: any) => {
-    const mainImg = item.desktopImageUrl || item.mobileImageUrl || "";
-    const payload = {
-      title: (item.title || "").trim(),
-      subtitle: item.subtitle || "",
-      desktopImageUrl: item.desktopImageUrl || mainImg,
-      mobileImageUrl: item.mobileImageUrl || mainImg,
-      linkUrl: item.linkUrl || "",
-      sortOrder: Number(item.sortOrder || 0),
-      isActive: item.isActive !== false,
-    };
-    if (item.id && !item.id.startsWith("temp-") && !item.id.startsWith("ban-")) {
-      await apiFetch(`/content/banners/${item.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-    } else {
-      await apiFetch("/content/banners", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-    }
-    loadResource("banners", "/content/banners");
-  };
-
-  const handleDeleteBanner = async (id: string) => {
-    await apiFetch(`/content/banners/${id}`, { method: "DELETE" });
-    loadResource("banners", "/content/banners");
-  };
-
-  const handleBulkDeleteBanner = async (ids: string[]) => {
-    for (const id of ids) {
-      await apiFetch(`/content/banners/${id}`, { method: "DELETE" });
-    }
-    loadResource("banners", "/content/banners");
-  };
 
 
 
@@ -1832,4 +1597,3 @@ export function ModuleView({
     </div>
   );
 }
-

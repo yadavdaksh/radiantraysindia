@@ -12,7 +12,7 @@ import { useWishlist } from "@/contexts/wishlist-context";
 import { placeholderStore, Review } from "@/lib/placeholder-store";
 import {
   FileText, MessageSquare, ShoppingCart, Send, Loader2,
-  Heart, PhoneCall, Star, CheckCircle2, ChevronRight,
+  Heart, Star, CheckCircle2, ChevronRight,
   ShieldCheck, Truck, Award, Package, ArrowRight, Zap,
 } from "lucide-react";
 

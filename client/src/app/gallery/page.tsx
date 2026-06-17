@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Image as ImageIcon, LayoutGrid, CheckCircle } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, CheckCircle } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { gallery as mockGallery } from "@/lib/site-data";
 import { motion, AnimatePresence } from "framer-motion";

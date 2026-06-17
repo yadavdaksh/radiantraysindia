@@ -11,9 +11,9 @@ import {
   IconShoppingCart, IconArrowBack,
   IconCreditCard, IconTicket, IconUsers, IconMapPin, IconHeart,
   IconTarget, IconMail, IconNews, IconMessageCircle,
-  IconBuildingFactory, IconPhoto, IconFlag, IconSeo,
-  IconSitemap, IconRobot, IconUser, IconShieldHalf, IconKey,
-  IconActivity, IconMailbox, IconSettings,
+  IconBuildingFactory, IconPhoto, IconFlag,
+  IconUser, IconShieldHalf, IconKey,
+  IconSettings,
 } from "@tabler/icons-react";
 import { ModuleView } from "./components/Views";
 import ProductsPage from "./pages/Products";
