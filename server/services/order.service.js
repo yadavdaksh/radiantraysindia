@@ -223,25 +223,14 @@ export const orderService = {
         product: {
           include: {
             images: true,
-          },
-        },
-        variant: {
-          include: {
-            images: true,
-            attributes: {
-              include: {
-                attributeValue: {
-                  include: { attribute: true },
-                },
-              },
-            },
+            variants: { where: { isDefault: true }, take: 1 },
           },
         },
       },
     });
   },
 
-  addToWishlist: async (customerId, productId, variantId = null) => {
+  addToWishlist: async (customerId, productId) => {
     if (!productId) throw new ApiError(400, "Product ID is required");
 
     const product = await prisma.product.findFirst({
@@ -251,30 +240,20 @@ export const orderService = {
     });
     if (!product) throw new ApiError(404, "Product not found");
 
-    let variant = null;
-    if (variantId) {
-      variant = await prisma.productVariant.findFirst({
-        where: { id: variantId, productId: product.id },
-      });
-      if (!variant) throw new ApiError(404, "Variant not found for this product");
-    }
-
-    const existing = await prisma.wishlist.findFirst({
-      where: { customerId, productId: product.id, variantId: variant?.id || null },
+    const existing = await prisma.wishlist.findUnique({
+      where: {
+        customerId_productId: { customerId, productId: product.id },
+      },
     });
 
     if (existing) return existing;
 
     return prisma.wishlist.create({
-      data: {
-        customerId,
-        productId: product.id,
-        variantId: variant?.id || null,
-      },
+      data: { customerId, productId: product.id },
     });
   },
 
-  removeFromWishlist: async (customerId, productId, variantId = null) => {
+  removeFromWishlist: async (customerId, productId) => {
     const product = await prisma.product.findFirst({
       where: {
         OR: [{ id: productId }, { slug: productId }],
@@ -282,11 +261,17 @@ export const orderService = {
     });
     if (!product) throw new ApiError(404, "Product not found");
 
-    const existing = await prisma.wishlist.findFirst({
-      where: { customerId, productId: product.id, variantId: variantId || null },
+    const existing = await prisma.wishlist.findUnique({
+      where: {
+        customerId_productId: { customerId, productId: product.id },
+      },
     });
     if (existing) {
-      await prisma.wishlist.delete({ where: { id: existing.id } });
+      await prisma.wishlist.delete({
+        where: {
+          customerId_productId: { customerId, productId: product.id },
+        },
+      });
     }
     return { success: true };
   },

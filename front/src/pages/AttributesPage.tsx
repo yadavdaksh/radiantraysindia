@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { IconPlus, IconTrash, IconEdit, IconX, IconCheck, IconTag } from "@tabler/icons-react";
 import { apiFetch } from "../lib/api";
 
@@ -147,7 +147,7 @@ export default function AttributesPage({ showToast }: AttributesPageProps) {
         <div>
           <h1 className="text-xl font-extrabold text-slate-950">Attributes</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Define product properties like Color, Size, Material. Variants are built from combinations of these.
+            Create shared option groups like Color, Size, or Material. Product variants use these values to generate combinations.
           </p>
         </div>
         <button
@@ -213,7 +213,7 @@ export default function AttributesPage({ showToast }: AttributesPageProps) {
           </div>
           <p className="font-bold text-slate-700">No attributes yet</p>
           <p className="text-sm text-slate-400">
-            Create attributes like "Color", "Size", or "Material" to enable product variants.
+            Add an attribute name first, then add values like Red, Blue, S, M, or L.
           </p>
           <button
             onClick={() => setShowAddAttr(true)}

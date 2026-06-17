@@ -9,8 +9,6 @@ import { RichEditorLazy as SimpleEditor } from "../components/RichEditorLazy";
 
 import { apiFetch } from "../lib/api";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
-
 function Label({ children }: { children: React.ReactNode }) {
   return <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">{children}</span>;
 }
@@ -141,11 +139,11 @@ export default function ProductForm({ showToast }: {
           packageDetails: v.packageDetails || "",
         }));
         const selectedAttributeIds = Array.from(
-          new Set(
+          new Set<string>(
             (p.variants || []).flatMap((variant: any) =>
               (variant.attributes || [])
                 .map((attr: any) => attr.attributeValue?.attribute?.id || attr.attributeValue?.attributeId || null)
-                .filter(Boolean)
+                .filter((value: string | null): value is string => Boolean(value))
             )
           )
         );
@@ -746,22 +744,23 @@ export default function ProductForm({ showToast }: {
               setForm(f => ({ ...f, selectedAttributeIds: ids } as any));
             };
 
-          // Selected attributes (full objects)
-          const selectedAttrs = allAttributes.filter((a: any) => selectedAttrIds.includes(a.id));
-          const slugPrefix = (form.slug || form.name)
-            .toUpperCase()
-            .replace(/[^A-Z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "")
-            .slice(0, 12) || "PROD";
+            // Selected attributes (full objects)
+            const selectedAttrs = allAttributes.filter((a: any) => selectedAttrIds.includes(a.id));
+            const slugPrefix = (form.slug || form.name)
+              .toUpperCase()
+              .replace(/[^A-Z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+              .slice(0, 12) || "PROD";
 
-          const getComboKey = (ids: string[]) => ids.slice().sort().join("|");
+            const getComboKey = (ids: string[]) => ids.slice().sort().join("|");
 
-          // Generate all variant combinations from selected attributes
-          const generateVariants = () => {
-            if (!selectedAttrs.length) {
-              showToast("Select at least one attribute first", "error");
+            // Generate all variant combinations from selected attributes
+            const generateVariants = () => {
+              if (!selectedAttrs.length) {
+                showToast("Select at least one attribute first", "error");
                 return;
               }
+
               const valArrays: { attrName: string; valueId: string; valueName: string }[][] =
                 selectedAttrs.map((attr: any) =>
                   (attr.values || []).map((v: any) => ({ attrName: attr.name, valueId: v.id, valueName: v.value }))
@@ -793,7 +792,6 @@ export default function ProductForm({ showToast }: {
                     name,
                     sku: existing.sku || sku,
                     attributeValueIds: attrValueIds,
-                    isDefault: ci === 0 ? existing.isDefault : existing.isDefault,
                   };
                 }
 
@@ -819,7 +817,7 @@ export default function ProductForm({ showToast }: {
                     <div>
                       <p className="text-sm font-extrabold text-slate-900">Step 1 — Select Attributes</p>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        Check which attributes apply to this product. Variants = all combinations.
+                        Choose the attribute groups used by this product. The form will build every value combination automatically.
                       </p>
                     </div>
                     <a
@@ -834,9 +832,9 @@ export default function ProductForm({ showToast }: {
 
                   {allAttributes.length === 0 ? (
                     <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm text-amber-700 font-semibold">
-                      No attributes defined yet.{" "}
+                      No attributes exist yet.{" "}
                       <a href="/attributes" target="_blank" className="underline">Create attributes first</a>
-                      {" "}(e.g. Color → Red, Blue; Size → S, M, L)
+                      {" "}(for example: Color → Red, Blue; Size → S, M, L)
                     </div>
                   ) : (
                     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
