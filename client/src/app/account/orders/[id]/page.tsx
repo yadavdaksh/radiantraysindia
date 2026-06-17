@@ -74,7 +74,7 @@ function ReasonModal({
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { customer } = useAuth();
+  const { customer, isLoading } = useAuth();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelModal, setCancelModal] = useState(false);
@@ -89,9 +89,10 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   }, [params.id]);
 
   useEffect(() => {
+    if (isLoading) return;
     if (!customer) { router.push(`/login?redirect=/account/orders/${params.id}`); return; }
     loadOrder();
-  }, [customer, params.id, loadOrder, router]);
+  }, [customer, isLoading, params.id, loadOrder, router]);
 
   const handleCancel = async (reason: string) => {
     setActionBusy(true);
@@ -138,7 +139,13 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   if (!order) return notFound();
 
   const canCancel = ["PENDING", "PAID"].includes(order.status);
-  const canReturn = order.status === "DELIVERED";
+  const deliveredLog = order.statusHistory?.find((h: any) => h.status === "DELIVERED");
+  const deliveryTime = deliveredLog ? new Date(deliveredLog.createdAt) : new Date(order.updatedAt);
+  const diffTime = Math.abs(new Date().getTime() - deliveryTime.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const within7Days = diffDays <= 7;
+  const hasB2C = order.items?.some((item: any) => item.product?.productType === "B2C");
+  const canReturn = order.status === "DELIVERED" && hasB2C && within7Days;
   const shipment = order.shipments?.[0];
   const trackingUrl = shipment?.awbCode
     ? `https://shiprocket.co/tracking/${shipment.awbCode}`
@@ -333,7 +340,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
               {Number(order.discount) > 0 && (
                 <div className="flex justify-between text-emerald-600 font-semibold">
-                  <span>Discount</span>
+                  <span>Discount {order.couponCode ? `(${order.couponCode})` : ""}</span>
                   <span>−₹{Number(order.discount).toLocaleString("en-IN")}</span>
                 </div>
               )}

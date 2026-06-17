@@ -26,10 +26,31 @@ export const authCookieOptions = {
   path: "/",
 };
 
-export const setAuthCookies = (res, { accessToken, refreshToken }) => {
+export const setAuthCookies = (res, { accessToken, refreshToken }, isCustomer = false) => {
   const refreshMaxAge = 7 * 24 * 60 * 60 * 1000;
   const accessMaxAge = 15 * 60 * 1000;
 
+  if (isCustomer) {
+    res.cookie("customerAccessToken", accessToken, {
+      ...authCookieOptions,
+      maxAge: accessMaxAge,
+    });
+    res.cookie("customerRefreshToken", refreshToken, {
+      ...authCookieOptions,
+      maxAge: refreshMaxAge,
+    });
+  } else {
+    res.cookie("adminAccessToken", accessToken, {
+      ...authCookieOptions,
+      maxAge: accessMaxAge,
+    });
+    res.cookie("adminRefreshToken", refreshToken, {
+      ...authCookieOptions,
+      maxAge: refreshMaxAge,
+    });
+  }
+
+  // Set default cookies for fallback/compatibility
   res.cookie(ACCESS_COOKIE, accessToken, {
     ...authCookieOptions,
     maxAge: accessMaxAge,
@@ -41,6 +62,10 @@ export const setAuthCookies = (res, { accessToken, refreshToken }) => {
 };
 
 export const clearAuthCookies = (res) => {
+  res.clearCookie("customerAccessToken", authCookieOptions);
+  res.clearCookie("customerRefreshToken", authCookieOptions);
+  res.clearCookie("adminAccessToken", authCookieOptions);
+  res.clearCookie("adminRefreshToken", authCookieOptions);
   res.clearCookie(ACCESS_COOKIE, authCookieOptions);
   res.clearCookie(REFRESH_COOKIE, authCookieOptions);
 };

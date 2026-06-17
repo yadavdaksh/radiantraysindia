@@ -81,8 +81,8 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
 
   // All settings keyed
   const [company, setCompany] = useState({
-    brandName: "Radiant Rays India", phone: "+91 40 12345678",
-    email: "sales@radiantraysindia.com", gstin: "36AAAAA1111A1Z1",
+    brandName: "Radiant Rays India", phone: "+91 731 815 8417",
+    email: "info@radiantraysindia.com", gstin: "36AAAAA1111A1Z1",
     address: "Plot 42, Sector II, Tech Park, Hyderabad",
     website: "https://radiantraysindia.com",
   });

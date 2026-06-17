@@ -62,3 +62,14 @@ export const deleteAttributeValue = asyncHandler(async (req, res) => {
   await prisma.attributeValue.delete({ where: { id: valueId } });
   res.json(new ApiResponsive(200, null, "Value deleted"));
 });
+
+export const updateAttributeValue = asyncHandler(async (req, res) => {
+  const { valueId } = req.params;
+  const { value } = req.body;
+  if (!value?.trim()) throw new ApiError(400, "Value is required");
+  const av = await prisma.attributeValue.update({
+    where: { id: valueId },
+    data: { value: value.trim() },
+  });
+  res.json(new ApiResponsive(200, av, "Value updated"));
+});

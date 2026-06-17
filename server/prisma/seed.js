@@ -73,18 +73,18 @@ async function main() {
   });
 
   // ── 2. Super Admin user ───────────────────────────────────────
-  const adminExists = await prisma.user.findUnique({ where: { email: "admin@radiantraysindia.com" } });
+  const adminExists = await prisma.user.findUnique({ where: { email: "info@radiantraysindia.com" } });
   if (!adminExists) {
     const hashed = await bcrypt.hash("Admin@1234", 12);
     await prisma.user.create({
       data: {
         name: "Super Admin",
-        email: "admin@radiantraysindia.com",
+        email: "info@radiantraysindia.com",
         password: hashed,
         roleId: superAdminRole.id,
       },
     });
-    console.log("✅ Super Admin: admin@radiantraysindia.com / Admin@1234");
+    console.log("✅ Super Admin: info@radiantraysindia.com / Admin@1234");
   } else {
     console.log("⏭  Super Admin already exists");
   }
@@ -457,7 +457,7 @@ async function main() {
   console.log(`✅ Coupons: ${coupons.length}`);
 
   console.log("\n🎉 Seed complete!");
-  console.log("   Admin: admin@radiantraysindia.com / Admin@1234");
+  console.log("   Admin: info@radiantraysindia.com / Admin@1234");
   console.log("   Coupons: CLEANROOM10, WELCOME500, SUMMER20");
 }
 

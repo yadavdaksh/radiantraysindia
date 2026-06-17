@@ -78,7 +78,12 @@ export default function IndustryDetailPage({ params }: { params: { slug: string 
 
   return (
     <SiteShell title={`${industryName} cleanroom systems`} subtitle={industryDesc}>
-      <div className="my-6">
+      <div className="my-6 space-y-6">
+        {industry?.imageUrl && (
+          <div className="relative w-full h-48 sm:h-64 rounded-3xl overflow-hidden bg-slate-100 border border-slate-200">
+            <img src={industry.imageUrl} alt={industryName} className="h-full w-full object-cover" />
+          </div>
+        )}
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center p-12 border border-dashed border-slate-200 bg-white rounded-2xl">
             <CircleAlert className="h-8 w-8 text-slate-400 mb-4" />

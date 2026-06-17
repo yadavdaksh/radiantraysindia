@@ -4,9 +4,9 @@ import { ApiError } from "../utils/ApiError.js";
 import { createSlug } from "../helpers/Slug.js";
 import { getPaginationParams, formatPaginatedResponse } from "../helpers/pagination.js";
 import { emailService } from "./email.service.js";
-import { deleteR2Image } from "../utils/r2.js";
+import { deleteR2Image, deleteObjectFromR2 } from "../utils/r2.js";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.SMTP_SENDER || "admin@radiantraysindia.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.SMTP_SENDER || "info@radiantraysindia.com";
 const LOW_STOCK_THRESHOLD = 5;
 
 const fireLowStockAlerts = async (variants, productName) => {
@@ -71,30 +71,30 @@ export const productService = {
       ...(featured === undefined ? {} : { featured: String(featured) === "true" }),
       ...(search
         ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" } },
-              { sku: { contains: search, mode: "insensitive" } },
-              { slug: { contains: search, mode: "insensitive" } },
-            ],
-          }
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { sku: { contains: search, mode: "insensitive" } },
+            { slug: { contains: search, mode: "insensitive" } },
+          ],
+        }
         : {}),
       ...(categorySlug
         ? {
-            categories: {
-              some: {
-                category: { slug: categorySlug },
-              },
+          categories: {
+            some: {
+              category: { slug: categorySlug },
             },
-          }
+          },
+        }
         : {}),
       ...(industrySlug
         ? {
-            industries: {
-              some: {
-                industry: { slug: industrySlug },
-              },
+          industries: {
+            some: {
+              industry: { slug: industrySlug },
             },
-          }
+          },
+        }
         : {}),
     };
 
@@ -249,6 +249,7 @@ export const productService = {
             productId: created.id,
             title: doc.title,
             url: doc.url,
+            key: doc.key || null,
             mimeType: doc.mimeType || null,
           })),
         });
@@ -426,6 +427,19 @@ export const productService = {
         });
       }
 
+      // Cleanup removed documents from R2
+      try {
+        const newDocUrls = new Set(documents.map(d => d.url).filter(Boolean));
+        const currentDocs = await tx.productDocument.findMany({ where: { productId: id } });
+        for (const doc of currentDocs) {
+          if (!newDocUrls.has(doc.url) && doc.key) {
+            await deleteObjectFromR2(doc.key);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed R2 doc cleanup during product update:", err.message);
+      }
+
       await tx.productDocument.deleteMany({ where: { productId: id } });
       if (documents.length) {
         await tx.productDocument.createMany({
@@ -433,6 +447,7 @@ export const productService = {
             productId: id,
             title: doc.title,
             url: doc.url,
+            key: doc.key || null,
             mimeType: doc.mimeType || null,
           })),
         });
@@ -446,8 +461,16 @@ export const productService = {
   },
 
   delete: async (id) => {
-    const existing = await prisma.product.findUnique({ where: { id } });
+    const existing = await prisma.product.findUnique({
+      where: { id },
+      include: { documents: true },
+    });
     if (!existing) throw new ApiError(404, "Product not found");
+
+    // Delete associated document files from R2
+    for (const doc of existing.documents || []) {
+      if (doc.key) deleteObjectFromR2(doc.key).catch(() => {});
+    }
 
     // Soft delete/archive
     await prisma.product.update({

@@ -10,11 +10,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ShoppingBag, User, Heart, Search, LogOut,
   MapPin, Mail, Phone, ChevronDown, Layers,
-  ArrowRight, Tag,
+  ArrowRight, Tag, Home,
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { useCategoriesNav } from "@/lib/use-categories-nav";
-import { industries as mockIndustries } from "@/lib/site-data";
+import { useIndustriesNav } from "@/lib/use-industries-nav";
 import Image from "next/image";
 
 const SIMPLE_NAV = [
@@ -29,6 +29,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   const { cartCount } = useCart();
   const { wishlist } = useWishlist();
   const navCategories = useCategoriesNav();
+  const navIndustries = useIndustriesNav();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -81,12 +82,8 @@ export function GlobalShell({ children }: { children: ReactNode }) {
     }
 
     try {
-      await apiClient.post("/leads", {
-        name: "Newsletter Subscriber",
+      await apiClient.post("/public/newsletter/subscribe", {
         email: newsletterEmail,
-        phone: "0000000000",
-        message: "Newsletter Subscription Request",
-        source: "Newsletter",
       });
       setNewsletterSuccess(true);
       setNewsletterEmail("");
@@ -167,8 +164,12 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                               onClick={() => setOpenDropdown(null)}
                               className="flex items-start gap-3 rounded-xl p-3 hover:bg-slate-50 transition group"
                             >
-                              <div className="h-8 w-8 shrink-0 rounded-xl bg-brand/10 flex items-center justify-center mt-0.5">
-                                <Layers className="h-4 w-4 text-brand" />
+                              <div className="h-8 w-8 shrink-0 rounded-xl bg-brand/10 overflow-hidden flex items-center justify-center mt-0.5">
+                                {cat.imageUrl ? (
+                                  <img src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover animate-fade-in" />
+                                ) : (
+                                  <Layers className="h-4 w-4 text-brand" />
+                                )}
                               </div>
                               <div className="min-w-0">
                                 <p className="font-bold text-slate-900 text-xs group-hover:text-brand transition">{cat.name}</p>
@@ -230,14 +231,18 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                         </Link>
                       </div>
                       <div className="p-2">
-                        {mockIndustries.map((ind) => (
+                        {navIndustries.map((ind) => (
                           <Link
                             key={ind.slug}
                             href={`/industries/${ind.slug}`}
                             onClick={() => setOpenDropdown(null)}
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-slate-50 transition group"
                           >
-                            <Tag className="h-3.5 w-3.5 text-brand shrink-0" />
+                            {ind.imageUrl ? (
+                              <img src={ind.imageUrl} alt={ind.name} className="h-5 w-5 rounded-md object-cover shrink-0 animate-fade-in" />
+                            ) : (
+                              <Tag className="h-3.5 w-3.5 text-brand shrink-0" />
+                            )}
                             <span className="text-xs font-semibold text-slate-800 group-hover:text-brand transition">{ind.name}</span>
                           </Link>
                         ))}
@@ -444,8 +449,8 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 <Link href="/industries" onClick={() => setMobileMenuOpen(false)} className="font-bold text-base hover:text-brand block mb-2">
                   Industries
                 </Link>
-                <div className="flex flex-wrap gap-1 ml-3">
-                  {mockIndustries.map((ind) => (
+                 <div className="flex flex-wrap gap-1 ml-3">
+                  {navIndustries.map((ind) => (
                     <Link key={ind.slug} href={`/industries/${ind.slug}`} onClick={() => setMobileMenuOpen(false)}
                       className="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full hover:text-brand hover:border-brand transition">
                       {ind.name}
@@ -464,8 +469,8 @@ export function GlobalShell({ children }: { children: ReactNode }) {
               <div className="flex flex-col gap-2 rounded-2xl bg-slate-50 p-4 text-sm">
                 <p className="font-semibold text-slate-900">Need specifications fast?</p>
                 <p className="text-slate-500">Call our direct hotline for immediate help.</p>
-                <a href="tel:+919876543210" className="mt-2 font-bold text-brand flex items-center gap-1.5">
-                  <Phone className="h-4 w-4" /> +91 98765 43210
+                <a href="tel:+917318158417" className="mt-2 font-bold text-brand flex items-center gap-1.5">
+                  <Phone className="h-4 w-4" /> +91 731 815 8417
                 </a>
               </div>
             </div>
@@ -474,7 +479,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* Page Content Container */}
-      <main className="flex-1 w-full mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" onClick={() => setOpenDropdown(null)}>
+      <main className="flex-1 w-full mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-20 lg:pb-8" onClick={() => setOpenDropdown(null)}>
         {children}
       </main>
 
@@ -494,15 +499,15 @@ export function GlobalShell({ children }: { children: ReactNode }) {
               <div className="flex flex-col gap-2.5 text-xs text-slate-500 pt-2">
                 <span className="flex items-center gap-2">
                   <Phone className="h-3.5 w-3.5 text-brand" />
-                  +91 98765 43210
+                  +91 731 815 8417
                 </span>
                 <span className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-brand" />
-                  sales@radiantraysindia.com
+                  info@radiantraysindia.com
                 </span>
                 <span className="flex items-center gap-2">
                   <MapPin className="h-3.5 w-3.5 text-brand" />
-                  Plot 45, Phase III, Industrial Area, Noida, UP, India
+                  JAGRAM 406/21, SHANTI NAGAR, GURUGRAM, HARYANA - 122022
                 </span>
               </div>
             </div>
@@ -617,6 +622,40 @@ export function GlobalShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200/80 px-4 py-2 flex items-center justify-around shadow-[0_-4px_12px_rgba(0,0,0,0.05)] pb-[calc(env(safe-area-inset-bottom)+8px)]">
+        <Link href="/" className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3">
+          <Home className="h-5 w-5" />
+          <span className="text-[10px] font-bold">Home</span>
+        </Link>
+        <button onClick={() => setSearchOpen(!searchOpen)} className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3">
+          <Search className="h-5 w-5" />
+          <span className="text-[10px] font-bold">Search</span>
+        </button>
+        <Link href="/cart" className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3 relative">
+          <ShoppingBag className="h-5 w-5" />
+          {cartCount > 0 && (
+            <span className="absolute top-0 right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white">
+              {cartCount}
+            </span>
+          )}
+          <span className="text-[10px] font-bold">Cart</span>
+        </Link>
+        <Link href="/account?tab=wishlist" className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3 relative">
+          <Heart className="h-5 w-5" />
+          {wishlist.length > 0 && (
+            <span className="absolute top-0 right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white">
+              {wishlist.length}
+            </span>
+          )}
+          <span className="text-[10px] font-bold">Wishlist</span>
+        </Link>
+        <Link href="/account" className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3">
+          <User className="h-5 w-5" />
+          <span className="text-[10px] font-bold">Account</span>
+        </Link>
+      </div>
     </div>
   );
 }

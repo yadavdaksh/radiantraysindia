@@ -19,6 +19,9 @@ import {
   deleteNewsletterSubscriber,
   listAllWishlists,
   listAllAddresses,
+  listContactSubmissionsAdmin,
+  updateContactSubmissionAdmin,
+  deleteContactSubmissionAdmin,
 } from "../controllers/system.controller.js";
 import { requireAuth, requirePermission, requireRole } from "../middlewares/auth.middleware.js";
 
@@ -53,6 +56,11 @@ router.put("/customers/:id",     requireAuth, requirePermission("customer", "upd
 // Newsletter subscribers
 router.get("/newsletter",        requireAuth, requirePermission("newsletter", "read"),   listNewsletterSubscribers);
 router.delete("/newsletter/:id", requireAuth, requirePermission("newsletter", "read"),   deleteNewsletterSubscriber);
+
+// Contact submissions
+router.get("/contact-submissions", requireAuth, requirePermission("lead", "read"), listContactSubmissionsAdmin);
+router.put("/contact-submissions/:id", requireAuth, requirePermission("lead", "update"), updateContactSubmissionAdmin);
+router.delete("/contact-submissions/:id", requireAuth, requirePermission("lead", "delete"), deleteContactSubmissionAdmin);
 
 // Wishlist overview
 router.get("/wishlists",         requireAuth, requirePermission("customer", "read"),   listAllWishlists);

@@ -7,6 +7,8 @@ import {
   listPublicIndustries,
   listPublicProducts,
   listPublicGallery,
+  subscribeNewsletterPublic,
+  submitContactFormPublic,
 } from "../controllers/public.controller.js";
 
 const router = Router();
@@ -18,6 +20,8 @@ router.get("/categories", listPublicCategories);
 router.get("/industries", listPublicIndustries);
 router.get("/gallery", listPublicGallery);
 router.get("/pages/:slug", getPublicPage);
+router.post("/newsletter/subscribe", subscribeNewsletterPublic);
+router.post("/contact", submitContactFormPublic);
 
 export default router;
 

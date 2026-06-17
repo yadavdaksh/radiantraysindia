@@ -12,16 +12,18 @@ export const metadata = {
 const FOUNDERS = [
   {
     name: "Shiwakshi Singh",
-    title: "Co-Founder & Director",
+    title: "Co-Founder & Director and Technical Director",
     initial: "S",
+    image: "/images/founders/shiwakshi-singh.jpeg",
     bio: "Shiwakshi leads business development, client relations, and quality assurance at Radiant Rays. With deep understanding of GMP and ISO cleanroom standards, she has built strong partnerships with pharmaceutical manufacturers, biotech labs, and hospital facilities across India. Her vision drives the company's commitment to precision engineering and post-sale support.",
     expertise: ["GMP Compliance", "Client Strategy", "Quality Assurance", "ISO Standards"],
     email: "shiwakshi@radiantraysindia.com",
   },
   {
     name: "Daksh Yadav",
-    title: "Co-Founder & Technical Director",
+    title: "Co-Founder",
     initial: "D",
+    image: "/images/founders/daksh.png",
     bio: "Daksh heads product engineering, R&D, and manufacturing operations. With hands-on expertise in cleanroom system design, HEPA filtration, SS fabrication, and logistics integration, he ensures every unit leaving the factory meets strict contamination control benchmarks. His engineering-first approach defines the technical edge of Radiant Rays products.",
     expertise: ["Cleanroom Engineering", "HEPA Filtration", "SS Fabrication", "Product R&D"],
     email: "daksh@radiantraysindia.com",
@@ -51,28 +53,28 @@ export default function AboutPage() {
     <div className="min-h-screen">
 
       {/* ── Hero ── */}
-      <section className="bg-gradient-to-br from-slate-950 via-[#041f35] to-[#062f50] text-white py-20 sm:py-28 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04]"
+      <section className="bg-gradient-to-br from-slate-950 via-[#032a47] to-[#011424] text-white py-24 sm:py-32 relative overflow-hidden rounded-[2.5rem] border border-slate-800 mx-4 sm:mx-6 lg:mx-8 my-6">
+        <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "32px 32px" }}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(3,95,150,0.35),transparent_65%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <span className="inline-flex items-center gap-2 rounded-full bg-brand/20 border border-brand/30 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-light">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand animate-ping" />
-            Est. 2009 — Noida, India
-          </span>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(3,95,150,0.3),transparent_70%)]" />
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md px-5 py-2 text-xs font-bold uppercase tracking-widest text-brand-light shadow-md">
+            <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
+            Est. 2009 — Gurugram, India
+          </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight max-w-4xl mx-auto">
-            Engineering Cleaner, Safer{" "}
-            <span className="text-brand-light">Controlled Environments</span>
+            Engineering Cleaner, Safer<br />
+            <span className="bg-gradient-to-r from-brand-light via-sky-300 to-white bg-clip-text text-transparent">Controlled Environments</span>
           </h1>
-          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Radiant Rays manufactures precision cleanroom equipment trusted by 500+ pharmaceutical, biotech, and hospital facilities across India.
+          <p className="text-slate-300 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed">
+            Radiant Rays manufactures high-specification, compliance-driven cleanroom equipment trusted by over 500+ pharmaceutical, biotechnology, and healthcare facilities nationwide.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-            <Link href="/products" className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-bold text-white hover:bg-brand-dark transition shadow-lg shadow-brand/20">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <Link href="/products" className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 text-xs font-bold text-white hover:bg-brand-dark transition shadow-lg shadow-brand/20 hover:-translate-y-0.5 duration-200">
               Explore Products <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full border border-slate-600 px-7 py-3.5 text-sm font-bold text-white hover:border-brand hover:text-brand transition">
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full border border-slate-650 px-8 py-4 text-xs font-bold text-white hover:border-brand hover:text-brand transition hover:-translate-y-0.5 duration-200 bg-white/5 backdrop-blur-sm">
               Get in Touch
             </Link>
           </div>
@@ -119,8 +121,12 @@ export default function AboutPage() {
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand via-brand-dark to-transparent" />
 
                 <div className="flex items-start gap-5">
-                  <div className="shrink-0 h-20 w-20 rounded-2xl bg-gradient-to-br from-brand/20 to-brand/5 border border-brand/15 flex items-center justify-center">
-                    <span className="text-3xl font-extrabold text-brand">{f.initial}</span>
+                  <div className="shrink-0 h-20 w-20 rounded-2xl bg-gradient-to-br from-brand/20 to-brand/5 border border-brand/15 flex items-center justify-center overflow-hidden">
+                    {f.image ? (
+                      <img src={f.image} alt={f.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-3xl font-extrabold text-brand">{f.initial}</span>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <h3 className="text-xl font-extrabold text-slate-950">{f.name}</h3>

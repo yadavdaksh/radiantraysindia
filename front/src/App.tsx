@@ -7,7 +7,7 @@ import {
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import {
-  IconLayoutDashboard, IconBox, IconCategory,
+  IconLayoutDashboard, IconBox, IconCategory, IconTag,
   IconShoppingCart, IconArrowBack,
   IconCreditCard, IconTicket, IconUsers, IconMapPin, IconHeart,
   IconTarget, IconMail, IconNews, IconMessageCircle,
@@ -19,6 +19,7 @@ import { ModuleView } from "./components/Views";
 import ProductsPage from "./pages/Products";
 import ProductForm from "./pages/ProductForm";
 import CategoriesPage from "./pages/Categories";
+import AttributesPage from "./pages/AttributesPage";
 import {
   CustomersPage, AddressesPage, WishlistPage,
   LeadsPage, ContactFormsPage, NewsletterPage, TestimonialsPage,
@@ -51,14 +52,9 @@ type ModuleKey =
   | "industries"
   | "gallery"
   | "banners"
-  | "seoPages"
-  | "sitemap"
-  | "robots"
   | "users"
   | "roles"
   | "permissions"
-  | "activityLogs"
-  | "emailLogs"
   | "settings";
 
 type SessionUser = {
@@ -145,6 +141,7 @@ const sidebarSections: SidebarSection[] = [
     items: [
       { key: "products", label: "Products", resource: "product", emoji: "products", icon: IconBox },
       { key: "categories", label: "Categories", resource: "category", emoji: "categories", icon: IconCategory },
+      { key: "attributes", label: "Attributes", resource: "attribute", emoji: "attributes", icon: IconTag },
     ],
   },
   {
@@ -182,21 +179,11 @@ const sidebarSections: SidebarSection[] = [
     ],
   },
   {
-    title: "SEO",
-    items: [
-      { key: "seoPages", label: "SEO Pages", resource: "seo", emoji: "seoPages", icon: IconSeo },
-      { key: "sitemap", label: "Sitemap", resource: "sitemap", emoji: "sitemap", icon: IconSitemap },
-      { key: "robots", label: "Robots", resource: "robots", emoji: "robots", icon: IconRobot },
-    ],
-  },
-  {
     title: "System",
     items: [
       { key: "users", label: "Users", resource: "user", emoji: "users", icon: IconUser },
       { key: "roles", label: "Roles", resource: "role", emoji: "roles", icon: IconShieldHalf },
       { key: "permissions", label: "Permissions", resource: "permission", emoji: "permissions", icon: IconKey },
-      { key: "activityLogs", label: "Activity Logs", resource: "activity", emoji: "activityLogs", icon: IconActivity },
-      { key: "emailLogs", label: "Email Logs", resource: "email", emoji: "emailLogs", icon: IconMailbox },
       { key: "settings", label: "Settings", resource: "setting", emoji: "settings", icon: IconSettings },
     ],
   },
@@ -382,7 +369,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
                   onChange={e => setEmail(e.target.value)}
                   type="email"
                   required
-                  placeholder="admin@radiantraysindia.com"
+                  placeholder="info@radiantraysindia.com"
                   className={inputCls}
                   autoComplete="email"
                   autoFocus
@@ -424,7 +411,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
                   onChange={e => setEmail(e.target.value)}
                   type="email"
                   required
-                  placeholder="admin@radiantraysindia.com"
+                  placeholder="info@radiantraysindia.com"
                   className={inputCls}
                   autoFocus
                 />
@@ -513,7 +500,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
                   onChange={e => setEmail(e.target.value)}
                   type="email"
                   required
-                  placeholder="admin@radiantraysindia.com"
+                  placeholder="info@radiantraysindia.com"
                   className={inputCls}
                   autoFocus
                 />
@@ -552,8 +539,8 @@ function App() {
     "dashboard", "products", "categories", "variants", "attributes",
     "orders", "returns", "refunds", "coupons", "customers", "addresses", "wishlist",
     "leads", "contactForms", "newsletter", "testimonials", "industries", "gallery",
-    "banners", "seoPages", "sitemap", "robots", "users", "roles", "permissions",
-    "activityLogs", "emailLogs", "settings",
+    "banners", "users", "roles", "permissions",
+    "settings",
   ];
   const activeFromUrl = allKeys.includes(pathKey as ModuleKey) ? (pathKey as ModuleKey) : "dashboard";
 
@@ -645,7 +632,7 @@ function App() {
     if (!session) return;
     const load = async () => {
       try {
-        const [home, products, leads, orders, users, roles, perms] = await Promise.allSettled([
+        const [home, products, leads, orders, users, roles, perms, returns] = await Promise.allSettled([
           apiFetch<any>("/public/home"),
           apiFetch<any>("/products?limit=100"),
           apiFetch<any>("/leads?limit=100"),
@@ -653,6 +640,7 @@ function App() {
           apiFetch<any>("/system/users"),
           apiFetch<any>("/system/roles"),
           apiFetch<any>("/system/permissions"),
+          apiFetch<any>("/orders?returned=true&limit=100"),
         ]);
         setDashboard({
           home: home.status === "fulfilled" ? home.value.data : { featuredProducts: [], categories: [], industries: [] },
@@ -662,6 +650,7 @@ function App() {
           users: users.status === "fulfilled" ? users.value.data : [],
           roles: roles.status === "fulfilled" ? roles.value.data : [],
           permissions: perms.status === "fulfilled" ? perms.value.data : [],
+          returns: returns.status === "fulfilled" ? returns.value.data : { items: [] },
         });
       } catch (error) {
         showToast(error instanceof Error ? error.message : "Failed to load dashboard", "error");
@@ -680,27 +669,22 @@ function App() {
       variants: ["variants", "/products?limit=5"],
       attributes: ["attributes", "/products?limit=5"],
       orders: ["orders", "/orders?limit=50"],
-      returns: ["returns", "/orders?limit=5"],
+      returns: ["returns", "/orders?returned=true&limit=100"],
       refunds: ["refunds", "/orders?limit=5"],
       coupons: ["coupons", "/coupons?limit=50"],
-      customers: ["customers", "/customers?limit=50"],
-      addresses: ["addresses", "/customers?limit=50"],
-      wishlist: ["wishlist", "/customers?limit=50"],
+      customers: ["customers", "/system/customers?limit=50"],
+      addresses: ["addresses", "/system/addresses"],
+      wishlist: ["wishlist", "/system/wishlists"],
       leads: ["leads", "/leads?limit=50"],
-      contactForms: ["contactForms", "/leads?limit=50"],
+      contactForms: ["contactForms", "/system/contact-submissions?limit=50"],
       newsletter: ["newsletter", "/public/home"],
       testimonials: ["testimonials", "/content/testimonials"],
       industries: ["industries", "/industries?limit=50"],
       gallery: ["gallery", "/content/gallery"],
       banners: ["banners", "/content/banners"],
-      seoPages: ["seoPages", "/products?limit=50"],
-      sitemap: ["sitemap", "/public/home"],
-      robots: ["robots", "/public/home"],
       users: ["users", "/system/users"],
       roles: ["roles", "/system/roles"],
       permissions: ["permissions", "/system/permissions"],
-      activityLogs: ["activityLogs", "/system/activity-logs"],
-      emailLogs: ["emailLogs", "/public/home"],
       settings: ["settings", "/content/settings"],
     };
     const entry = map[active];
@@ -974,6 +958,7 @@ function App() {
             <Route path="/products/edit/:id" element={<ProductForm showToast={showToast} can={can} />} />
             <Route path="/categories" element={<CategoriesPage showToast={showToast} />} />
             <Route path="/subcategories" element={<CategoriesPage showToast={showToast} />} />
+            <Route path="/attributes" element={<AttributesPage showToast={showToast} />} />
             <Route path="/customers" element={<CustomersPage showToast={showToast} />} />
             <Route path="/addresses" element={<AddressesPage showToast={showToast} />} />
             <Route path="/wishlist" element={<WishlistPage showToast={showToast} />} />
@@ -997,6 +982,9 @@ function App() {
             const allLeads: any[] = dashboard?.leads?.items || [];
             const categories: any[] = dashboard?.home?.categories || [];
             const industries: any[] = dashboard?.home?.industries || [];
+
+            const allReturns: any[] = dashboard?.returns?.items || [];
+            const totalReturnAmt = allReturns.reduce((s: number, o: any) => s + Number(o.total || 0), 0);
 
             const b2bCount = allProducts.filter((p: any) => p.productType === "B2B").length;
             const b2cCount = allProducts.filter((p: any) => p.productType === "B2C").length;
@@ -1040,8 +1028,8 @@ function App() {
             if (!dashboard) {
               return (
                 <div className="space-y-5 animate-pulse">
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {[1, 2, 3, 4].map(i => <div key={i} className="h-24 rounded-xl bg-slate-100" />)}
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-24 rounded-xl bg-slate-100" />)}
                   </div>
                   <div className="h-52 rounded-xl bg-slate-100" />
                   <div className="grid gap-4 lg:grid-cols-3">
@@ -1054,11 +1042,12 @@ function App() {
             return (
               <div className="space-y-5">
                 {/* Stat cards */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                   {[
                     { label: "Total Products", value: allProducts.length, sub: `${activeProducts} active`, color: "bg-sky-50 text-sky-700" },
                     { label: "Categories", value: categories.length, sub: `${industries.length} industries`, color: "bg-violet-50 text-violet-700" },
                     { label: "Total Orders", value: allOrders.length, sub: `₹${totalRevenue.toLocaleString("en-IN")} revenue`, color: "bg-emerald-50 text-emerald-700" },
+                    { label: "Total Returns", value: allReturns.length, sub: `₹${totalReturnAmt.toLocaleString("en-IN")} refunded`, color: "bg-rose-50 text-rose-700" },
                     { label: "Total Leads", value: allLeads.length, sub: `${allLeads.filter((l: any) => l.status === "NEW").length} new`, color: "bg-amber-50 text-amber-700" },
                   ].map(({ label, value, sub, color }) => (
                     <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

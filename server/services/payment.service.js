@@ -75,6 +75,10 @@ export const paymentService = {
     });
     if (!payment) throw new ApiError(404, "Payment record not found");
 
+    if (payment.status === "SUCCESS") {
+      return { verified: true };
+    }
+
     if (isMock) {
       // Mock validation success
       await paymentService.captureSuccess({
@@ -122,7 +126,7 @@ export const paymentService = {
   },
 
   captureSuccess: async ({ paymentId, razorpayPaymentId, razorpaySignature, method, response }) => {
-    return prisma.$transaction(async (tx) => {
+    const updatedPayment = await prisma.$transaction(async (tx) => {
       const payment = await tx.payment.update({
         where: { id: paymentId },
         data: {
@@ -153,6 +157,41 @@ export const paymentService = {
         },
       });
 
+      // Increment coupon usage count if used
+      if (payment.order.couponCode) {
+        await tx.coupon.updateMany({
+          where: { code: payment.order.couponCode.toUpperCase() },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
+
+      // Deduct variant stocks based on order items
+      const orderItems = await tx.orderItem.findMany({
+        where: { orderId: payment.orderId },
+      });
+      for (const item of orderItems) {
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: {
+              stock: { decrement: item.quantity },
+            },
+          });
+        }
+      }
+
+      // Clear customer cart
+      if (payment.customerId) {
+        const cart = await tx.cart.findUnique({
+          where: { customerId: payment.customerId },
+        });
+        if (cart) {
+          await tx.cartItem.deleteMany({
+            where: { cartId: cart.id },
+          });
+        }
+      }
+
       // Send payment email receipt
       try {
         await emailService.sendPaymentSuccess(payment.order.customerEmail, payment.order.customerName, {
@@ -173,6 +212,17 @@ export const paymentService = {
 
       return payment;
     });
+
+    // Auto-dispatch shipment via Shiprocket in background
+    try {
+      const { shipmentService } = await import("./shipment.service.js");
+      await shipmentService.createShipment(updatedPayment.orderId);
+      console.log(`Auto shipment successfully created for order ${updatedPayment.order.orderNumber}`);
+    } catch (shippingError) {
+      console.error("Auto shipment creation failed:", shippingError.message);
+    }
+
+    return updatedPayment;
   },
 
   webhookHandler: async (req) => {

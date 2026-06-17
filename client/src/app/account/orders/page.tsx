@@ -27,20 +27,21 @@ function StatusIcon({ s }: { s: string }) {
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { customer } = useAuth();
+  const { customer, isLoading } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (isLoading) return;
     if (!customer) { router.push("/login?redirect=/account/orders"); return; }
     apiClient.get("/orders/mine")
       .then(r => setOrders(r.data.data || []))
       .catch(e => setError(e.response?.data?.message || "Failed to load orders"))
       .finally(() => setLoading(false));
-  }, [customer, router]);
+  }, [customer, isLoading, router]);
 
-  if (!customer) return null;
+  if (isLoading || !customer) return null;
 
   return (
     <SiteShell title="My Orders" subtitle="Track your cleanroom equipment orders and shipments.">

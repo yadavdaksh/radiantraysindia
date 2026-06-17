@@ -4,6 +4,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { createSlug } from "../helpers/Slug.js";
+
+import { leadService } from "../services/lead.service.js";
 import { validatePassword } from "../helpers/validatePassword.js";
 
 export const listUsers = asyncHandler(async (req, res) => {
@@ -268,5 +270,21 @@ export const listActivityLogs = asyncHandler(async (req, res) => {
     take: 100,
   });
   res.json(new ApiResponsive(200, items));
+});
+
+
+export const listContactSubmissionsAdmin = asyncHandler(async (req, res) => {
+  const submissions = await leadService.listContactSubmissions();
+  res.json(new ApiResponsive(200, submissions, "Contact submissions retrieved successfully"));
+});
+
+export const updateContactSubmissionAdmin = asyncHandler(async (req, res) => {
+  const submission = await leadService.updateContactSubmission(req.params.id, req.body);
+  res.json(new ApiResponsive(200, submission, "Contact submission updated successfully"));
+});
+
+export const deleteContactSubmissionAdmin = asyncHandler(async (req, res) => {
+  await leadService.deleteContactSubmission(req.params.id);
+  res.json(new ApiResponsive(200, null, "Contact submission deleted successfully"));
 });
 

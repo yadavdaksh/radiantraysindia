@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { getProductImage } from "@/lib/site-data";
 import {
   User, MapPin, Heart, Shield, Package, Loader2, Plus, Trash2,
-  Edit2, Check, X, Star, ArrowRight, Eye, EyeOff,
+  Edit2, Check, X, Star, ArrowRight, Eye, EyeOff, LogOut,
 } from "lucide-react";
 
 const STATES = ["Andhra Pradesh","Assam","Bihar","Chhattisgarh","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Jammu & Kashmir","Ladakh","Arunachal Pradesh"];
@@ -36,8 +36,21 @@ type Tab = "profile" | "orders" | "addresses" | "wishlist" | "inquiries" | "secu
 export default function AccountPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { customer, updateProfile, logout } = useAuth();
-  const [tab, setTab] = useState<Tab>((searchParams.get("tab") as Tab) || "profile");
+  const { customer, updateProfile, logout, isLoading } = useAuth();
+  const [tab, setTab] = useState<Tab>("profile");
+
+  // Sync tab state from URL search params
+  useEffect(() => {
+    const t = searchParams.get("tab") as Tab;
+    if (t && ["profile", "orders", "addresses", "wishlist", "inquiries", "security"].includes(t)) {
+      setTab(t);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (newTab: Tab) => {
+    setTab(newTab);
+    router.replace(`/account?tab=${newTab}`, { scroll: false });
+  };
 
   // ── Profile ──────────────────────────────────────────────────────────────
   const [profileForm, setProfileForm] = useState({ name: "", phone: "" });
@@ -68,9 +81,10 @@ export default function AccountPage() {
 
   // Redirect if not logged in
   useEffect(() => {
+    if (isLoading) return;
     if (!customer) router.push("/login?redirect=/account");
     else setProfileForm({ name: customer.name, phone: customer.phone || "" });
-  }, [customer, router]);
+  }, [customer, isLoading, router]);
 
   // Load data per tab
   const loadOrders = useCallback(async () => {
@@ -203,24 +217,31 @@ export default function AccountPage() {
       <div className="grid gap-6 lg:grid-cols-[220px_1fr] my-6">
 
         {/* Sidebar */}
-        <aside className="rounded-2xl border border-slate-200 bg-white p-3 h-fit shadow-sm space-y-0.5 sticky top-24">
-          <div className="px-3 py-3 border-b border-slate-100 mb-2">
+        <aside className="rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:p-3 h-fit lg:shadow-sm lg:space-y-0.5 lg:sticky lg:top-24 flex lg:flex-col overflow-x-auto lg:overflow-visible gap-2 lg:gap-0.5 max-lg:w-full max-lg:border-none max-lg:bg-transparent max-lg:p-0 max-lg:shadow-none max-lg:rounded-none max-lg:pb-2 max-lg:mb-2 max-lg:scrollbar-none">
+          <div className="px-3 py-3 border-b border-slate-100 mb-2 hidden lg:block">
             <p className="font-extrabold text-sm text-slate-900 truncate">{customer.name}</p>
             <p className="text-[11px] text-slate-400 truncate">{customer.email}</p>
           </div>
           {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${tab === t.id ? "bg-brand/8 text-brand" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
+            <button key={t.id} onClick={() => handleTabChange(t.id)}
+              className={`flex-shrink-0 lg:w-full flex items-center gap-2 lg:gap-3 rounded-xl px-4 py-2.5 lg:px-3 text-xs font-bold transition ${
+                tab === t.id ? "bg-brand/8 text-brand" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 bg-slate-50 lg:bg-transparent"
+              }`}>
               <t.icon className="h-4 w-4 shrink-0" />
               {t.label}
             </button>
           ))}
-          <div className="pt-2 border-t border-slate-100 mt-2">
+          <div className="pt-2 border-t border-slate-100 mt-2 hidden lg:block">
             <button onClick={() => { logout(); router.push("/"); }}
               className="w-full text-left px-3 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition">
               Sign Out
             </button>
           </div>
+          <button onClick={() => { logout(); router.push("/"); }}
+            className="lg:hidden flex-shrink-0 flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 transition">
+            <LogOut className="h-4 w-4 shrink-0" />
+            Sign Out
+          </button>
         </aside>
 
         {/* Main */}
@@ -250,7 +271,7 @@ export default function AccountPage() {
                   <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Phone Number</label>
                   <input type="tel" value={profileForm.phone}
                     onChange={e => setProfileForm(p => ({ ...p, phone: e.target.value }))}
-                    placeholder="9876543210"
+                    placeholder="7318158417"
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-brand focus:bg-white focus:ring-1 focus:ring-brand transition" />
                 </div>
                 <button type="submit" disabled={profileLoading}

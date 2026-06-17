@@ -111,10 +111,25 @@ export const listOrders = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const status = req.query.status;
   const paymentStatus = req.query.paymentStatus;
+  const returned = req.query.returned === "true";
+
+  const returnCondition = {
+    status: "CANCELLED",
+    statusHistory: {
+      some: {
+        notes: {
+          contains: "Return requested by customer",
+        }
+      }
+    }
+  };
 
   const where = {
     ...(status ? { status } : {}),
     ...(paymentStatus ? { paymentStatus } : {}),
+    ...(returned ? returnCondition : {
+      NOT: returnCondition
+    }),
   };
 
   const [items, total] = await prisma.$transaction([
@@ -251,6 +266,28 @@ export const returnMyOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Only delivered orders can be returned");
   }
 
+  // 1. Verify B2C product eligibility
+  const orderWithItems = await prisma.order.findUnique({
+    where: { id: order.id },
+    include: { items: { include: { product: true } } },
+  });
+  const hasB2C = orderWithItems.items.some(item => item.product?.productType === "B2C");
+  if (!hasB2C) {
+    throw new ApiError(400, "Only orders containing B2C products are eligible for returns.");
+  }
+
+  // 2. Verify 7-day limit from delivery
+  const deliveredLog = await prisma.orderStatusHistory.findFirst({
+    where: { orderId: order.id, status: "DELIVERED" },
+    orderBy: { createdAt: "desc" },
+  });
+  const deliveryTime = deliveredLog ? new Date(deliveredLog.createdAt) : new Date(order.updatedAt);
+  const diffTime = Math.abs(new Date().getTime() - deliveryTime.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (diffDays > 7) {
+    throw new ApiError(400, "Return eligibility period has expired (7 days limit from delivery).");
+  }
+
   const updated = await prisma.$transaction(async (tx) => {
     const o = await tx.order.update({
       where: { id: order.id },
@@ -265,6 +302,14 @@ export const returnMyOrder = asyncHandler(async (req, res) => {
     });
     return o;
   });
+
+  // 3. Trigger Shiprocket Return creation in the background
+  try {
+    const { processShiprocketReturn } = await import("../utils/shiprocket.js");
+    await processShiprocketReturn(order.id, reason.trim());
+  } catch (err) {
+    console.error("Auto Shiprocket return processing failed:", err.message);
+  }
 
   res.json(new ApiResponsive(200, updated, "Return request submitted. Our team will contact you within 24 hours."));
 });

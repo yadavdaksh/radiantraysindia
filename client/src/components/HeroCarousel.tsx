@@ -217,16 +217,11 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
                   </>
                 );
 
-                if (slide.linkUrl) {
-                  return (
-                    <Link href={slide.linkUrl} className="absolute inset-0 block cursor-pointer">
-                      <SlideContent />
-                    </Link>
-                  );
-                }
-
                 return (
                   <div className="absolute inset-0">
+                    {slide.linkUrl && (
+                      <Link href={slide.linkUrl} className="absolute inset-0 z-10 cursor-pointer" />
+                    )}
                     <SlideContent />
                   </div>
                 );

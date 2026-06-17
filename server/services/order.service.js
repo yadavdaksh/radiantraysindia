@@ -384,6 +384,14 @@ export const orderService = {
           shipping: new Prisma.Decimal(shipping),
           total: new Prisma.Decimal(total),
           couponCode: couponCode || null,
+          couponDetails: validatedCoupon ? {
+            code: validatedCoupon.code,
+            description: validatedCoupon.description,
+            discountType: validatedCoupon.discountType,
+            discountValue: Number(validatedCoupon.discountValue),
+            minOrderValue: validatedCoupon.minOrderValue ? Number(validatedCoupon.minOrderValue) : null,
+            maxDiscount: validatedCoupon.maxDiscount ? Number(validatedCoupon.maxDiscount) : null,
+          } : null,
           shippingAddress: address,
           billingAddress: address, // default same as shipping
           notes: notes || null,
@@ -409,31 +417,6 @@ export const orderService = {
         include: {
           items: true,
         },
-      });
-
-      // Update coupon usage count if used
-      if (validatedCoupon) {
-        await tx.coupon.update({
-          where: { id: validatedCoupon.id },
-          data: { usedCount: { increment: 1 } },
-        });
-      }
-
-      // Deduct variant stocks
-      for (const item of customer.cart.items) {
-        if (item.variantId) {
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              stock: { decrement: item.quantity },
-            },
-          });
-        }
-      }
-
-      // Clear customer cart
-      await tx.cartItem.deleteMany({
-        where: { cartId: customer.cart.id },
       });
 
       return newOrder;

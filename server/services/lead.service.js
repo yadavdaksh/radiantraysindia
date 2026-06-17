@@ -4,23 +4,24 @@ import { emailService } from "./email.service.js";
 import { getPaginationParams, formatPaginatedResponse } from "../helpers/pagination.js";
 
 export const leadService = {
-  list: async (query) => {
+  list: async (query, customerId = null) => {
     const { page, limit, skip } = getPaginationParams(query);
     const status = query.status;
     const search = String(query.search || "").trim();
 
     const source = query.source;
     const where = {
+      ...(customerId ? { customerId } : {}),
       ...(status ? { status } : {}),
       ...(source ? { source: { contains: source, mode: "insensitive" } } : {}),
       ...(search
         ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" } },
-              { email: { contains: search, mode: "insensitive" } },
-              { company: { contains: search, mode: "insensitive" } },
-            ],
-          }
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+            { company: { contains: search, mode: "insensitive" } },
+          ],
+        }
         : {}),
     };
 
@@ -96,7 +97,7 @@ export const leadService = {
 
     // Notify Admins
     try {
-      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@radiantraysindia.com";
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_EMAIL || "info@radiantraysindia.com";
       await emailService.sendAdminNotification(
         adminEmail,
         `New B2B Lead Received from ${lead.name}`,
@@ -165,6 +166,25 @@ export const leadService = {
     return prisma.contactSubmission.findMany({
       orderBy: { createdAt: "desc" },
     });
+  },
+
+  updateContactSubmission: async (id, body) => {
+    const existing = await prisma.contactSubmission.findUnique({ where: { id } });
+    if (!existing) throw new ApiError(404, "Contact submission not found");
+    return prisma.contactSubmission.update({
+      where: { id },
+      data: {
+        status: body.status ?? existing.status,
+        adminNotes: body.adminNotes ?? existing.adminNotes,
+      },
+    });
+  },
+
+  deleteContactSubmission: async (id) => {
+    const existing = await prisma.contactSubmission.findUnique({ where: { id } });
+    if (!existing) throw new ApiError(404, "Contact submission not found");
+    await prisma.contactSubmission.delete({ where: { id } });
+    return { success: true };
   },
 
   // Newsletter Subscriptions

@@ -1,6 +1,8 @@
 import { prisma } from "../config/db.js";
 import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { leadService } from "../services/lead.service.js";
+import { emailService } from "../services/email.service.js";
 
 const selectProduct = {
   categories: {
@@ -74,17 +76,19 @@ export const homeData = asyncHandler(async (_req, res) => {
 export const listPublicProducts = asyncHandler(async (req, res) => {
   const categorySlug = req.query.category;
   const industrySlug = req.query.industry;
-  const productType  = req.query.type;
-  const search       = String(req.query.q || req.query.search || "").trim();
-  const limit        = Math.min(Number(req.query.limit || 50), 100);
+  const productType = req.query.type;
+  const search = String(req.query.q || req.query.search || "").trim();
+  const limit = Math.min(Number(req.query.limit || 50), 100);
 
   const where = {
     isActive: true,
     ...(productType ? { productType } : {}),
-    ...(search ? { OR: [
-      { name: { contains: search, mode: "insensitive" } },
-      { shortDescription: { contains: search, mode: "insensitive" } },
-    ]} : {}),
+    ...(search ? {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { shortDescription: { contains: search, mode: "insensitive" } },
+      ]
+    } : {}),
     ...(categorySlug ? { categories: { some: { category: { slug: categorySlug } } } } : {}),
     ...(industrySlug ? { industries: { some: { industry: { slug: industrySlug } } } } : {}),
   };
@@ -144,3 +148,23 @@ export const getPublicPage = asyncHandler(async (req, res) => {
   res.json(new ApiResponsive(200, item));
 });
 
+
+
+export const subscribeNewsletterPublic = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const result = await leadService.subscribeNewsletter(email);
+
+  // Try sending confirmation email
+  try {
+    await emailService.sendNewsletterWelcome(email);
+  } catch (err) {
+    console.warn("Could not send newsletter confirmation email:", err.message);
+  }
+
+  res.json(new ApiResponsive(200, result.subscriber, result.message));
+});
+
+export const submitContactFormPublic = asyncHandler(async (req, res) => {
+  const contact = await leadService.submitContactForm(req.body);
+  res.status(201).json(new ApiResponsive(201, contact, "Message sent successfully"));
+});

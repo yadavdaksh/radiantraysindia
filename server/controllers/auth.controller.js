@@ -80,7 +80,7 @@ export const login = asyncHandler(async (req, res) => {
     });
 
     await createRefreshRecord({ token: refreshToken, userId: user.id, req });
-    setAuthCookies(res, { accessToken, refreshToken });
+    setAuthCookies(res, { accessToken, refreshToken }, false);
 
     const payload = buildAuthPayload(user, permissions);
     delete payload.password;
@@ -93,7 +93,7 @@ export const login = asyncHandler(async (req, res) => {
   // Fallback to customer login
   try {
     const result = await customerAuthService.login(email, password, req);
-    setAuthCookies(res, { accessToken: result.accessToken, refreshToken: result.refreshToken });
+    setAuthCookies(res, { accessToken: result.accessToken, refreshToken: result.refreshToken }, true);
     return res.status(200).json(
       new ApiResponsive(
         200,
@@ -110,7 +110,7 @@ export const customerLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) throw new ApiError(400, "Email and password are required");
   const result = await customerAuthService.login(email, password, req);
-  setAuthCookies(res, { accessToken: result.accessToken, refreshToken: result.refreshToken });
+  setAuthCookies(res, { accessToken: result.accessToken, refreshToken: result.refreshToken }, true);
   res.status(200).json(new ApiResponsive(200, { customer: result.customer, accessToken: result.accessToken }, "Login successful"));
 });
 
@@ -124,8 +124,15 @@ export const customerRegister = asyncHandler(async (req, res) => {
 export const customerVerifyOtp = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
   const result = await customerAuthService.verifyOtp(email, otp, req);
-  setAuthCookies(res, { accessToken: result.accessToken, refreshToken: result.refreshToken });
+  setAuthCookies(res, { accessToken: result.accessToken, refreshToken: result.refreshToken }, true);
   res.status(200).json(new ApiResponsive(200, { customer: result.customer, accessToken: result.accessToken }, "Email verified successfully"));
+});
+
+export const customerResendVerifyOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) throw new ApiError(400, "Email is required");
+  await customerAuthService.resendVerificationOtp(email);
+  res.status(200).json(new ApiResponsive(200, null, "Verification OTP resent successfully"));
 });
 
 export const customerForgotPassword = asyncHandler(async (req, res) => {
@@ -263,7 +270,7 @@ export const me = asyncHandler(async (req, res) => {
 });
 
 export const refresh = asyncHandler(async (req, res) => {
-  const token = req.cookies?.refreshToken || req.body?.refreshToken;
+  const token = req.cookies?.adminRefreshToken || req.cookies?.customerRefreshToken || req.cookies?.refreshToken || req.body?.refreshToken;
   if (!token) throw new ApiError(401, "Refresh token required");
 
   const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
@@ -275,7 +282,7 @@ export const refresh = asyncHandler(async (req, res) => {
     tokens = await adminAuthService.refresh(token, req);
   }
 
-  setAuthCookies(res, tokens);
+  setAuthCookies(res, tokens, decoded.isCustomer);
   res.json(
     new ApiResponsive(200, { accessToken: tokens.accessToken }, "Token refreshed successfully")
   );

@@ -278,16 +278,26 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
   const load = () => {
     setLoading(true);
     apiFetch("/content/banners?limit=50")
-      .then(j => setItems(j.data?.items || []))
+      .then(j => {
+        // Sort items by sortOrder ascending before saving to state
+        const sorted = (j.data?.items || []).sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        setItems(sorted);
+      })
       .catch(e => showToast(e.message, "error"))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
 
-  const openCreate = () => { setForm({ title: "", subtitle: "", linkUrl: "", sortOrder: 0, desktopImageUrl: "", mobileImageUrl: "" }); setModal("create"); };
+  const openCreate = () => {
+    // Find next sort order: max current sortOrder + 1
+    const nextOrder = items.length > 0 ? Math.max(...items.map(x => x.sortOrder || 0)) + 1 : 0;
+    setForm({ title: "", subtitle: "", linkUrl: "", sortOrder: nextOrder, desktopImageUrl: "", mobileImageUrl: "" });
+    setModal("create");
+  };
+
   const openEdit = (item: any) => {
-    setForm({ title: item.title, subtitle: item.subtitle || "", linkUrl: item.linkUrl || "", sortOrder: item.sortOrder || 0, desktopImageUrl: item.desktopImageUrl || "", mobileImageUrl: item.mobileImageUrl || "" });
+    setForm({ title: item.title || "", subtitle: item.subtitle || "", linkUrl: item.linkUrl || "", sortOrder: item.sortOrder || 0, desktopImageUrl: item.desktopImageUrl || "", mobileImageUrl: item.mobileImageUrl || "" });
     setModal(item);
   };
 
@@ -339,47 +349,81 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
       </PageHeader>
 
       {loading ? <Skeleton /> : items.length === 0 ? <Empty icon={IconFlag} msg="No banners — add one to show on homepage hero" /> : (
-        <div className="space-y-4">
-          {items.map((item: any) => (
-            <div key={item.id} className={`rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden ${!item.isActive ? "opacity-60" : ""}`}>
-              {item.desktopImageUrl && (
-                <div className="h-28 overflow-hidden bg-slate-100">
-                  <img src={item.desktopImageUrl} alt={item.title} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                </div>
-              )}
-              {!item.desktopImageUrl && (
-                <div className="h-16 bg-gradient-to-r from-brand/20 to-slate-200/40 flex items-center px-4">
-                  <p className="text-xs font-semibold text-brand/70">No desktop image — fallback gradient shown</p>
-                </div>
-              )}
-              <div className="p-4 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-slate-900">{item.title}</p>
-                    <Badge color={item.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}>
-                      {item.isActive ? "Live" : "Hidden"}
-                    </Badge>
-                    <Badge color="bg-slate-100 text-slate-500">Order: {item.sortOrder}</Badge>
-                  </div>
-                  {item.subtitle && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{item.subtitle}</p>}
-                  {item.linkUrl && <p className="text-[10px] text-sky-600 font-mono mt-0.5">{item.linkUrl}</p>}
-                  <div className="flex gap-2 mt-1.5">
-                    {item.desktopImageUrl && <Badge color="bg-sky-50 text-sky-700">Desktop ✓</Badge>}
-                    {item.mobileImageUrl && <Badge color="bg-violet-50 text-violet-700">Mobile ✓</Badge>}
-                    {!item.mobileImageUrl && <Badge color="bg-amber-50 text-amber-700">No mobile image</Badge>}
-                  </div>
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  <button onClick={() => toggle(item)} title={item.isActive ? "Hide" : "Publish"}
-                    className={`h-8 w-8 flex items-center justify-center rounded-lg transition ${item.isActive ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-50"}`}>
-                    {item.isActive ? <IconEye size={14} /> : <IconEyeOff size={14} />}
-                  </button>
-                  <button onClick={() => openEdit(item)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition"><IconEdit size={14} /></button>
-                  <button onClick={() => del(item.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition"><IconTrash size={14} /></button>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th className="px-4 py-3 text-left">Desktop Image Preview</th>
+                  <th className="px-4 py-3 text-left">Mobile Image</th>
+                  <th className="px-4 py-3 text-left">Title / Subtitle</th>
+                  <th className="px-4 py-3 text-left">Redirect Path</th>
+                  <th className="px-4 py-3 text-center">Sort Order</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {items.map((item: any) => (
+                  <tr key={item.id} className={`hover:bg-slate-50 transition ${!item.isActive ? "opacity-60 bg-slate-50/40" : ""}`}>
+                    <td className="px-4 py-3.5">
+                      {item.desktopImageUrl ? (
+                        <div className="h-10 w-28 rounded-lg overflow-hidden border border-slate-150 bg-slate-100">
+                          <img src={item.desktopImageUrl} alt="Desktop Preview" className="h-full w-full object-cover" />
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-semibold italic">No Desktop Image</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {item.mobileImageUrl ? (
+                        <div className="h-10 w-8 rounded-lg overflow-hidden border border-slate-150 bg-slate-100">
+                          <img src={item.mobileImageUrl} alt="Mobile Preview" className="h-full w-full object-cover" />
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-bold">Uses Desktop</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5 max-w-xs">
+                      <div>
+                        <p className="font-bold text-slate-900 truncate">{item.title || "Untitled"}</p>
+                        {item.subtitle && <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.subtitle}</p>}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {item.linkUrl ? (
+                        <span className="font-mono text-[11px] text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded">
+                          {item.linkUrl}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">None</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-xl">
+                        {item.sortOrder}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <Badge color={item.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-150 text-slate-500"}>
+                        {item.isActive ? "Live" : "Hidden"}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <div className="flex justify-end gap-1 shrink-0">
+                        <button onClick={() => toggle(item)} title={item.isActive ? "Hide Banner" : "Publish Banner"}
+                          className={`h-8 w-8 flex items-center justify-center rounded-lg transition ${item.isActive ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-50"}`}>
+                          {item.isActive ? <IconEye size={15} /> : <IconEyeOff size={15} />}
+                        </button>
+                        <button onClick={() => openEdit(item)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition"><IconEdit size={15} /></button>
+                        <button onClick={() => del(item.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition"><IconTrash size={15} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -776,7 +820,7 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
             {([
               { label: "Full Name *", key: "name", type: "text", ph: "Admin Name" },
               { label: "Email *", key: "email", type: "email", ph: "admin@company.com" },
-              { label: "Phone", key: "phone", type: "tel", ph: "+91 98765 43210" },
+              { label: "Phone", key: "phone", type: "tel", ph: "+91 731 815 8417" },
               { label: modal === "create" ? "Password *" : "New Password (leave blank to keep)", key: "password", type: "password", ph: "••••••••" },
             ] as any[]).map(f => (
               <div key={f.key} className="space-y-1.5">

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   listAttributes, createAttribute, updateAttribute, deleteAttribute,
-  createAttributeValue, deleteAttributeValue,
+  createAttributeValue, deleteAttributeValue, updateAttributeValue,
 } from "../controllers/attribute.controller.js";
 import { requireAuth, requirePermission } from "../middlewares/auth.middleware.js";
 
@@ -12,7 +12,8 @@ router.post("/",   requireAuth, requirePermission("attribute", "create"), create
 router.put("/:id", requireAuth, requirePermission("attribute", "update"), updateAttribute);
 router.delete("/:id", requireAuth, requirePermission("attribute", "delete"), deleteAttribute);
 
-router.post("/:attributeId/values",      requireAuth, requirePermission("attribute", "create"), createAttributeValue);
-router.delete("/values/:valueId",         requireAuth, requirePermission("attribute", "delete"), deleteAttributeValue);
+router.post("/:attributeId/values",            requireAuth, requirePermission("attribute", "create"), createAttributeValue);
+router.put("/:attributeId/values/:valueId",    requireAuth, requirePermission("attribute", "update"), updateAttributeValue);
+router.delete("/:attributeId/values/:valueId", requireAuth, requirePermission("attribute", "delete"), deleteAttributeValue);
 
 export default router;

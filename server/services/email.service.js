@@ -23,7 +23,7 @@ const BASE_STYLES = `
 const getFooter = () => `
   <div class="footer">
     © ${new Date().getFullYear()} Radiant Rays | Cleanroom Equipment Manufacturer<br>
-    <a href="mailto:sales@radiantraysindia.com">sales@radiantraysindia.com</a> &nbsp;·&nbsp; +91 96439 02980<br>
+    <a href="mailto:info@radiantraysindia.com">info@radiantraysindia.com</a> &nbsp;·&nbsp; +91 731 815 8417<br>
     This is an automated message. Please do not reply directly.
   </div>
 `;
@@ -59,7 +59,8 @@ const dispatchAndLog = async (to, subject, templateName, html) => {
     console.error("Failed to write email log to database:", logError);
   }
 
-  if (status === "FAILED") {
+  // In development, do not crash the request flow if email delivery fails
+  if (status === "FAILED" && process.env.NODE_ENV === "production") {
     throw new Error(errorMessage || "Failed to dispatch email");
   }
 };
@@ -164,7 +165,7 @@ export const emailService = {
           <div class="content">
             <h2>Hello ${name},</h2>
             <p>The password for your customer account at Radiant Rays was successfully changed.</p>
-            <p>If you did not authorize this change, please contact our support department immediately at sales@radiantraysindia.com.</p>
+            <p>If you did not authorize this change, please contact our support department immediately at info@radiantraysindia.com.</p>
           </div>
           ${getFooter()}
         </div>
@@ -196,7 +197,7 @@ export const emailService = {
               ${details.productName ? `<p><strong>Product:</strong> ${details.productName}</p>` : ""}
               ${details.company ? `<p><strong>Company:</strong> ${details.company}</p>` : ""}
             </div>
-            <p>For immediate assistance, feel free to contact us via WhatsApp on +91 96439 02980.</p>
+            <p>For immediate assistance, feel free to contact us via WhatsApp on +91 731 815 8417.</p>
           </div>
           ${getFooter()}
         </div>
@@ -393,7 +394,7 @@ export const emailService = {
               <p><strong>Refund ID:</strong> ${details.refundId || "N/A"}</p>
               <p><strong>Expected Credit:</strong> 5–7 business days to your original payment method.</p>
             </div>
-            <p>If you have any questions about your refund, please contact us at sales@radiantraysindia.com.</p>
+            <p>If you have any questions about your refund, please contact us at info@radiantraysindia.com.</p>
           </div>
           ${getFooter()}
         </div>
@@ -463,5 +464,31 @@ export const emailService = {
       </html>
     `;
     await dispatchAndLog(email, `[ADMIN SYSTEM] ${subject}`, "admin-notification", html);
+  },
+
+  sendNewsletterWelcome: async (email) => {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>${BASE_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="header-accent">Subscribed</div>
+            <h1>Newsletter Subscription Confirmed</h1>
+          </div>
+          <div class="content">
+            <h2>Hello!</h2>
+            <p>Thank you for subscribing to Radiant Rays updates.</p>
+            <p>You will now receive our cleanroom technical bulletins, specification sheets, and compliance guides directly in your inbox.</p>
+          </div>
+          ${getFooter()}
+        </div>
+      </body>
+      </html>
+    `;
+    await dispatchAndLog(email, "Subscribed to Radiant Rays Updates", "newsletter-welcome", html);
   },
 };

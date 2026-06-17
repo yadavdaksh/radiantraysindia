@@ -37,7 +37,7 @@ const sendEmail = async (options) => {
           service: process.env.SMTP_SERVICE,
           auth: {
             user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD,
+            pass: process.env.SMTP_PASSWORD || process.env.SMTP_PASS,
           },
         }
         : {
@@ -46,7 +46,7 @@ const sendEmail = async (options) => {
           secure,
           auth: {
             user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD,
+            pass: process.env.SMTP_PASSWORD || process.env.SMTP_PASS,
           },
         };
 

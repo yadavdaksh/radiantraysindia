@@ -47,18 +47,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const restore = async () => {
       const localCust = localStorage.getItem("rr_curr_customer");
       const localTok = localStorage.getItem("rr_curr_token");
-      if (localCust && localTok) {
-        try {
-          // Validate token is still alive
-          const res = await apiClient.get("/customer/profile");
-          const fresh = res.data.data;
-          setCustomer(fresh);
-          setToken(localTok);
-          setSession(fresh, localTok);
-        } catch {
-          // Token expired — clear but keep customer for display
-          setCustomer(JSON.parse(localCust));
-          setToken(localTok);
+      try {
+        // Validate token is still alive / fetch profile using cookies
+        const res = await apiClient.get("/customer/profile");
+        const fresh = res.data.data;
+        setCustomer(fresh);
+        const activeToken = localTok || "cookie-auth";
+        setToken(activeToken);
+        setSession(fresh, activeToken);
+      } catch {
+        // Fallback to local storage if API call fails
+        if (localCust && localTok) {
+          try {
+            setCustomer(JSON.parse(localCust));
+            setToken(localTok);
+          } catch (_) {}
         }
       }
       setIsLoading(false);
@@ -90,8 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendOtp = async (email: string) => {
-    // Trigger by sending forgot-password flow for unverified users
-    await apiClient.post("/auth/customer/forgot-password", { email });
+    await apiClient.post("/auth/customer/resend-otp", { email });
   };
 
   const forgotPassword = async (email: string) => {

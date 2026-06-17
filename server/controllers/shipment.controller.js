@@ -3,9 +3,15 @@ import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createShipment = asyncHandler(async (req, res) => {
-  const { orderId } = req.body;
-  const shipment = await shipmentService.createShipment(orderId);
+  const { orderId, courierId } = req.body;
+  const shipment = await shipmentService.createShipment(orderId, courierId);
   res.status(201).json(new ApiResponsive(201, shipment, "Shipment processed in Shiprocket successfully"));
+});
+
+export const getRates = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const rates = await shipmentService.checkRates(orderId);
+  res.json(new ApiResponsive(200, rates, "Courier rates retrieved successfully"));
 });
 
 export const cancelShipment = asyncHandler(async (req, res) => {

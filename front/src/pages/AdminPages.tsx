@@ -366,6 +366,7 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [viewingLead, setViewingLead] = useState<any | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -381,6 +382,15 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
     try {
       await apiFetch(`/leads/${id}`, { method: "PUT", body: JSON.stringify({ status }) });
       showToast("Lead updated");
+      load();
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const deleteLead = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this lead?")) return;
+    try {
+      await apiFetch(`/leads/${id}`, { method: "DELETE" });
+      showToast("Lead deleted successfully");
       load();
     } catch (e: any) { showToast(e.message, "error"); }
   };
@@ -408,7 +418,11 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-slate-900">{lead.name}</p>
                       <Badge color={statusColors[lead.status] || "bg-slate-100 text-slate-600"}>{lead.status}</Badge>
-                      {lead.source && <Badge color="bg-slate-100 text-slate-500">{lead.source}</Badge>}
+                      {lead.source && (
+                        <Badge color={lead.source === "CUSTOMIZE" ? "bg-purple-100 text-purple-700" : "bg-sky-100 text-sky-700"}>
+                          {lead.source}
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 flex-wrap">
                       {lead.email && <span className="flex items-center gap-1"><IconMail size={11} />{lead.email}</span>}
@@ -429,6 +443,14 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
+                    <button onClick={() => setViewingLead(lead)} title="View detailed lead specification"
+                      className="text-slate-400 hover:text-sky-600 transition p-1">
+                      <IconEye size={15} />
+                    </button>
+                    <button onClick={() => deleteLead(lead.id)} title="Delete Lead"
+                      className="text-slate-400 hover:text-rose-600 transition p-1">
+                      <IconTrash size={15} />
+                    </button>
                     <button onClick={() => setExpanded(expanded === lead.id ? null : lead.id)}
                       className="text-slate-400 hover:text-slate-700">
                       {expanded === lead.id ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
@@ -438,13 +460,90 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
                 {expanded === lead.id && lead.message && (
                   <div className="px-4 pb-4 border-t border-slate-100 pt-3">
                     <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Message</p>
-                    <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3">{lead.message}</p>
+                    <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3 whitespace-pre-wrap">{lead.message}</p>
                     <p className="text-[10px] text-slate-400 mt-2">{new Date(lead.createdAt).toLocaleString("en-IN")}</p>
                   </div>
                 )}
               </div>
             ))}
       </div>
+
+      {/* Lead Details Modal */}
+      {viewingLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4"
+          onClick={e => e.target === e.currentTarget && setViewingLead(null)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base">B2B Lead Specifications</h3>
+                <p className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {viewingLead.id}</p>
+              </div>
+              <button onClick={() => setViewingLead(null)} className="text-slate-400 hover:text-slate-700">
+                <IconX size={18} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Contact Name</p>
+                  <p className="text-sm font-bold text-slate-800 mt-1">{viewingLead.name}</p>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Source / Type</p>
+                  <div className="mt-1.5">
+                    <Badge color={viewingLead.source === "CUSTOMIZE" ? "bg-purple-100 text-purple-800" : viewingLead.source === "QUOTE" ? "bg-sky-100 text-sky-800" : "bg-slate-100 text-slate-700"}>
+                      {viewingLead.source || "WEBSITE"}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 col-span-2 sm:col-span-1">
+                  <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Phone</p>
+                  <p className="text-sm font-semibold text-slate-800 mt-1">{viewingLead.phone || "—"}</p>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 col-span-2 sm:col-span-1">
+                  <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Email</p>
+                  <p className="text-sm font-semibold text-slate-800 mt-1 break-all">{viewingLead.email || "—"}</p>
+                </div>
+                {viewingLead.company && (
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 col-span-2">
+                    <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Company</p>
+                    <p className="text-sm font-semibold text-slate-800 mt-1">{viewingLead.company}</p>
+                  </div>
+                )}
+                {viewingLead.product && (
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 col-span-2">
+                    <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Requested Product</p>
+                    <p className="text-xs font-bold text-sky-850 mt-1">{viewingLead.product.name}</p>
+                    <p className="text-[9px] text-slate-400 font-mono mt-0.5">SKU: {viewingLead.product.sku}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Lead Message & Specifications</p>
+                <div className="text-xs text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-xl p-3.5 whitespace-pre-wrap">
+                  {viewingLead.message}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t border-slate-100">
+                <span>Created: {new Date(viewingLead.createdAt).toLocaleString("en-IN")}</span>
+                <span>Status: <strong className="text-slate-600">{viewingLead.status}</strong></span>
+              </div>
+            </div>
+            <div className="flex gap-3 px-5 py-4 bg-slate-50 border-t border-slate-100 justify-end">
+              <button onClick={() => deleteLead(viewingLead.id).then(() => setViewingLead(null))}
+                className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition">
+                Delete Lead
+              </button>
+              <button onClick={() => setViewingLead(null)}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -749,6 +848,37 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
   const [statusFilter, setStatusFilter] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [rates, setRates] = useState<Record<string, any[]>>({});
+  const [loadingRates, setLoadingRates] = useState<Record<string, boolean>>({});
+  const [selectedCourier, setSelectedCourier] = useState<Record<string, any>>({});
+
+  const fetchRates = async (orderId: string) => {
+    setLoadingRates(prev => ({ ...prev, [orderId]: true }));
+    try {
+      const res = await apiFetch<any>(`/shipments/rates/${orderId}`);
+      setRates(prev => ({ ...prev, [orderId]: res.data?.available_courier_companies || [] }));
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setLoadingRates(prev => ({ ...prev, [orderId]: false }));
+    }
+  };
+
+  const processShipment = async (orderId: string, courierId: any) => {
+    setUpdatingId(orderId);
+    try {
+      await apiFetch(`/shipments/create`, {
+        method: "POST",
+        body: JSON.stringify({ orderId, courierId })
+      });
+      showToast("Shipment processed successfully in Shiprocket");
+      load();
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const load = useCallback(() => {
     setLoading(true);
@@ -938,8 +1068,8 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
                     </div>
                   </div>
 
-                  {/* Address Grid */}
-                  <div className="grid gap-4 md:grid-cols-2">
+                  {/* Address & Pricing Grid */}
+                  <div className="grid gap-4 md:grid-cols-3">
                     {order.shippingAddress && (
                       <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1">
                         <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Shipping Address</p>
@@ -965,6 +1095,101 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
                         </div>
                       </div>
                     )}
+
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1.5 text-xs">
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Financial Summary</p>
+                      <div className="space-y-1 text-slate-650">
+                        <div className="flex justify-between">
+                          <span>Subtotal:</span>
+                          <span className="font-bold text-slate-800">₹{Number(order.subtotal || 0).toLocaleString("en-IN")}</span>
+                        </div>
+                        {Number(order.discount || 0) > 0 && (
+                          <div className="flex justify-between text-emerald-600 font-semibold">
+                            <span>Discount {order.couponCode ? `(${order.couponCode})` : ""}:</span>
+                            <span>−₹{Number(order.discount).toLocaleString("en-IN")}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span>GST (18%):</span>
+                          <span className="font-bold text-slate-800">₹{Number(order.tax || 0).toLocaleString("en-IN")}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Shipping:</span>
+                          <span className="font-bold text-slate-800">₹{Number(order.shipping || 0).toLocaleString("en-IN")}</span>
+                        </div>
+                        <div className="flex justify-between border-t border-slate-100 pt-1 font-extrabold text-sky-700">
+                          <span>Grand Total:</span>
+                          <span>₹{Number(order.total || 0).toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Logistics / Shipping section */}
+                  <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Logistics & Shiprocket Shipping</p>
+
+                    {order.awbCode ? (
+                      <div className="rounded-xl bg-sky-50 border border-sky-100 p-3.5 flex flex-wrap justify-between items-center gap-3">
+                        <div className="text-xs">
+                          <p className="font-bold text-sky-900">Shipment Registered in Shiprocket</p>
+                          <p className="text-slate-600 mt-1">Courier Partner: <span className="font-semibold text-slate-800">{order.courierName || "Standard Courier"}</span></p>
+                          <p className="text-slate-600">AWB Code: <code className="font-mono bg-sky-100 px-1.5 py-0.5 rounded text-sky-700 font-bold">{order.awbCode}</code></p>
+                          <p className="text-slate-600">Shiprocket Status: <span className="font-bold text-sky-800">{order.shiprocketStatus || "AWB_ASSIGNED"}</span></p>
+                        </div>
+                        <a href={`https://shiprocket.co/tracking/${order.awbCode}`} target="_blank" rel="noopener noreferrer"
+                          className="px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold hover:bg-sky-700 transition">
+                          Track Shipment
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => fetchRates(order.id)}
+                            disabled={loadingRates[order.id]}
+                            className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition disabled:opacity-50"
+                          >
+                            {loadingRates[order.id] ? "Fetching Courier Rates..." : "Check Logistics / Fetch Rates"}
+                          </button>
+                          <p className="text-[10px] text-slate-400 leading-relaxed max-w-md">
+                            Calculates Shiprocket real-time rates based on pickup coordinates, order dimensions, weight, and delivery pincode.
+                          </p>
+                        </div>
+
+                        {rates[order.id] && rates[order.id].length > 0 && (
+                          <div className="space-y-2.5">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Select Delivery Courier partner (Prepaid by Admin):</p>
+                            <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-3">
+                              {rates[order.id].map((c: any) => {
+                                const isSelected = selectedCourier[order.id] === c.courier_company_id;
+                                return (
+                                  <div
+                                    key={c.courier_company_id || c.courier_name}
+                                    onClick={() => setSelectedCourier(prev => ({ ...prev, [order.id]: c.courier_company_id }))}
+                                    className={`p-3.5 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${isSelected ? "border-sky-600 bg-sky-50/50" : "border-slate-205 bg-white hover:border-slate-300"
+                                      }`}
+                                  >
+                                    <div>
+                                      <p className="font-bold text-slate-800 text-xs">{c.courier_name}</p>
+                                      <p className="text-[10px] text-slate-400 mt-0.5">Delivery: {c.expected_delivery_date || "3-4 Days"}</p>
+                                    </div>
+                                    <p className="text-xs font-extrabold text-sky-700 mt-2">₹{c.rate}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <button
+                              onClick={() => processShipment(order.id, selectedCourier[order.id])}
+                              disabled={!selectedCourier[order.id] || updatingId === order.id}
+                              className="w-full sm:w-auto rounded-xl bg-sky-600 hover:bg-sky-700 px-6 py-2.5 text-xs font-extrabold text-white transition disabled:opacity-50 shadow"
+                            >
+                              Process Shiprocket Order & AWB (Paid by Admin)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {order.notes && (
@@ -973,6 +1198,20 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
                       <p className="text-xs text-slate-700 italic">{order.notes}</p>
                     </div>
                   )}
+
+                  {(() => {
+                    const cancelHistoryLog = order.statusHistory?.find((h: any) => h.status === "CANCELLED");
+                    if (cancelHistoryLog) {
+                      return (
+                        <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3.5 mt-2">
+                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-rose-700 mb-1">Cancellation / Return Reason</p>
+                          <p className="text-xs text-rose-800 font-semibold leading-relaxed">{cancelHistoryLog.notes}</p>
+                          <p className="text-[9px] text-rose-450 mt-1">Logged on: {new Date(cancelHistoryLog.createdAt).toLocaleString("en-IN")}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               )}
             </div>

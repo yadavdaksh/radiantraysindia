@@ -253,10 +253,41 @@ export const customerAuthService = {
       },
     });
 
+    console.log(`\n--- [DEV ONLY] OTP Code for customer registration of ${email}: ${otp} ---\n`);
+
     // Send verify email OTP
     await emailService.sendVerificationOtp(customer.email, customer.name, otp);
 
     return { id: customer.id, name: customer.name, email: customer.email, isVerified: false };
+  },
+
+  resendVerificationOtp: async (email) => {
+    const customer = await prisma.customer.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!customer) {
+      throw new ApiError(404, "Customer not found");
+    }
+
+    if (customer.isVerified) {
+      throw new ApiError(400, "Email is already verified");
+    }
+
+    const otp = generateOTP(6);
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: {
+        verifyOtp: otp,
+        verifyOtpExpires: expires,
+      },
+    });
+
+    console.log(`\n--- [DEV ONLY] Resent OTP Code for ${email}: ${otp} ---\n`);
+
+    await emailService.sendVerificationOtp(customer.email, customer.name, otp);
   },
 
   verifyOtp: async (email, otp, req) => {
@@ -334,6 +365,7 @@ export const customerAuthService = {
         where: { id: customer.id },
         data: { verifyOtp: otp, verifyOtpExpires: otpExpires },
       });
+      console.log(`\n--- [DEV ONLY] OTP Code (regenerated on unverified login) for ${customer.email}: ${otp} ---\n`);
       await emailService.sendVerificationOtp(customer.email, customer.name, otp);
       throw new ApiError(403, "Email is not verified. A new OTP has been sent to your email.");
     }
@@ -444,6 +476,8 @@ export const customerAuthService = {
         resetPasswordOtpExpires: expires,
       },
     });
+
+    console.log(`\n--- [DEV ONLY] Forgot Password OTP Code for ${email}: ${otp} ---\n`);
 
     await emailService.sendForgotPasswordOtp(customer.email, customer.name, otp);
   },

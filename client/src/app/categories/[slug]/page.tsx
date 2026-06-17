@@ -109,8 +109,12 @@ export default function CategoryDetailPage({ params }: { params: { slug: string 
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center">
-              <Layers className="h-4.5 w-4.5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 overflow-hidden flex items-center justify-center">
+              {category?.imageUrl ? (
+                <img src={category.imageUrl} alt={categoryName} className="h-full w-full object-cover" />
+              ) : (
+                <Layers className="h-4.5 w-4.5 text-brand" />
+              )}
             </div>
             <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Category</span>
           </div>

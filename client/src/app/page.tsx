@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, PhoneCall, CheckCircle2, Zap, Globe } from "lucide-react";
+import { ArrowRight, PhoneCall, CheckCircle2, Zap, Globe, Tag } from "lucide-react";
 import { products as mockProducts, categories as mockCategories, industries as mockIndustries, testimonials as mockTestimonials, gallery as mockGallery } from "@/lib/site-data";
 import HeroCarousel from "@/components/HeroCarousel";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4002/api/v1";
 
@@ -52,9 +53,9 @@ export default async function Home() {
     logo: "https://radiantraysindia.com/logo.png",
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+91-98765-43210",
+      telephone: "+91-731-815-8417",
       contactType: "sales",
-      email: "sales@radiantraysindia.com",
+      email: "info@radiantraysindia.com",
       areaServed: "IN",
     },
   };
@@ -101,18 +102,30 @@ export default async function Home() {
                 <Link
                   key={cat.slug}
                   href={`/products?category=${cat.slug}`}
-                  className="group rounded-2xl border border-slate-100 bg-slate-50/60 p-5 shadow-sm transition-all hover:bg-white hover:border-brand/25 hover:shadow-lg hover:-translate-y-0.5 duration-200"
+                  className="group rounded-2xl border border-slate-100 bg-slate-50/60 p-5 shadow-sm transition-all hover:bg-white hover:border-brand/25 hover:shadow-lg hover:-translate-y-0.5 duration-200 flex flex-col justify-between"
                 >
-
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand leading-snug">
-                    {cat.name}
-                  </h3>
-                  <p className="mt-1.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
-                    {cat.summary || cat.description || "View specifications and variant options."}
-                  </p>
-                  <span className="mt-3 inline-flex items-center text-[10px] font-bold text-brand gap-0.5">
-                    Browse <ArrowRight className="h-3 w-3" />
-                  </span>
+                  <div>
+                    {cat.imageUrl && (
+                      <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden mb-4 bg-slate-100">
+                        <img
+                          src={cat.imageUrl}
+                          alt={cat.name}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand leading-snug">
+                      {cat.name}
+                    </h3>
+                    <p className="mt-1.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
+                      {cat.summary || cat.description || "View specifications and variant options."}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="mt-3 inline-flex items-center text-[10px] font-bold text-brand gap-0.5">
+                      Browse <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -161,7 +174,19 @@ export default async function Home() {
                   href={`/products?industry=${ind.slug}`}
                   className="group flex flex-col items-center justify-center text-center p-4 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-brand/20 hover:shadow-md duration-200"
                 >
-
+                  {ind.imageUrl ? (
+                    <div className="h-10 w-10 rounded-xl bg-brand/10 overflow-hidden flex items-center justify-center mb-3">
+                      <img
+                        src={ind.imageUrl}
+                        alt={ind.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-10 w-10 rounded-xl bg-brand/5 flex items-center justify-center mb-3">
+                      <Tag className="h-5 w-5 text-brand" />
+                    </div>
+                  )}
                   <span className="text-xs font-bold text-slate-800 group-hover:text-brand line-clamp-2 leading-tight">
                     {ind.name}
                   </span>
@@ -182,29 +207,7 @@ export default async function Home() {
                 Trusted by Facility Managers & Labs
               </h2>
             </div>
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {testimonials.map((t: any, i: number) => (
-                <div key={i} className="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex gap-0.5 mb-3">
-                      {[...Array(t.rating || 5)].map((_, s) => (
-                        <span key={s} className="text-amber-400 text-xs">★</span>
-                      ))}
-                    </div>
-                    <p className="text-sm text-slate-600 leading-relaxed italic">"{t.quote}"</p>
-                  </div>
-                  <div className="mt-4 flex items-center gap-3 pt-4 border-t border-slate-100">
-                    <div className="h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center font-extrabold text-xs text-brand shrink-0">
-                      {t.name?.[0] || "?"}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900">{t.name}</p>
-                      <p className="text-[10px] text-slate-500">{t.designation ? `${t.designation} · ` : ""}{t.company}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <TestimonialsCarousel testimonials={testimonials} />
           </div>
         </section>
       )}
@@ -258,14 +261,16 @@ export default async function Home() {
             {[
               {
                 name: "Shiwakshi Singh",
-                title: "Co-Founder & Director",
+                title: "Co-Founder & Director and Technical Director",
                 desc: "Leads business development, client relations, and quality assurance. Expert in GMP and ISO cleanroom standards.",
+                image: "/images/founders/shiwakshi-singh.jpeg",
                 initial: "S",
               },
               {
                 name: "Daksh Yadav",
-                title: "Co-Founder & Technical Director",
+                title: "Co-Founder",
                 desc: "Heads product engineering and manufacturing. Expert in HEPA filtration, SS fabrication, and cleanroom system design.",
+                image: "/images/founders/daksh.png",
                 initial: "D",
               },
             ].map((f) => (
@@ -274,8 +279,12 @@ export default async function Home() {
                 href="/about"
                 className="group flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand/25 transition-all duration-200"
               >
-                <div className="h-14 w-14 shrink-0 rounded-2xl bg-brand/10 border border-brand/15 flex items-center justify-center">
-                  <span className="text-2xl font-extrabold text-brand">{f.initial}</span>
+                <div className="h-14 w-14 shrink-0 rounded-2xl bg-brand/10 border border-brand/15 flex items-center justify-center overflow-hidden">
+                  {f.image ? (
+                    <img src={f.image} alt={f.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-extrabold text-brand">{f.initial}</span>
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="font-extrabold text-slate-950 group-hover:text-brand transition">{f.name}</p>

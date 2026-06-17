@@ -4,7 +4,7 @@ import {
   IconArrowLeft, IconDeviceFloppy, IconPlus, IconTrash,
   IconX, IconInfoCircle, IconCheck,
 } from "@tabler/icons-react";
-import { ProductImageUploader } from "../components/Views";
+import { ProductImageUploader, ProductDocUploader } from "../components/Views";
 import { RichEditorLazy as SimpleEditor } from "../components/RichEditorLazy";
 
 import { apiFetch } from "../lib/api";
@@ -61,135 +61,15 @@ const emptyForm = {
   industryIds: [] as string[],
   metaTitle: "", metaDescription: "", canonicalUrl: "",
   images: [] as Array<{ url: string; altText?: string; isPrimary?: boolean; sortOrder?: number }>,
-  documents: [] as Array<{ title: string; url: string; mimeType?: string }>,
+  documents: [] as Array<{ title: string; url: string; key?: string; mimeType?: string }>,
   variants: [emptyVariant()] as Variant[],
   // product-level logistics (used when hasVariants = false)
   weight: "1.0", length: "10.0", width: "10.0", height: "10.0",
   hsn: "9403", packageDetails: "",
+  selectedAttributeIds: [] as string[],
 };
 
-// ── Attributes Manager (sidebar widget) ──────────────────────────────────────
-function AttributesManager({ attributes, onRefresh }: { attributes: any[]; onRefresh: () => void }) {
-  const [newAttrName, setNewAttrName] = useState("");
-  const [newValName, setNewValName] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState(false);
-  const [open, setOpen] = useState(false);
 
-  const post = async (path: string, body: object) => {
-    const r = await fetch(`${API_BASE}${path}`, {
-      method: "POST", credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((j as any).message || "Failed");
-    return j;
-  };
-
-  const deleteReq = async (path: string) => {
-    const r = await fetch(`${API_BASE}${path}`, { method: "DELETE", credentials: "include" });
-    if (!r.ok) throw new Error("Delete failed");
-  };
-
-  const addAttr = async () => {
-    if (!newAttrName.trim()) return;
-    setBusy(true);
-    try { await post("/attributes", { name: newAttrName.trim() }); setNewAttrName(""); onRefresh(); }
-    catch (e: any) { alert(e.message); }
-    finally { setBusy(false); }
-  };
-
-  const addVal = async (attrId: string) => {
-    const val = newValName[attrId]?.trim();
-    if (!val) return;
-    setBusy(true);
-    try { await post(`/attributes/${attrId}/values`, { value: val }); setNewValName(p => ({ ...p, [attrId]: "" })); onRefresh(); }
-    catch (e: any) { alert(e.message); }
-    finally { setBusy(false); }
-  };
-
-  const delAttr = async (id: string) => {
-    if (!confirm("Delete attribute and all its values?")) return;
-    await deleteReq(`/attributes/${id}`); onRefresh();
-  };
-
-  const delVal = async (valueId: string) => {
-    await deleteReq(`/attributes/values/${valueId}`); onRefresh();
-  };
-
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition"
-      >
-        <span>Manage Attributes</span>
-        <span className="text-slate-300">{open ? "▲" : "▼"}</span>
-      </button>
-
-      {open && (
-        <div className="p-4 space-y-4 border-t border-slate-100">
-          {/* Add attribute */}
-          <div className="flex gap-2">
-            <input
-              value={newAttrName}
-              onChange={e => setNewAttrName(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addAttr())}
-              placeholder="New attribute (e.g. Size)"
-              className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-sky-500 focus:bg-white transition"
-            />
-            <button type="button" onClick={addAttr} disabled={busy || !newAttrName.trim()}
-              className="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold hover:bg-sky-800 transition disabled:opacity-50">
-              + Add
-            </button>
-          </div>
-
-          {/* Existing attributes */}
-          {attributes.length === 0 && (
-            <p className="text-[10px] text-slate-400 italic text-center py-2">No attributes yet</p>
-          )}
-          {attributes.map((attr: any) => (
-            <div key={attr.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">{attr.name}</p>
-                <button type="button" onClick={() => delAttr(attr.id)}
-                  className="text-slate-300 hover:text-rose-500 transition">
-                  <IconX size={12} />
-                </button>
-              </div>
-              {/* Values */}
-              <div className="flex flex-wrap gap-1">
-                {(attr.values || []).map((val: any) => (
-                  <span key={val.id} className="inline-flex items-center gap-1 bg-white border border-slate-200 rounded-md px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                    {val.value}
-                    <button type="button" onClick={() => delVal(val.id)} className="text-slate-300 hover:text-rose-500 transition ml-0.5">
-                      <IconX size={9} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              {/* Add value */}
-              <div className="flex gap-1.5">
-                <input
-                  value={newValName[attr.id] || ""}
-                  onChange={e => setNewValName(p => ({ ...p, [attr.id]: e.target.value }))}
-                  onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addVal(attr.id))}
-                  placeholder="Add value..."
-                  className="flex-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] outline-none focus:border-sky-400 transition"
-                />
-                <button type="button" onClick={() => addVal(attr.id)} disabled={busy || !newValName[attr.id]?.trim()}
-                  className="px-2 py-1 rounded-md bg-slate-700 text-white text-[10px] font-bold hover:bg-slate-800 transition disabled:opacity-40">
-                  +
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function ProductForm({ showToast }: {
   showToast: (msg: string, type?: "success" | "error" | "info") => void;
@@ -494,7 +374,43 @@ export default function ProductForm({ showToast }: {
             <div className="space-y-4">
               <div>
                 <Label>Product Name *</Label>
-                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required className={inputCls} placeholder="e.g. Biosafety Cabinet Class II A2" />
+                <input
+                  value={form.name}
+                  onChange={e => {
+                    const name = e.target.value;
+                    const slugified = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                    setForm(f => ({ ...f, name, slug: f.id ? f.slug : slugified }));
+                  }}
+                  required
+                  className={inputCls}
+                  placeholder="e.g. Biosafety Cabinet Class II A2"
+                />
+              </div>
+              <div>
+                <Label>Product Slug (URL Path) *</Label>
+                <div className="flex gap-2">
+                  <input
+                    value={form.slug}
+                    onChange={e => {
+                      const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+                      setForm(f => ({ ...f, slug }));
+                    }}
+                    required
+                    className={`${inputCls} flex-1 font-mono`}
+                    placeholder="e.g. biosafety-cabinet-class-ii-a2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const slugified = form.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                      setForm(f => ({ ...f, slug: slugified }));
+                      showToast("Slug generated from product name", "info");
+                    }}
+                    className="px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -792,236 +708,382 @@ export default function ProductForm({ showToast }: {
               </div>
 
               {/* Documents */}
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Technical Documents (PDF)</Label>
-                  <button type="button" onClick={() => setForm(f => ({ ...f, documents: [...f.documents, { title: "", url: "", mimeType: "application/pdf" }] }))}
-                    className="text-[10px] font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-lg hover:bg-sky-100 transition flex items-center gap-1">
-                    <IconPlus size={11} /> Add
-                  </button>
-                </div>
-                {form.documents.map((doc, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <input value={doc.title} onChange={e => {
-                      const docs = [...form.documents]; docs[i] = { ...doc, title: e.target.value }; setForm(f => ({ ...f, documents: docs }));
-                    }} placeholder="Document title" className={`${inputCls} flex-1`} />
-                    <input value={doc.url} onChange={e => {
-                      const docs = [...form.documents]; docs[i] = { ...doc, url: e.target.value }; setForm(f => ({ ...f, documents: docs }));
-                    }} placeholder="PDF URL" className={`${inputCls} flex-1`} />
-                    <button type="button" onClick={() => setForm(f => ({ ...f, documents: f.documents.filter((_, j) => j !== i) }))}
-                      className="text-slate-400 hover:text-rose-600"><IconX size={14} /></button>
-                  </div>
-                ))}
+              <div className="pt-4 border-t border-slate-100">
+                <ProductDocUploader
+                  documents={form.documents}
+                  onChange={docs => setForm(f => ({ ...f, documents: docs }))}
+                  showToast={showToast}
+                />
               </div>
             </div>
           )}
 
           {/* ── VARIANTS ── */}
-          {tab === "variants" && form.hasVariants && (
-            <div className="space-y-4">
-              {/* Quick guide */}
-              <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-600 space-y-1">
-                <p className="font-extrabold text-slate-800">Each variant = one specific buyable option</p>
-                <p>Give each a <strong>unique name</strong>, set its <strong>SKU, price, stock</strong>, upload its <strong>images</strong>, and tag its <strong>attributes</strong>.</p>
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  <span className="text-[10px] font-extrabold text-slate-400 mr-1">Quick examples →</span>
-                  {["2 Feet", "3 Feet", "4 Feet", "6 Feet", "Single Door", "Double Door", "Vertical", "Horizontal", "SS 304", "SS 316", "Standard", "Heavy Duty"].map(ex => (
-                    <button
-                      key={ex}
-                      type="button"
-                      onClick={() => {
-                        const vars = [...form.variants];
-                        if (vars[activeVariantIdx]) {
-                          vars[activeVariantIdx] = { ...vars[activeVariantIdx], name: ex };
-                          setForm(f => ({ ...f, variants: vars }));
-                        }
-                      }}
-                      className="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-700 hover:bg-sky-50 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full transition"
-                    >
-                      {ex}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[10px] text-slate-400 mt-1">Click any label above to set the name for the currently selected variant tab.</p>
-              </div>
+          {tab === "variants" && form.hasVariants && (() => {
+            // Cartesian product helper
+            const cartesian = (arrays: string[][]): string[][] => {
+              if (!arrays.length) return [[]];
+              const [first, ...rest] = arrays;
+              const restProduct = cartesian(rest);
+              return first.flatMap(v => restProduct.map(r => [v, ...r]));
+            };
 
-              {/* Variant tabs */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {form.variants.map((v, i) => (
-                  <button key={i} type="button" onClick={() => setActiveVariantIdx(i)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${activeVariantIdx === i ? "bg-sky-700 text-white border-sky-700" : "border-slate-200 text-slate-600 hover:border-sky-300"}`}>
-                    {v.name || `Variant ${i + 1}`}
-                    {v.isDefault && <span className="ml-1 text-[8px] opacity-70">●</span>}
-                  </button>
-                ))}
-                <button type="button" onClick={addVariant}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold border border-dashed border-slate-300 text-slate-400 hover:border-sky-400 hover:text-sky-600 transition flex items-center gap-1">
-                  <IconPlus size={12} /> Add
-                </button>
-              </div>
+            // Which attribute ids are selected for this product
+            const selectedAttrIds: string[] = (form as any).selectedAttributeIds || [];
 
-              {/* Active variant form */}
-              {form.variants[activeVariantIdx] && (() => {
-                const v = form.variants[activeVariantIdx];
-                const i = activeVariantIdx;
-                return (
-                  <div className="space-y-4 rounded-xl border border-slate-200 p-4 bg-slate-50/30">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Variant {i + 1}</p>
-                      <div className="flex items-center gap-3">
-                        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer">
-                          <input type="checkbox" checked={v.isDefault} onChange={e => {
-                            setForm(f => ({
-                              ...f,
-                              variants: f.variants.map((x, j) => ({ ...x, isDefault: j === i ? e.target.checked : false })),
-                            }));
-                          }} className="h-3.5 w-3.5 rounded" /> Default
-                        </label>
-                        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer">
-                          <input type="checkbox" checked={v.isActive} onChange={e => updateVariant(i, "isActive", e.target.checked)} className="h-3.5 w-3.5 rounded" /> Active
-                        </label>
-                        {form.variants.length > 1 && (
-                          <button type="button" onClick={() => removeVariant(i)} className="text-rose-500 hover:text-rose-700">
-                            <IconTrash size={13} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <div><Label>Variant Name *</Label><input value={v.name} onChange={e => updateVariant(i, "name", e.target.value)} required className={inputCls} placeholder="e.g. 3 Feet, Class II A2" /></div>
-                      <div><Label>SKU (auto if blank)</Label><input value={v.sku} onChange={e => updateVariant(i, "sku", e.target.value)} className={`${inputCls} font-mono`} /></div>
-                      {/* Prices only for B2C */}
-                      {form.productType === "B2C" && (
-                        <>
-                          <div>
-                            <Label>Price (₹) *</Label>
-                            <input type="number" min="1" value={v.price} onChange={e => updateVariant(i, "price", e.target.value)} className={inputCls} placeholder="Original price" />
-                          </div>
-                          <div>
-                            <Label>Sale Price (₹) — optional</Label>
-                            <input
-                              type="number" min="1"
-                              value={v.salePrice}
-                              onChange={e => updateVariant(i, "salePrice", e.target.value)}
-                              className={`${inputCls} ${v.salePrice && Number(v.salePrice) >= Number(v.price) ? "border-rose-400 bg-rose-50" : ""}`}
-                              placeholder="Must be less than price"
-                            />
-                            {v.salePrice && Number(v.salePrice) >= Number(v.price) && (
-                              <p className="text-[10px] text-rose-600 font-bold mt-1">⚠ Sale price must be less than price (₹{v.price})</p>
-                            )}
-                            {v.salePrice && Number(v.salePrice) > 0 && Number(v.salePrice) < Number(v.price) && (
-                              <p className="text-[10px] text-emerald-600 font-semibold mt-1">
-                                ✓ {Math.round((1 - Number(v.salePrice) / Number(v.price)) * 100)}% discount
-                              </p>
-                            )}
-                          </div>
-                        </>
-                      )}
-                      {form.productType === "B2B" && (
-                        <div className="rounded-xl bg-amber-50 border border-amber-100 px-3 py-2.5 text-xs text-amber-700 font-semibold flex items-center gap-1.5">
-                          B2B — price set on quotation, no price here
-                        </div>
-                      )}
-                      <div><Label>Stock (units)</Label><input type="number" value={v.stock} onChange={e => updateVariant(i, "stock", Number(e.target.value))} className={inputCls} /></div>
-                    </div>
+            const setSelectedAttrIds = (ids: string[]) => {
+              setForm(f => ({ ...f, selectedAttributeIds: ids } as any));
+            };
 
-                    {/* Variant images — drag drop */}
+            // Selected attributes (full objects)
+            const selectedAttrs = allAttributes.filter((a: any) => selectedAttrIds.includes(a.id));
+
+            // Generate all variant combinations from selected attributes
+            const generateVariants = () => {
+              if (!selectedAttrs.length) {
+                showToast("Select at least one attribute first", "error");
+                return;
+              }
+              const valArrays: { attrName: string; valueId: string; valueName: string }[][] =
+                selectedAttrs.map((attr: any) =>
+                  (attr.values || []).map((v: any) => ({ attrName: attr.name, valueId: v.id, valueName: v.value }))
+                ).filter((arr: any[]) => arr.length > 0);
+
+              if (valArrays.some(arr => arr.length === 0)) {
+                showToast("Some selected attributes have no values. Add values on the Attributes page first.", "error");
+                return;
+              }
+
+              const combinations = cartesian(valArrays as any[][]);
+              const slugBase = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+              const newVariants: Variant[] = combinations.map((combo: any[], ci: number) => {
+                const name = combo.map((c: any) => c.valueName).join(" / ");
+                const skuSuffix = combo.map((c: any) => c.valueName.toUpperCase().replace(/[^A-Z0-9]/g, "")).join("-");
+                const sku = `${slugBase.toUpperCase().replace(/-/g, "").slice(0, 8)}-${skuSuffix}`;
+                const attrValueIds = combo.map((c: any) => c.valueId);
+
+                // Preserve existing variant data if name matches
+                const existing = form.variants.find(v => v.name === name);
+                if (existing) return { ...existing, name, sku: existing.sku || sku, attributeValueIds: attrValueIds };
+
+                return {
+                  ...emptyVariant(),
+                  name,
+                  sku,
+                  attributeValueIds: attrValueIds,
+                  isDefault: ci === 0,
+                };
+              });
+
+              setForm(f => ({ ...f, variants: newVariants }));
+              setActiveVariantIdx(0);
+              showToast(`${newVariants.length} variants generated`, "success");
+            };
+
+            return (
+              <div className="space-y-6">
+                {/* Step 1: Select Attributes */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+                  <div className="flex items-center justify-between gap-3">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label>Variant Images (max 5)</Label>
-                        <span className="text-[10px] text-slate-400">Drag to reorder</span>
-                      </div>
-                      <ProductImageUploader
-                        images={(v.images || []).slice(0, 5)}
-                        onChange={imgs => updateVariant(i, "images", imgs.slice(0, 5))}
-                        showToast={showToast}
-                      />
+                      <p className="text-sm font-extrabold text-slate-900">Step 1 — Select Attributes</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Check which attributes apply to this product. Variants = all combinations.
+                      </p>
                     </div>
+                    <a
+                      href="/attributes"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-bold text-sky-700 bg-sky-50 px-3 py-1.5 rounded-xl hover:bg-sky-100 transition whitespace-nowrap"
+                    >
+                      + Manage Attributes ↗
+                    </a>
+                  </div>
 
-                    {/* Attributes — predefined options like Size, Color */}
-                    {allAttributes.length > 0 ? (
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <Label>Attributes</Label>
-                          <span className="text-[10px] text-sky-600 font-semibold">Click values to tag this variant</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mb-2">
-                          e.g. if this variant is the "3 Feet SS304" option → click <strong>3 Feet</strong> under Width and <strong>SS304</strong> under Material.
-                        </p>
-                        <div className="space-y-3">
-                          {allAttributes.map((attr: any) => (
-                            <div key={attr.id} className="rounded-xl border border-slate-200 p-3 bg-white">
-                              <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">{attr.name}</p>
-                              <div className="flex flex-wrap gap-2">
-                                {(attr.values || []).map((val: any) => {
-                                  const selected = v.attributeValueIds.includes(val.id);
-                                  return (
-                                    <button
-                                      key={val.id}
-                                      type="button"
-                                      onClick={() => {
-                                        const ids = selected
-                                          ? v.attributeValueIds.filter((id: string) => id !== val.id)
-                                          : [...v.attributeValueIds, val.id];
-                                        updateVariant(i, "attributeValueIds", ids);
-                                      }}
-                                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${selected
-                                          ? "bg-sky-700 text-white border-sky-700"
-                                          : "border-slate-200 text-slate-600 hover:border-sky-300 hover:text-sky-600"
-                                        }`}
-                                    >
-                                      {val.value}
-                                    </button>
-                                  );
-                                })}
+                  {allAttributes.length === 0 ? (
+                    <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm text-amber-700 font-semibold">
+                      No attributes defined yet.{" "}
+                      <a href="/attributes" target="_blank" className="underline">Create attributes first</a>
+                      {" "}(e.g. Color → Red, Blue; Size → S, M, L)
+                    </div>
+                  ) : (
+                    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                      {allAttributes.map((attr: any) => {
+                        const isSelected = selectedAttrIds.includes(attr.id);
+                        return (
+                          <label
+                            key={attr.id}
+                            className={`flex items-start gap-3 rounded-xl border-2 p-3 cursor-pointer transition ${isSelected ? "border-sky-500 bg-sky-50" : "border-slate-200 hover:border-sky-300"}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={e => {
+                                const ids = e.target.checked
+                                  ? [...selectedAttrIds, attr.id]
+                                  : selectedAttrIds.filter((id: string) => id !== attr.id);
+                                setSelectedAttrIds(ids);
+                              }}
+                              className="h-4 w-4 rounded border-slate-300 text-sky-600 mt-0.5 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-slate-800">{attr.name}</p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {(attr.values || []).slice(0, 5).map((v: any) => (
+                                  <span key={v.id} className="text-[10px] font-semibold bg-white border border-slate-200 rounded-full px-2 py-0.5 text-slate-600">
+                                    {v.value}
+                                  </span>
+                                ))}
+                                {(attr.values || []).length > 5 && (
+                                  <span className="text-[10px] text-slate-400">+{attr.values.length - 5} more</span>
+                                )}
                                 {(attr.values || []).length === 0 && (
-                                  <p className="text-[10px] text-slate-400 italic">No values — add via Attributes page</p>
+                                  <span className="text-[10px] text-amber-600 italic">No values yet</span>
                                 )}
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="rounded-xl bg-amber-50 border border-amber-100 px-3 py-2.5 text-xs text-amber-700">
-                        No attributes yet. Use "Manage Attributes" panel on the right to create them (e.g. Width → 2ft, 3ft, 4ft).
-                      </div>
-                    )}
-
-                    {/* Spec key-value */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label>Technical Specifications</Label>
-                        <button type="button" onClick={() => {
-                          const spec = { ...v.specification, "": "" };
-                          updateVariant(i, "specification", spec);
-                        }} className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg hover:bg-sky-100 flex items-center gap-1">
-                          <IconPlus size={10} /> Add Row
-                        </button>
-                      </div>
-                      <div className="space-y-2">
-                        {Object.entries(v.specification).map(([k, val], si) => (
-                          <div key={si} className="flex gap-2">
-                            <input value={k} onChange={e => {
-                              const s: Record<string, string> = {};
-                              Object.entries(v.specification).forEach(([ok, ov], oi) => { s[oi === si ? e.target.value : ok] = String(ov); });
-                              updateVariant(i, "specification", s);
-                            }} placeholder="Label" className={`${inputCls} flex-1`} />
-                            <input value={String(val)} onChange={e => {
-                              updateVariant(i, "specification", { ...v.specification, [k]: e.target.value });
-                            }} placeholder="Value" className={`${inputCls} flex-1`} />
-                            <button type="button" onClick={() => {
-                              const s = { ...v.specification }; delete s[k]; updateVariant(i, "specification", s);
-                            }} className="text-slate-400 hover:text-rose-600"><IconX size={13} /></button>
-                          </div>
-                        ))}
-                      </div>
+                          </label>
+                        );
+                      })}
                     </div>
+                  )}
+
+                  {selectedAttrIds.length > 0 && (
+                    <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+                      <div className="flex-1 text-xs text-slate-600">
+                        <strong>{selectedAttrs.reduce((acc: number, a: any) => acc * Math.max(a.values?.length || 0, 1), 1)}</strong> combination{selectedAttrs.reduce((acc: number, a: any) => acc * Math.max(a.values?.length || 0, 1), 1) !== 1 ? "s" : ""} will be generated from <strong>{selectedAttrs.map((a: any) => a.name).join(" × ")}</strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={generateVariants}
+                        className="inline-flex items-center gap-2 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold px-4 py-2.5 transition"
+                      >
+                        <IconCheck size={14} />
+                        Generate Variants
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Step 2: Variant Cards */}
+                {form.variants.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-extrabold text-slate-900">Step 2 — Configure Variants ({form.variants.length})</p>
+                      <button
+                        type="button"
+                        onClick={addVariant}
+                        className="text-[10px] font-bold text-sky-700 bg-sky-50 px-3 py-1.5 rounded-xl hover:bg-sky-100 transition flex items-center gap-1"
+                      >
+                        <IconPlus size={11} /> Add Manual Variant
+                      </button>
+                    </div>
+
+                    {/* Variant selector tabs */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {form.variants.map((v, i) => (
+                        <button key={i} type="button" onClick={() => setActiveVariantIdx(i)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition ${activeVariantIdx === i ? "bg-sky-700 text-white border-sky-700" : "border-slate-200 text-slate-600 hover:border-sky-300 bg-white"}`}>
+                          {v.name || `Variant ${i + 1}`}
+                          {v.isDefault && <span className="ml-1 text-[8px] opacity-70">●</span>}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Active variant detail card */}
+                    {form.variants[activeVariantIdx] && (() => {
+                      const v = form.variants[activeVariantIdx];
+                      const i = activeVariantIdx;
+
+                      // Resolve attribute chips for this variant
+                      const attrChips: { attrName: string; valueName: string }[] = [];
+                      allAttributes.forEach((attr: any) => {
+                        (attr.values || []).forEach((val: any) => {
+                          if (v.attributeValueIds.includes(val.id)) {
+                            attrChips.push({ attrName: attr.name, valueName: val.value });
+                          }
+                        });
+                      });
+
+                      return (
+                        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-5">
+                          {/* Variant header */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-2 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Variant {i + 1}</span>
+                                {attrChips.map((chip, ci) => (
+                                  <span key={ci} className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full bg-sky-100 text-sky-800 px-2.5 py-0.5">
+                                    <span className="text-sky-500">{chip.attrName}:</span> {chip.valueName}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer">
+                                  <input type="checkbox" checked={v.isDefault} onChange={e => {
+                                    setForm(f => ({
+                                      ...f,
+                                      variants: f.variants.map((x, j) => ({ ...x, isDefault: j === i ? e.target.checked : false })),
+                                    }));
+                                  }} className="h-3.5 w-3.5 rounded" />
+                                  Default variant
+                                </label>
+                                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer">
+                                  <input type="checkbox" checked={v.isActive} onChange={e => updateVariant(i, "isActive", e.target.checked)} className="h-3.5 w-3.5 rounded" />
+                                  Active
+                                </label>
+                              </div>
+                            </div>
+                            {form.variants.length > 1 && (
+                              <button type="button" onClick={() => removeVariant(i)}
+                                className="h-8 w-8 flex items-center justify-center rounded-xl border border-rose-100 text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition shrink-0">
+                                <IconTrash size={13} />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Core fields */}
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div>
+                              <Label>Variant Name *</Label>
+                              <input value={v.name} onChange={e => updateVariant(i, "name", e.target.value)} required className={inputCls} placeholder="e.g. Red / M or 3 Feet" />
+                            </div>
+                            <div>
+                              <Label>SKU (auto-generated if blank)</Label>
+                              <input value={v.sku} onChange={e => updateVariant(i, "sku", e.target.value)} className={`${inputCls} font-mono text-xs`} placeholder="Auto-generated from name" />
+                              <p className="text-[10px] text-slate-400 mt-1">Leave blank to auto-generate on save</p>
+                            </div>
+
+                            {/* B2C prices */}
+                            {form.productType === "B2C" && (
+                              <>
+                                <div>
+                                  <Label>MRP / Base Price (₹) *</Label>
+                                  <input type="number" min="1" value={v.price} onChange={e => updateVariant(i, "price", e.target.value)} className={inputCls} placeholder="Original price" />
+                                </div>
+                                <div>
+                                  <Label>Sale Price (₹) — optional</Label>
+                                  <input
+                                    type="number" min="1"
+                                    value={v.salePrice}
+                                    onChange={e => updateVariant(i, "salePrice", e.target.value)}
+                                    className={`${inputCls} ${v.salePrice && Number(v.salePrice) >= Number(v.price) ? "border-rose-400 bg-rose-50" : ""}`}
+                                    placeholder="Must be less than MRP"
+                                  />
+                                  {v.salePrice && Number(v.salePrice) >= Number(v.price) && (
+                                    <p className="text-[10px] text-rose-600 font-bold mt-1">⚠ Sale price must be less than MRP (₹{v.price})</p>
+                                  )}
+                                  {v.salePrice && Number(v.salePrice) > 0 && Number(v.salePrice) < Number(v.price) && (
+                                    <p className="text-[10px] text-emerald-600 font-semibold mt-1">
+                                      ✓ {Math.round((1 - Number(v.salePrice) / Number(v.price)) * 100)}% discount
+                                    </p>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                            {form.productType === "B2B" && (
+                              <div className="sm:col-span-2 rounded-xl bg-amber-50 border border-amber-100 px-3 py-2.5 text-xs text-amber-700 font-semibold">
+                                B2B product — price negotiated on quotation, not shown here
+                              </div>
+                            )}
+
+                            <div>
+                              <Label>Stock (units)</Label>
+                              <input type="number" min="0" value={v.stock} onChange={e => updateVariant(i, "stock", Number(e.target.value))} className={inputCls} />
+                            </div>
+                          </div>
+
+                          {/* Attribute values selector — for manual assignment / override */}
+                          {allAttributes.length > 0 && (
+                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-3">
+                              <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                                Attribute Values — Tagged to this variant
+                              </p>
+                              <p className="text-[10px] text-slate-400">Click to toggle which attribute values describe this variant option.</p>
+                              <div className="space-y-2">
+                                {allAttributes.map((attr: any) => (
+                                  <div key={attr.id} className="flex items-start gap-2">
+                                    <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide w-20 shrink-0 mt-1">{attr.name}</span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {(attr.values || []).map((val: any) => {
+                                        const selected = v.attributeValueIds.includes(val.id);
+                                        return (
+                                          <button
+                                            key={val.id}
+                                            type="button"
+                                            onClick={() => {
+                                              const ids = selected
+                                                ? v.attributeValueIds.filter((id: string) => id !== val.id)
+                                                : [...v.attributeValueIds, val.id];
+                                              updateVariant(i, "attributeValueIds", ids);
+                                            }}
+                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition ${selected ? "bg-sky-700 text-white border-sky-700" : "border-slate-200 text-slate-600 bg-white hover:border-sky-300"}`}
+                                          >
+                                            {val.value}
+                                          </button>
+                                        );
+                                      })}
+                                      {(attr.values || []).length === 0 && (
+                                        <span className="text-[10px] text-slate-400 italic">No values</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Variant images */}
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <Label>Variant Images (max 5)</Label>
+                              <span className="text-[10px] text-slate-400">Drag to reorder</span>
+                            </div>
+                            <ProductImageUploader
+                              images={(v.images || []).slice(0, 5)}
+                              onChange={imgs => updateVariant(i, "images", imgs.slice(0, 5))}
+                              showToast={showToast}
+                            />
+                          </div>
+
+                          {/* Technical Specifications */}
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <Label>Technical Specifications</Label>
+                              <button type="button" onClick={() => {
+                                updateVariant(i, "specification", { ...v.specification, "": "" });
+                              }} className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg hover:bg-sky-100 flex items-center gap-1">
+                                <IconPlus size={10} /> Add Row
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              {Object.entries(v.specification).map(([k, val], si) => (
+                                <div key={si} className="flex gap-2">
+                                  <input value={k} onChange={e => {
+                                    const s: Record<string, string> = {};
+                                    Object.entries(v.specification).forEach(([ok, ov], oi) => { s[oi === si ? e.target.value : ok] = String(ov); });
+                                    updateVariant(i, "specification", s);
+                                  }} placeholder="Label" className={`${inputCls} flex-1`} />
+                                  <input value={String(val)} onChange={e => {
+                                    updateVariant(i, "specification", { ...v.specification, [k]: e.target.value });
+                                  }} placeholder="Value" className={`${inputCls} flex-1`} />
+                                  <button type="button" onClick={() => {
+                                    const s = { ...v.specification }; delete s[k]; updateVariant(i, "specification", s);
+                                  }} className="text-slate-400 hover:text-rose-600"><IconX size={13} /></button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
-                );
-              })()}
-            </div>
-          )}
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── LOGISTICS ── */}
           {tab === "logistics" && (
@@ -1091,13 +1153,25 @@ export default function ProductForm({ showToast }: {
             </div>
           </div>
 
-          {/* Attributes manager */}
-          <AttributesManager
-            attributes={allAttributes}
-            onRefresh={() =>
-              apiFetch("/attributes").then(j => setAllAttributes(Array.isArray(j.data) ? j.data : [])).catch(() => { })
-            }
-          />
+          {/* Attributes quick link */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-2">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Attributes</p>
+            <p className="text-[11px] text-slate-500">Manage global attributes (Color, Size, Material) and their values.</p>
+            <a
+              href="/attributes"
+              className="flex items-center justify-between rounded-xl bg-sky-50 border border-sky-100 px-3 py-2.5 hover:bg-sky-100 transition group"
+            >
+              <span className="text-xs font-bold text-sky-700">Open Attributes Page</span>
+              <span className="text-sky-500 group-hover:translate-x-0.5 transition-transform">→</span>
+            </a>
+            {allAttributes.length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-1">
+                {allAttributes.map((a: any) => (
+                  <span key={a.id} className="text-[10px] font-bold rounded-full bg-slate-100 text-slate-600 px-2 py-0.5">{a.name}</span>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Quick image preview */}
           {form.images.length > 0 && (
@@ -1141,3 +1215,4 @@ function LogisticsFields({ weight, length, width, height, hsn, packageDetails, o
     </div>
   );
 }
+

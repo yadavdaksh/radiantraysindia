@@ -78,6 +78,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [leadMessage, setLeadMessage] = useState("");
   const [leadLoading, setLeadLoading] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
+  const [inquiryType, setInquiryType] = useState<"QUOTE" | "CUSTOMIZE">("QUOTE");
 
   // Reviews
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -201,7 +202,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         name: leadName, phone: leadPhone, email: leadEmail,
         company: leadCompany, message: leadMessage,
         productId: product.id, variantId: selectedVariant?.id || null,
-        source: "Website Product Inquiry",
+        source: inquiryType,
       });
       setLeadSuccess(true);
       setLeadName(""); setLeadPhone(""); setLeadEmail(""); setLeadCompany(""); setLeadMessage("");
@@ -508,18 +509,18 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
                 <div className="grid grid-cols-2 gap-3">
                   <a
-                    href={`https://wa.me/919876543210?text=Hi, I'm interested in ${encodeURIComponent(product.name)}. Please share a quote.`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 py-3.5 text-xs font-bold text-white transition shadow"
+                    href="#quote-form"
+                    onClick={() => setInquiryType("QUOTE")}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand hover:bg-brand-dark py-3.5 text-xs font-bold text-white transition shadow shadow-brand/20"
                   >
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.115 1.52 5.84L.06 23.617l5.95-1.557A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.815 9.815 0 01-5.006-1.37l-.36-.213-3.531.924.939-3.438-.235-.374A9.818 9.818 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182c5.422 0 9.818 4.396 9.818 9.818 0 5.422-4.396 9.818-9.818 9.818z"/></svg>
-                    WhatsApp Quote
+                    <FileText className="h-4 w-4" /> Quotate Now
                   </a>
                   <a
                     href="#quote-form"
+                    onClick={() => setInquiryType("CUSTOMIZE")}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-brand bg-white hover:bg-brand/5 py-3.5 text-xs font-bold text-brand transition"
                   >
-                    <PhoneCall className="h-4 w-4" /> Request Quote
+                    <Zap className="h-4 w-4" /> Request Customize
                   </a>
                 </div>
               </div>
@@ -576,13 +577,36 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       {/* ── B2B Quote Form ── */}
       {!isB2C && (
         <section id="quote-form" className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm mb-8">
+          <div className="flex border-b border-slate-100 mb-6">
+            <button
+              type="button"
+              onClick={() => { setInquiryType("QUOTE"); setLeadSuccess(false); }}
+              className={`flex-1 pb-3 text-sm font-bold border-b-2 transition ${inquiryType === "QUOTE" ? "border-brand text-brand" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+            >
+              Request Commercial Quotation
+            </button>
+            <button
+              type="button"
+              onClick={() => { setInquiryType("CUSTOMIZE"); setLeadSuccess(false); }}
+              className={`flex-1 pb-3 text-sm font-bold border-b-2 transition ${inquiryType === "CUSTOMIZE" ? "border-brand text-brand" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+            >
+              Request Customization
+            </button>
+          </div>
+
           <div className="flex items-start gap-4 mb-6">
             <div className="h-10 w-10 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Send className="h-5 w-5 text-brand" />
+              {inquiryType === "QUOTE" ? <FileText className="h-5 w-5 text-brand" /> : <Zap className="h-5 w-5 text-brand" />}
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-slate-950">Request Quotation & Technical Drawings</h3>
-              <p className="text-xs text-slate-500 mt-1">Submit specifications. Engineers respond within 24 hours with a detailed proposal.</p>
+              <h3 className="text-xl font-extrabold text-slate-950">
+                {inquiryType === "QUOTE" ? "Request Quotation & Drawings" : "Customization Specifications Request"}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                {inquiryType === "QUOTE" 
+                  ? "Submit specifications. Engineers respond within 24 hours with a detailed proposal."
+                  : "Submit custom requirements. Our technical drawing team will prepare layout plans."}
+              </p>
             </div>
           </div>
 
@@ -598,7 +622,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <form onSubmit={handleLeadSubmit} className="grid gap-4 sm:grid-cols-2">
               {([
                 { label: "Your Name *", type: "text", val: leadName, set: setLeadName, ph: "Full Name" },
-                { label: "Phone Number *", type: "tel", val: leadPhone, set: setLeadPhone, ph: "+91 98765 43210" },
+                { label: "Phone Number *", type: "tel", val: leadPhone, set: setLeadPhone, ph: "+91 731 815 8417" },
                 { label: "Email Address *", type: "email", val: leadEmail, set: setLeadEmail, ph: "work@company.com" },
                 { label: "Company Name *", type: "text", val: leadCompany, set: setLeadCompany, ph: "Company Pvt Ltd" },
               ] as any[]).map(({ label, type, val, set, ph }) => (
@@ -611,10 +635,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 </div>
               ))}
               <div className="sm:col-span-2 space-y-1">
-                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Requirements & Specifications *</label>
+                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                  {inquiryType === "QUOTE" ? "Requirements & Specifications *" : "Customization Requirements *"}
+                </label>
                 <textarea
                   required rows={4} value={leadMessage} onChange={(e) => setLeadMessage(e.target.value)}
-                  placeholder="Specify: ISO class, dimensions (LxWxH), material (SS 304/316), airflow type, UV fixtures, quantity, installation site..."
+                  placeholder={inquiryType === "QUOTE" 
+                    ? "Specify: ISO class, dimensions (LxWxH), material (SS 304/316), airflow type, UV fixtures, quantity, installation site..."
+                    : "Specify custom size, non-standard dimensions, airflow velocity tolerances, double-skin partitioning, pre-filter preferences, etc."}
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:border-brand focus:bg-white transition resize-none"
                 />
               </div>
@@ -623,7 +651,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   type="submit" disabled={leadLoading}
                   className="inline-flex items-center gap-2.5 rounded-2xl bg-brand px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-brand/20 hover:bg-brand-dark transition disabled:opacity-70"
                 >
-                  {leadLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : <><Send className="h-4 w-4" /> Submit Specifications Request</>}
+                  {leadLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : <><Send className="h-4 w-4" /> Submit {inquiryType === "QUOTE" ? "Quotation" : "Customization"} Request</>}
                 </button>
               </div>
             </form>

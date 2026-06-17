@@ -9,6 +9,7 @@ import {
   updateShiprocketSettings,
   listPickupAddresses,
   createPickupAddress,
+  getRates,
 } from "../controllers/shipment.controller.js";
 import { requireAuth, requirePermission } from "../middlewares/auth.middleware.js";
 
@@ -17,6 +18,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.post("/create", requirePermission("order", "update"), createShipment);
+router.get("/rates/:orderId", requirePermission("order", "read"), getRates);
 router.post("/cancel", requirePermission("order", "update"), cancelShipment);
 router.post("/sync", requirePermission("order", "update"), syncShipmentTracking);
 router.get("/label/:shipmentId", requirePermission("order", "read"), getShipmentLabel);

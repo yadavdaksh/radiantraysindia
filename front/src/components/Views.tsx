@@ -385,6 +385,163 @@ export function ProductImageUploader({ images, onChange, showToast }: ProductIma
   );
 }
 
+// --- Product Document (PDF) Uploader ---
+async function uploadPdfToR2(file: File): Promise<{ url: string; key: string; originalName: string }> {
+  const formData = new FormData();
+  formData.append("document", file);
+  formData.append("folder", "documents");
+  const res = await fetch(`${API_BASE}/uploads`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export interface ProductDoc {
+  title: string;
+  url: string;
+  key?: string;
+  mimeType?: string;
+}
+
+interface ProductDocUploaderProps {
+  documents: ProductDoc[];
+  onChange: (docs: ProductDoc[]) => void;
+  showToast: (msg: string, type?: "success" | "error" | "info") => void;
+}
+
+export function ProductDocUploader({ documents, onChange, showToast }: ProductDocUploaderProps) {
+  const [uploading, setUploading] = useState<number | null>(null);
+
+  const handleFileUpload = async (idx: number, file: File) => {
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      showToast("Only PDF files are allowed", "error");
+      return;
+    }
+    setUploading(idx);
+    try {
+      // Delete old file from R2 if replacing
+      const existing = documents[idx];
+      if (existing?.key) {
+        deleteFromR2(existing.key).catch(() => {});
+      }
+      const data = await uploadPdfToR2(file);
+      const updated = [...documents];
+      updated[idx] = { ...updated[idx], url: data.url, key: data.key };
+      onChange(updated);
+      showToast(`PDF uploaded: ${data.originalName}`, "success");
+    } catch (err: any) {
+      showToast(err.message || "PDF upload failed", "error");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleAddRow = () => {
+    onChange([...documents, { title: "", url: "", mimeType: "application/pdf" }]);
+  };
+
+  const handleRemove = async (idx: number) => {
+    const doc = documents[idx];
+    if (doc?.key) {
+      deleteFromR2(doc.key).catch(() => {});
+    }
+    onChange(documents.filter((_, i) => i !== idx));
+  };
+
+  const handleTitleChange = (idx: number, title: string) => {
+    const updated = [...documents];
+    updated[idx] = { ...updated[idx], title };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Technical Documents (PDF)</span>
+        <button
+          type="button"
+          onClick={handleAddRow}
+          className="text-[10px] font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-lg hover:bg-sky-100 transition flex items-center gap-1"
+        >
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          Add PDF
+        </button>
+      </div>
+
+      {documents.length === 0 && (
+        <div className="rounded-xl border border-dashed border-slate-200 p-5 text-center text-xs text-slate-400 italic">
+          No documents yet. Click "Add PDF" to attach technical data sheets.
+        </div>
+      )}
+
+      {documents.map((doc, idx) => (
+        <div key={idx} className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              value={doc.title}
+              onChange={e => handleTitleChange(idx, e.target.value)}
+              placeholder="Document title (e.g. Technical Data Sheet)"
+              className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition"
+            />
+            <button
+              type="button"
+              onClick={() => handleRemove(idx)}
+              className="text-slate-400 hover:text-rose-600 transition p-1"
+              title="Remove document"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+
+          {doc.url ? (
+            <div className="flex items-center gap-2 rounded-lg bg-white border border-emerald-200 px-3 py-2">
+              <svg className="h-4 w-4 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM11 18v-4l-1.5 1.5-.7-.7 2.7-2.7 2.7 2.7-.7.7L12 14v4h-1z"/></svg>
+              <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-slate-700 hover:text-sky-700 truncate flex-1">
+                {doc.url.split("/").pop() || "View PDF"}
+              </a>
+              <label className="cursor-pointer text-[10px] font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg hover:bg-sky-100 transition whitespace-nowrap relative">
+                {uploading === idx ? (
+                  <span className="flex items-center gap-1">
+                    <span className="animate-spin h-3 w-3 border-2 border-t-transparent border-sky-600 rounded-full" />
+                    Uploading...
+                  </span>
+                ) : "Replace PDF"}
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(idx, f); e.target.value = ""; }}
+                />
+              </label>
+            </div>
+          ) : (
+            <label className={`flex items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 cursor-pointer transition ${uploading === idx ? "border-sky-300 bg-sky-50" : "border-slate-300 hover:border-sky-400 hover:bg-sky-50/20"}`}>
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(idx, f); e.target.value = ""; }}
+              />
+              {uploading === idx ? (
+                <span className="flex items-center gap-2 text-xs text-sky-700 font-semibold">
+                  <span className="animate-spin h-4 w-4 border-2 border-t-transparent border-sky-600 rounded-full" />
+                  Uploading PDF to R2...
+                </span>
+              ) : (
+                <span className="text-xs text-slate-500 font-semibold">Click to upload PDF</span>
+              )}
+            </label>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // --- Reusable Generic CRUD Table Component ---
 interface ColumnDef<T> {
   key: string;
@@ -834,12 +991,18 @@ function CRUDTable<T extends { id: string; isActive?: boolean }>({
                     )}
 
                     {field.type === "textarea" && (
-                      <textarea
-                        value={formState[field.key] || ""}
-                        onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
-                        className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${hasErr ? "border-rose-500" : "border-slate-300"
-                          }`}
-                      />
+                      field.key === "message" && active === "contactForms" ? (
+                        <div className="w-full rounded-2xl border border-slate-200 p-4 text-sm bg-slate-50 text-slate-700 whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed shadow-inner font-normal">
+                          {formState[field.key]}
+                        </div>
+                      ) : (
+                        <textarea
+                          value={formState[field.key] || ""}
+                          onChange={(e) => setFormState({ ...formState, [field.key]: e.target.value })}
+                          className={`w-full rounded-2xl border p-3.5 text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition min-h-24 ${hasErr ? "border-rose-500" : "border-slate-300"
+                            }`}
+                        />
+                      )
                     )}
 
                     {field.type === "json" && (
@@ -1111,35 +1274,7 @@ export function ModuleView({
   // ==========================================
   // 5. RETURNS VIEW (Mock)
   // ==========================================
-  const [returns, setReturns] = useState<any[]>(() =>
-    getMockData("rr_adm_returns", [
-      { id: "ret-1", orderNumber: "ORD-88127", customerName: "Bose Pharma", reason: "Wrong Sash Type shipped", amount: 15400, status: "PENDING", date: new Date().toISOString() },
-      { id: "ret-2", orderNumber: "ORD-99210", customerName: "Helix Biotech", reason: "Damaged packaging frame", amount: 35000, status: "APPROVED", date: new Date().toISOString() },
-    ])
-  );
-
-  const handleSaveReturn = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = returns.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...returns, { ...item, id: `ret-${Date.now()}`, date: new Date().toISOString() }];
-    }
-    setReturns(updated);
-    saveMockData("rr_adm_returns", updated);
-  };
-
-  const handleDeleteReturn = async (id: string) => {
-    const updated = returns.filter((x) => x.id !== id);
-    setReturns(updated);
-    saveMockData("rr_adm_returns", updated);
-  };
-
-  const handleBulkDeleteReturn = async (ids: string[]) => {
-    const updated = returns.filter((x) => !ids.includes(x.id));
-    setReturns(updated);
-    saveMockData("rr_adm_returns", updated);
-  };
+  const returnsList = active === "returns" ? (data?.items || data || []) : [];
 
   // ==========================================
   // 6. REFUNDS VIEW (Mock)
@@ -1273,35 +1408,44 @@ export function ModuleView({
   };
 
   // ==========================================
-  // 10. CONTACT FORMS VIEW (Mock)
   // ==========================================
-  const [contacts, setContacts] = useState<any[]>(() =>
-    getMockData("rr_adm_contacts", [
-      { id: "con-1", name: "Dr. Vijay Prasad", email: "vijay@apollolabs.org", phone: "9123456789", subject: "Biosafety Cabinet Query", message: "Do you provide installation services in Visakhapatnam?", status: "NEW" },
-    ])
-  );
+  // 10. CONTACT FORMS VIEW (Connected to API)
+  // ==========================================
+  const contactsList = data || [];
 
   const handleSaveContact = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = contacts.map((x) => (x.id === item.id ? { ...x, ...item } : x));
+    const payload = {
+      name: item.name,
+      email: item.email,
+      phone: item.phone || "",
+      subject: item.subject || "General Inquiry",
+      message: item.message,
+      status: item.status || "NEW",
+    };
+    if (item.id && !item.id.startsWith("temp-") && !item.id.startsWith("con-")) {
+      await apiFetch(`/system/contact-submissions/${item.id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
     } else {
-      updated = [...contacts, { ...item, id: `con-${Date.now()}` }];
+      await apiFetch("/contact", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
     }
-    setContacts(updated);
-    saveMockData("rr_adm_contacts", updated);
+    loadResource("contactForms", "/system/contact-submissions?limit=50");
   };
 
   const handleDeleteContact = async (id: string) => {
-    const updated = contacts.filter((x) => x.id !== id);
-    setContacts(updated);
-    saveMockData("rr_adm_contacts", updated);
+    await apiFetch(`/system/contact-submissions/${id}`, { method: "DELETE" });
+    loadResource("contactForms", "/system/contact-submissions?limit=50");
   };
 
   const handleBulkDeleteContact = async (ids: string[]) => {
-    const updated = contacts.filter((x) => !ids.includes(x.id));
-    setContacts(updated);
-    saveMockData("rr_adm_contacts", updated);
+    for (const id of ids) {
+      await apiFetch(`/system/contact-submissions/${id}`, { method: "DELETE" });
+    }
+    loadResource("contactForms", "/system/contact-submissions?limit=50");
   };
 
   // ==========================================
@@ -1379,99 +1523,7 @@ export function ModuleView({
     loadResource("banners", "/content/banners");
   };
 
-  // ==========================================
-  // 13. SEO PAGES VIEW (Mock)
-  // ==========================================
-  const [seos, setSeos] = useState<any[]>(() =>
-    getMockData("rr_adm_seos", [
-      { id: "seo-1", pagePath: "/products/biosafety-cabinets", metaTitle: "Certified Biosafety Cabinets India", metaDescription: "Purchase double-filtered cleanroom bio safety cabinets", keywords: "HEPA, cleanroom, biosafety", canonicalUrl: "https://radiantraysindia.com/products/biosafety-cabinets" },
-    ])
-  );
 
-  const handleSaveSEO = async (item: any) => {
-    let updated;
-    if (item.id) {
-      updated = seos.map((x) => (x.id === item.id ? { ...x, ...item } : x));
-    } else {
-      updated = [...seos, { ...item, id: `seo-${Date.now()}` }];
-    }
-    setSeos(updated);
-    saveMockData("rr_adm_seos", updated);
-  };
-
-  const handleDeleteSEO = async (id: string) => {
-    const updated = seos.filter((x) => x.id !== id);
-    setSeos(updated);
-    saveMockData("rr_adm_seos", updated);
-  };
-
-  const handleBulkDeleteSEO = async (ids: string[]) => {
-    const updated = seos.filter((x) => !ids.includes(x.id));
-    setSeos(updated);
-    saveMockData("rr_adm_seos", updated);
-  };
-
-  // ==========================================
-  // 14. SITEMAP VIEW (Mock XML list)
-  // ==========================================
-  const [sitemaps, setSitemaps] = useState<any[]>(() =>
-    getMockData("rr_adm_sitemaps", [
-      { id: "sm-1", fileName: "sitemap-main.xml", urlCount: 12, lastGenerated: new Date().toLocaleString() },
-      { id: "sm-2", fileName: "sitemap-products.xml", urlCount: 45, lastGenerated: new Date().toLocaleString() },
-    ])
-  );
-  const [sitemapLoading, setSitemapLoading] = useState(false);
-
-  const triggerRegenerateSitemap = () => {
-    setSitemapLoading(true);
-    setTimeout(() => {
-      const updated = [
-        { id: "sm-1", fileName: "sitemap-main.xml", urlCount: 15, lastGenerated: new Date().toLocaleString() },
-        { id: "sm-2", fileName: "sitemap-products.xml", urlCount: 52, lastGenerated: new Date().toLocaleString() },
-        { id: "sm-3", fileName: "sitemap-industries.xml", urlCount: 8, lastGenerated: new Date().toLocaleString() },
-      ];
-      setSitemaps(updated);
-      saveMockData("rr_adm_sitemaps", updated);
-      setSitemapLoading(false);
-      showToast("Sitemap XML files successfully compiled and pushed to static hosting.");
-    }, 1500);
-  };
-
-  // ==========================================
-  // 15. ROBOTS VIEW (Mock Editor)
-  // ==========================================
-  const [robotsTxt, setRobotsTxt] = useState(() =>
-    getMockData(
-      "rr_adm_robots",
-      `User-agent: *\nDisallow: /admin\nDisallow: /auth\n\nSitemap: https://radiantraysindia.com/sitemap.xml`
-    )
-  );
-  const [robotsSaving, setRobotsSaving] = useState(false);
-
-  const handleSaveRobots = (e: React.FormEvent) => {
-    e.preventDefault();
-    setRobotsSaving(true);
-    setTimeout(() => {
-      saveMockData("rr_adm_robots", robotsTxt);
-      setRobotsSaving(false);
-      showToast("Robots.txt configuration published.");
-    }, 800);
-  };
-
-  // ==========================================
-  // 16. EMAIL LOGS VIEW (Mock outbound smtp logs)
-  // ==========================================
-  const [emails] = useState<any[]>(() =>
-    getMockData("rr_adm_emails", [
-      { id: "em-1", recipient: "purchasing@apollolabs.org", subject: "B2B Quote Request Confirmation", template: "b2b_lead_acknowledgement", status: "SENT", sentAt: new Date().toLocaleString() },
-      { id: "em-2", recipient: "dr.prasad@apollo.org", subject: "OTP Access Verification", template: "otp_validation_code", status: "SENT", sentAt: new Date().toLocaleString() },
-    ])
-  );
-
-  // ==========================================
-  // 17. ACTIVITY LOGS VIEW (Connected to API)
-  // ==========================================
-  const activityLogs = data || [];
 
   return (
     <div className="space-y-6">
@@ -1639,15 +1691,31 @@ export function ModuleView({
           title="Return"
           eyebrow="Sales Operations"
           description="Cleanroom returns requests database log."
-          items={returns}
+          items={returnsList}
           columns={[
             { key: "orderNumber", label: "Order Reference" },
             { key: "customerName", label: "Customer Name" },
-            { key: "reason", label: "Reason of Return" },
             {
-              key: "amount",
-              label: "Refunded Value",
-              render: (item: any) => `₹${Number(item.amount || 0).toLocaleString()}`,
+              key: "notes",
+              label: "Reason of Return",
+              render: (item: any) => {
+                const returnLog = item.statusHistory?.find((h: any) => h.notes?.includes("Return requested"));
+                return returnLog ? returnLog.notes.replace("Return requested by customer. Reason: ", "") : item.notes || "No reason specified";
+              }
+            },
+            {
+              key: "total",
+              label: "Order Total Value",
+              render: (item: any) => `₹${Number(item.total || 0).toLocaleString()}`,
+            },
+            {
+              key: "shiprocketStatus",
+              label: "Shiprocket Status",
+              render: (item: any) => (
+                <span className="rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase bg-sky-100 text-sky-800">
+                  {item.shiprocketStatus || "CREATED"}
+                </span>
+              ),
             },
             {
               key: "status",
@@ -1658,7 +1726,9 @@ export function ModuleView({
                     ? "bg-amber-100 text-amber-800"
                     : item.status === "APPROVED"
                       ? "bg-sky-100 text-sky-800"
-                      : "bg-emerald-100 text-emerald-800"
+                      : item.status === "CANCELLED"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-emerald-100 text-emerald-800"
                     }`}
                 >
                   {item.status}
@@ -1667,25 +1737,38 @@ export function ModuleView({
             },
           ]}
           formFields={[
-            { key: "orderNumber", label: "Order ID Reference", type: "text", required: true },
-            { key: "customerName", label: "Customer Name", type: "text", required: true },
-            { key: "reason", label: "Detailed Reason", type: "textarea", required: true },
-            { key: "amount", label: "Approved Refund Amount (₹)", type: "number" },
+            { key: "orderNumber", label: "Order ID Reference", type: "text", required: true, disabled: true },
+            { key: "customerName", label: "Customer Name", type: "text", required: true, disabled: true },
             {
               key: "status",
               label: "Return Status",
               type: "select",
               options: [
-                { value: "PENDING", label: "Pending Review" },
-                { value: "APPROVED", label: "Approved (Awaiting Item)" },
-                { value: "REJECTED", label: "Rejected Request" },
-                { value: "COMPLETED", label: "Completed & Refunded" },
+                { value: "CANCELLED", label: "Return Processing" },
+                { value: "REFUNDED", label: "Refunded Successfully" },
               ],
             },
           ]}
-          onSave={handleSaveReturn}
-          onDelete={handleDeleteReturn}
-          onBulkDelete={handleBulkDeleteReturn}
+          onSave={async (item: any) => {
+            await apiFetch(`/orders/${item.id}`, {
+              method: "PUT",
+              body: JSON.stringify({ status: item.status, reason: `Updated return status to ${item.status}` }),
+            });
+            showToast("Return status updated successfully.");
+            loadResource("returns", "/orders?returned=true&limit=100");
+          }}
+          onDelete={async (id: string) => {
+            await apiFetch(`/orders/${id}`, { method: "PUT", body: JSON.stringify({ status: "REFUNDED", reason: "Marked Refunded by Admin" }) });
+            showToast("Return marked as Refunded.");
+            loadResource("returns", "/orders?returned=true&limit=100");
+          }}
+          onBulkDelete={async (ids: string[]) => {
+            for (const id of ids) {
+              await apiFetch(`/orders/${id}`, { method: "PUT", body: JSON.stringify({ status: "REFUNDED" }) });
+            }
+            showToast("Returns marked as Refunded.");
+            loadResource("returns", "/orders?returned=true&limit=100");
+          }}
           searchField="orderNumber"
           searchPlaceholder="Search returns..."
           showToast={showToast}
@@ -1746,459 +1829,7 @@ export function ModuleView({
         />
       )}
 
-      {/* 7. CUSTOMERS VIEW */}
-      {active === "customers" && (
-        <div>
-          <CRUDTable
-            title="Customer"
-            eyebrow="CRM Registry"
-            description="Manage corporate cleanroom buyer profiles."
-            items={customers}
-            columns={[
-              { key: "name", label: "Corporate Buyer Name" },
-              { key: "email", label: "Registry Email" },
-              { key: "phone", label: "Phone Contact" },
-              {
-                key: "isVerified",
-                label: "MFA OTP Verified",
-                render: (item: any) => (
-                  <span className={`text-[10px] font-bold ${item.isVerified ? "text-emerald-600" : "text-rose-600"}`}>
-                    {item.isVerified ? "Verified" : "Unverified"}
-                  </span>
-                ),
-              },
-            ]}
-            formFields={[
-              { key: "name", label: "Company/Buyer Name", type: "text", required: true },
-              { key: "email", label: "Contact Email", type: "text", required: true },
-              { key: "phone", label: "Hotline Phone", type: "text" },
-              {
-                key: "status",
-                label: "Customer Account Status",
-                type: "select",
-                options: [
-                  { value: "Active", label: "Active Purchasing" },
-                  { value: "Inactive", label: "Blacklisted/Suspended" },
-                ],
-              },
-            ]}
-            onSave={handleSaveCustomer}
-            onDelete={handleDeleteCustomer}
-            onBulkDelete={handleBulkDeleteCustomer}
-            searchField="name"
-            searchPlaceholder="Search customer list..."
-            showToast={showToast}
-          />
-
-          {/* Quick detail overlay if custom drawer requested */}
-          {activeCustomerDetail && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-              <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl space-y-4">
-                <h4 className="font-bold text-slate-900">Buyer Details: {activeCustomerDetail.name}</h4>
-                <div className="text-xs space-y-2 text-slate-600">
-                  <p><strong>Email:</strong> {activeCustomerDetail.email}</p>
-                  <p><strong>Phone:</strong> {activeCustomerDetail.phone}</p>
-                  <p><strong>Verified Account:</strong> {activeCustomerDetail.isVerified ? "Yes" : "No"}</p>
-                </div>
-                <button
-                  onClick={() => setActiveCustomerDetail(null)}
-                  className="w-full rounded-2xl bg-slate-950 py-2.5 text-xs text-white"
-                >
-                  Close Detail Modal
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 8. ADDRESSES VIEW */}
-      {active === "addresses" && (
-        <CRUDTable
-          title="Customer Address"
-          eyebrow="Logistics DB"
-          description="Billing and shipping addresses registered under customers."
-          items={addresses}
-          columns={[
-            { key: "customerName", label: "Associated Customer" },
-            { key: "label", label: "Address Tag" },
-            { key: "addressLine1", label: "Address Line" },
-            { key: "city", label: "City / State" },
-            { key: "pincode", label: "Pincode Code" },
-          ]}
-          formFields={[
-            { key: "customerName", label: "Associated Buyer Name", type: "text", required: true },
-            { key: "label", label: "Address Label (e.g. Factory Office)", type: "text", required: true },
-            { key: "addressLine1", label: "Address line 1", type: "text", required: true },
-            { key: "city", label: "City", type: "text", required: true },
-            { key: "state", label: "State Region", type: "text", required: true },
-            { key: "pincode", label: "postal Code (Pincode)", type: "text", required: true },
-            { key: "country", label: "Country Destination", type: "text", required: true },
-            { key: "isDefault", label: "Is Primary Shipping Address", type: "checkbox" },
-          ]}
-          onSave={handleSaveAddress}
-          onDelete={handleDeleteAddress}
-          onBulkDelete={handleBulkDeleteAddress}
-          searchField="customerName"
-          searchPlaceholder="Search address list..."
-          showToast={showToast}
-        />
-      )}
-
-      {/* 9. WISHLIST VIEW */}
-      {active === "wishlist" && (
-        <CRUDTable
-          title="Wishlist Item"
-          eyebrow="Customer Insights"
-          description="Customer wishlist tracking report."
-          items={wishlists}
-          columns={[
-            { key: "customerName", label: "Customer Name" },
-            { key: "productName", label: "Bookmarked Product" },
-            { key: "dateAdded", label: "Saved Date" },
-          ]}
-          formFields={[
-            { key: "customerName", label: "Customer Account Name", type: "text", required: true },
-            { key: "productName", label: "Catalog Product Name", type: "text", required: true },
-          ]}
-          onSave={handleSaveWishlist}
-          onDelete={handleDeleteWishlist}
-          onBulkDelete={handleBulkDeleteWishlist}
-          searchField="customerName"
-          searchPlaceholder="Search wishlists..."
-          showToast={showToast}
-        />
-      )}
-
-      {/* 10. CONTACT FORMS VIEW */}
-      {active === "contactForms" && (
-        <CRUDTable
-          title="Inbound Submission"
-          eyebrow="Marketing Leads"
-          description="General contact submissions."
-          items={contacts}
-          columns={[
-            { key: "name", label: "Visitor Name" },
-            { key: "email", label: "Contact Info" },
-            { key: "subject", label: "Subject Header" },
-            { key: "message", label: "Message Copy" },
-            {
-              key: "status",
-              label: "Workflow Status",
-              render: (item: any) => (
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${item.status === "NEW" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"
-                    }`}
-                >
-                  {item.status}
-                </span>
-              ),
-            },
-          ]}
-          formFields={[
-            { key: "name", label: "Sender Name", type: "text", required: true },
-            { key: "email", label: "Sender Email", type: "text", required: true },
-            { key: "subject", label: "Subject", type: "text" },
-            { key: "message", label: "Message Body", type: "textarea", required: true },
-            {
-              key: "status",
-              label: "Workflow Status",
-              type: "select",
-              options: [
-                { value: "NEW", label: "Fresh Inbound" },
-                { value: "IN_PROGRESS", label: "Replying / Contacted" },
-                { value: "RESOLVED", label: "Resolved Ticket" },
-              ],
-            },
-          ]}
-          onSave={handleSaveContact}
-          onDelete={handleDeleteContact}
-          onBulkDelete={handleBulkDeleteContact}
-          searchField="name"
-          searchPlaceholder="Search submissions..."
-          showToast={showToast}
-        />
-      )}
-
-      {/* 11. NEWSLETTER VIEW */}
-      {active === "newsletter" && (
-        <CRUDTable
-          title="Newsletter Subscriber"
-          eyebrow="Marketing Channels"
-          description="Emails registered for automatic product catalog releases."
-          items={subscribers}
-          columns={[
-            { key: "email", label: "Subscriber Email Address" },
-            { key: "dateSubscribed", label: "Subscription Date" },
-          ]}
-          formFields={[
-            { key: "email", label: "Subscriber Email", type: "text", required: true },
-          ]}
-          onSave={handleSaveSubscriber}
-          onDelete={handleDeleteSubscriber}
-          onBulkDelete={handleBulkDeleteSubscriber}
-          searchField="email"
-          searchPlaceholder="Search email subscribers..."
-          showToast={showToast}
-        />
-      )}
-
-      {/* 12. BANNERS VIEW */}
-      {active === "banners" && (
-        <CRUDTable
-          title="Banner"
-          eyebrow="Marketing Content"
-          description="Configure marketing slider banners displayed on the client home screen."
-          items={bannersList}
-          columns={[
-            { key: "title", label: "Banner Main Title" },
-            { key: "subtitle", label: "Subheading Caption" },
-            { key: "linkUrl", label: "Redirect Action Link" },
-            { key: "sortOrder", label: "Slide Order Weight" },
-          ]}
-          formFields={[
-            { key: "title", label: "Banner Title Header", type: "text", },
-            { key: "subtitle", label: "Banner Subtitle Description", type: "text" },
-            {
-              key: "desktopImageUrl",
-              label: "Desktop Banner Background Image",
-              type: "image",
-              required: true,
-              dimensions: "Recommended: 1920x600 px (16:5)"
-            },
-            {
-              key: "mobileImageUrl",
-              label: "Mobile Banner Background Image",
-              type: "image",
-              required: true,
-              dimensions: "Recommended: 600x800 px (3:4)"
-            },
-            { key: "linkUrl", label: "CTA Redirect Path (e.g. /products)", type: "text" },
-            { key: "sortOrder", label: "Ordering Sort Weight", type: "number" },
-          ]}
-          onSave={handleSaveBanner}
-          onDelete={handleDeleteBanner}
-          onBulkDelete={handleBulkDeleteBanner}
-          searchField="title"
-          searchPlaceholder="Search banner campaigns..."
-          showToast={showToast}
-        />
-      )}
-
-      {/* 13. SEO PAGES VIEW */}
-      {active === "seoPages" && (
-        <CRUDTable
-          title="SEO Page"
-          eyebrow="SEO Meta Tags"
-          description="Metadata tags injected on client shell pages."
-          items={seos}
-          columns={[
-            { key: "pagePath", label: "URL Page Path" },
-            { key: "metaTitle", label: "Title Tag Content" },
-            { key: "metaDescription", label: "Description Tag Content" },
-            { key: "keywords", label: "Page Keywords" },
-          ]}
-          formFields={[
-            { key: "pagePath", label: "Static Web Path (e.g. /products/passbox)", type: "text", required: true },
-            { key: "metaTitle", label: "HTML Meta Title", type: "text", required: true },
-            { key: "metaDescription", label: "HTML Meta Description", type: "textarea", required: true },
-            { key: "keywords", label: "Meta Keywords (Comma-separated)", type: "text" },
-            { key: "canonicalUrl", label: "Canonical URL Path override", type: "text" },
-          ]}
-          onSave={handleSaveSEO}
-          onDelete={handleDeleteSEO}
-          onBulkDelete={handleBulkDeleteSEO}
-          searchField="pagePath"
-          searchPlaceholder="Search SEO pages..."
-          showToast={showToast}
-        />
-      )}
-
-      {/* 14. SITEMAP VIEW */}
-      {active === "sitemap" && (
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Sitemap XML Manager</h3>
-              <p className="text-xs text-slate-500 mt-1">Regenerate and publish Google indexing sitemaps.</p>
-            </div>
-            <button
-              onClick={triggerRegenerateSitemap}
-              disabled={sitemapLoading}
-              className="inline-flex items-center gap-2 rounded-2xl bg-sky-700 hover:bg-sky-800 px-5 py-3 text-xs font-semibold text-white transition shadow disabled:opacity-50"
-            >
-              {sitemapLoading ? <SpinnerIcon /> : null}
-              {sitemapLoading ? "Generating XML..." : "Regenerate & Publish Sitemap"}
-            </button>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            {sitemaps.map((sm) => (
-              <div key={sm.id} className="rounded-2xl border border-slate-200 p-4 bg-slate-50/50 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-mono text-xs font-bold text-slate-800 bg-slate-200/80 px-2 py-0.5 rounded">
-                    {sm.fileName}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-semibold">Live XML</span>
-                </div>
-                <div className="text-xs space-y-1 text-slate-600 pt-1">
-                  <p><strong>Total Indexed URLs:</strong> {sm.urlCount} paths</p>
-                  <p><strong>Last Compiled:</strong> {sm.lastGenerated}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 15. ROBOTS VIEW */}
-      {active === "robots" && (
-        <div className="rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-sm max-w-2xl space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-slate-900">Configure Robots.txt</h3>
-            <p className="text-xs text-slate-500 mt-1">Custom rule definitions regulating crawl engine access.</p>
-          </div>
-
-          <form onSubmit={handleSaveRobots} className="space-y-4">
-            <textarea
-              value={robotsTxt}
-              onChange={(e) => setRobotsTxt(e.target.value)}
-              className="w-full min-h-60 rounded-3xl border border-slate-300 p-5 font-mono text-sm outline-none bg-white focus:ring-4 focus:border-sky-400 ring-sky-100 transition shadow-inner"
-            />
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={robotsSaving}
-                className="inline-flex items-center gap-2 rounded-2xl bg-sky-700 hover:bg-sky-800 px-6 py-3 text-xs font-bold text-white transition shadow disabled:opacity-50"
-              >
-                {robotsSaving ? <SpinnerIcon /> : null}
-                {robotsSaving ? "Publishing..." : "Save & Publish Robots.txt"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* 16. EMAIL LOGS VIEW */}
-      {active === "emailLogs" && (
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-slate-900">SMTP Server Outbound Logs</h3>
-            <p className="text-xs text-slate-500 mt-1">Audit log of mail messages dispatched via Brevo SMTP Gateway.</p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                  <th className="py-3 px-2">Recipient Mail</th>
-                  <th className="py-3 px-2">Subject Header</th>
-                  <th className="py-3 px-2">Template Tag</th>
-                  <th className="py-3 px-2">Gateway Status</th>
-                  <th className="py-3 px-2">Time Dispatched</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {emails.map((em) => (
-                  <tr key={em.id} className="hover:bg-slate-50/50">
-                    <td className="py-3.5 px-2 font-bold text-slate-900">{em.recipient}</td>
-                    <td className="py-3.5 px-2">{em.subject}</td>
-                    <td className="py-3.5 px-2 font-mono text-[10px] text-slate-500 uppercase">{em.template}</td>
-                    <td className="py-3.5 px-2">
-                      <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-250 px-2 py-0.5 text-[9px] font-bold">
-                        {em.status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-2 text-slate-400">{em.sentAt}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* 17. ACTIVITY LOGS VIEW */}
-      {active === "activityLogs" && (
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-slate-900">Administrative Audit Logs</h3>
-            <p className="text-xs text-slate-500 mt-1">Audit log of administrative control actions.</p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                  <th className="py-3 px-2">Timestamp</th>
-                  <th className="py-3 px-2">Action Type</th>
-                  <th className="py-3 px-2">Operation Details</th>
-                  <th className="py-3 px-2">Model Target</th>
-                  <th className="py-3 px-2">Executed By</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {activityLogs.length > 0 ? (
-                  activityLogs.map((log: any) => (
-                    <tr key={log.id} className="hover:bg-slate-50/50">
-                      <td className="py-3.5 px-2 text-slate-400">{new Date(log.createdAt).toLocaleString()}</td>
-                      <td className="py-3.5 px-2">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase ${log.type === "LOGIN" || log.type === "LOGOUT"
-                            ? "bg-sky-100 text-sky-800"
-                            : log.type === "CREATE"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : log.type === "DELETE"
-                                ? "bg-rose-100 text-rose-800"
-                                : "bg-slate-200 text-slate-700"
-                            }`}
-                        >
-                          {log.type}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-2 font-bold text-slate-900">
-                        <p>{log.title}</p>
-                        {log.description && <p className="text-[10px] text-slate-400 font-normal mt-0.5">{log.description}</p>}
-                      </td>
-                      <td className="py-3.5 px-2 font-mono text-[10px] text-slate-500">
-                        {log.entityType ? `${log.entityType} (${log.entityId})` : "System"}
-                      </td>
-                      <td className="py-3.5 px-2 text-slate-500">
-                        {log.actor?.name || "Automated Task"} ({log.actor?.email || "system"})
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  // Default mock fallback
-                  [
-                    { id: "log-1", createdAt: new Date().toISOString(), type: "LOGIN", title: "Super admin login", description: "Successful console session from IP 192.168.1.10", entityType: "User", entityId: "user-1", actor: { name: "System Admin", email: "admin@radiantraysindia.com" } },
-                    { id: "log-2", createdAt: new Date().toISOString(), type: "CREATE", title: "Product Category added", description: "Biosafety Cabinets category added to catalog", entityType: "Category", entityId: "cat-1", actor: { name: "System Admin", email: "admin@radiantraysindia.com" } },
-                  ].map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/50">
-                      <td className="py-3.5 px-2 text-slate-400">{new Date(log.createdAt).toLocaleString()}</td>
-                      <td className="py-3.5 px-2">
-                        <span className="rounded-full bg-sky-100 text-sky-800 px-2.5 py-0.5 text-[9px] font-bold uppercase">
-                          {log.type}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-2 font-bold text-slate-900">
-                        <p>{log.title}</p>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">{log.description}</p>
-                      </td>
-                      <td className="py-3.5 px-2 font-mono text-[10px] text-slate-500">
-                        {log.entityType} ({log.entityId})
-                      </td>
-                      <td className="py-3.5 px-2 text-slate-500">
-                        {log.actor.name} ({log.actor.email})
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+

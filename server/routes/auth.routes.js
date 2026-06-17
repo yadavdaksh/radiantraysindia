@@ -9,6 +9,7 @@ import {
   customerLogin,
   customerRegister,
   customerVerifyOtp,
+  customerResendVerifyOtp,
   customerForgotPassword,
   customerResetPassword,
   changePassword,
@@ -36,6 +37,7 @@ router.post("/admin/reset-password", adminResetPassword);
 router.post("/customer/login", customerLogin);
 router.post("/customer/register", customerRegister);
 router.post("/customer/verify-otp", customerVerifyOtp);
+router.post("/customer/resend-otp", customerResendVerifyOtp);
 router.post("/customer/forgot-password", customerForgotPassword);
 router.post("/customer/reset-password", customerResetPassword);
 

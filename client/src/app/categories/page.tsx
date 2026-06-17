@@ -49,8 +49,12 @@ export default async function CategoriesPage() {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand to-brand-dark opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
             <div className="flex items-start gap-4 mb-4">
-              <div className="h-11 w-11 shrink-0 rounded-2xl bg-brand/10 flex items-center justify-center group-hover:bg-brand/15 transition">
-                <Layers className="h-5 w-5 text-brand" />
+              <div className="h-11 w-11 shrink-0 rounded-2xl bg-brand/10 flex items-center justify-center group-hover:bg-brand/15 overflow-hidden transition">
+                {cat.imageUrl ? (
+                  <img src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                ) : (
+                  <Layers className="h-5 w-5 text-brand" />
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="font-extrabold text-slate-950 text-base group-hover:text-brand transition leading-tight">
