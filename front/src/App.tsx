@@ -591,11 +591,14 @@ function App() {
       setBusy(false);
     }
   };
-
   const loadSession = async () => {
     try {
       const result = await apiFetch<{ user: SessionUser }>("/auth/me");
-      setSession(result.data.user);
+      if (result.data.user?.role === "CUSTOMER") {
+        setSession(null);
+      } else {
+        setSession(result.data.user);
+      }
     } catch (_) {
       setSession(null);
     } finally {

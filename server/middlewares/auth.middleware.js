@@ -3,34 +3,58 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { prisma } from "../config/db.js";
 import { ACCESS_COOKIE, REFRESH_COOKIE } from "../utils/token.js";
+const isAdminRequest = (req) => {
+  const referer = req.headers?.referer || "";
+  const origin = req.headers?.origin || "";
+  
+  if (
+    referer.includes("5173") || 
+    referer.includes("admin.radiantraysindia.com") || 
+    origin.includes("5173") || 
+    origin.includes("admin.radiantraysindia.com")
+  ) {
+    return true;
+  }
+  
+  const url = req.originalUrl || "";
+  if (
+    url.includes("/system/") ||
+    (url.includes("/orders") && !url.includes("/orders/mine")) ||
+    url.includes("/users") ||
+    url.includes("/roles") ||
+    url.includes("/permissions") ||
+    url.includes("/uploads")
+  ) {
+    return true;
+  }
+  
+  return false;
+};
 
 const resolveToken = (req, cookieName) => {
-  const isCustomerPath = (req.originalUrl.includes("/customer") && !req.originalUrl.includes("/system/")) || 
-                         req.originalUrl.includes("/cart") || 
-                         req.originalUrl.includes("/addresses") || 
-                         req.originalUrl.includes("/checkout") || 
-                         req.originalUrl.includes("/wishlist") ||
-                         req.originalUrl.includes("/reviews") ||
-                         req.originalUrl.includes("/orders/mine") ||
-                         (req.originalUrl.includes("/leads") && !req.headers.referer?.includes("5173") && !req.headers.origin?.includes("5173"));
+  const isAdmin = isAdminRequest(req);
   
   if (cookieName === ACCESS_COOKIE) {
-    if (isCustomerPath) {
-      return req.cookies?.customerAccessToken || req.cookies?.[cookieName] || req.headers?.authorization?.replace("Bearer ", "") || req.query?.token;
-    } else {
+    if (isAdmin) {
       return req.cookies?.adminAccessToken || req.cookies?.[cookieName] || req.headers?.authorization?.replace("Bearer ", "") || req.query?.token;
+    } else {
+      return req.cookies?.customerAccessToken || req.cookies?.[cookieName] || req.headers?.authorization?.replace("Bearer ", "") || req.query?.token;
     }
   }
 
   if (cookieName === REFRESH_COOKIE) {
-    if (isCustomerPath) {
-      return req.cookies?.customerRefreshToken || req.cookies?.[cookieName];
-    } else {
+    if (isAdmin) {
       return req.cookies?.adminRefreshToken || req.cookies?.[cookieName];
+    } else {
+      return req.cookies?.customerRefreshToken || req.cookies?.[cookieName];
     }
   }
 
-  return req.cookies?.[cookieName] || req.headers?.authorization?.replace("Bearer ", "") || req.query?.token;
+  if (isAdmin) {
+    return req.cookies?.adminAccessToken || req.cookies?.[cookieName] || req.headers?.authorization?.replace("Bearer ", "") || req.query?.token;
+  } else {
+    return req.cookies?.customerAccessToken || req.cookies?.[cookieName] || req.headers?.authorization?.replace("Bearer ", "") || req.query?.token;
+  }
 };
 
 const buildPermissionSet = (permissions = []) =>

@@ -49,18 +49,7 @@ export const setAuthCookies = (res, { accessToken, refreshToken }, isCustomer = 
       maxAge: refreshMaxAge,
     });
   }
-
-  // Set default cookies for fallback/compatibility
-  res.cookie(ACCESS_COOKIE, accessToken, {
-    ...authCookieOptions,
-    maxAge: accessMaxAge,
-  });
-  res.cookie(REFRESH_COOKIE, refreshToken, {
-    ...authCookieOptions,
-    maxAge: refreshMaxAge,
-  });
 };
-
 export const clearAuthCookies = (res) => {
   res.clearCookie("customerAccessToken", authCookieOptions);
   res.clearCookie("customerRefreshToken", authCookieOptions);
