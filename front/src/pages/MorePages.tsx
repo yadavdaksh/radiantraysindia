@@ -820,7 +820,7 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
             {([
               { label: "Full Name *", key: "name", type: "text", ph: "Admin Name" },
               { label: "Email *", key: "email", type: "email", ph: "admin@company.com" },
-              { label: "Phone", key: "phone", type: "tel", ph: "+91 731 815 8417" },
+              { label: "Phone", key: "phone", type: "tel", ph: "+91 92117 81378" },
               { label: modal === "create" ? "Password *" : "New Password (leave blank to keep)", key: "password", type: "password", ph: "••••••••" },
             ] as any[]).map(f => (
               <div key={f.key} className="space-y-1.5">

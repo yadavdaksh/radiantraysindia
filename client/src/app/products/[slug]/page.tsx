@@ -668,7 +668,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <form onSubmit={handleLeadSubmit} className="grid gap-4 sm:grid-cols-2">
               {([
                 { label: "Your Name *", type: "text", val: leadName, set: setLeadName, ph: "Full Name" },
-                { label: "Phone Number *", type: "tel", val: leadPhone, set: setLeadPhone, ph: "+91 731 815 8417" },
+                { label: "Phone Number *", type: "tel", val: leadPhone, set: setLeadPhone, ph: "+91 92117 81378" },
                 { label: "Email Address *", type: "email", val: leadEmail, set: setLeadEmail, ph: "work@company.com" },
                 { label: "Company Name *", type: "text", val: leadCompany, set: setLeadCompany, ph: "Company Pvt Ltd" },
               ] as any[]).map(({ label, type, val, set, ph }) => (

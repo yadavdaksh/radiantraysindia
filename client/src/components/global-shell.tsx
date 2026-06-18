@@ -469,9 +469,14 @@ export function GlobalShell({ children }: { children: ReactNode }) {
               <div className="flex flex-col gap-2 rounded-2xl bg-slate-50 p-4 text-sm">
                 <p className="font-semibold text-slate-900">Need specifications fast?</p>
                 <p className="text-slate-500">Call our direct hotline for immediate help.</p>
-                <a href="tel:+917318158417" className="mt-2 font-bold text-brand flex items-center gap-1.5">
-                  <Phone className="h-4 w-4" /> +91 731 815 8417
-                </a>
+                <div className="mt-2 flex flex-col gap-1.5">
+                  <a href="tel:+917318158417" className="font-bold text-brand flex items-center gap-1.5">
+                    <Phone className="h-4 w-4" /> +91 731 815 8417
+                  </a>
+                  <a href="tel:+919211781378" className="font-bold text-brand flex items-center gap-1.5 pl-5.5">
+                    +91 92117 81378
+                  </a>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -497,9 +502,12 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 and SS modular furniture. ISO 9001 and CE compliant manufacturing.
               </p>
               <div className="flex flex-col gap-2.5 text-xs text-slate-500 pt-2">
-                <span className="flex items-center gap-2">
-                  <Phone className="h-3.5 w-3.5 text-brand" />
-                  +91 731 815 8417
+                <span className="flex items-start gap-2">
+                  <Phone className="h-3.5 w-3.5 text-brand mt-0.5" />
+                  <span className="flex flex-col">
+                    <a href="tel:+917318158417" className="hover:text-brand transition">+91 731 815 8417</a>
+                    <a href="tel:+919211781378" className="hover:text-brand transition">+91 92117 81378</a>
+                  </span>
                 </span>
                 <span className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-brand" />

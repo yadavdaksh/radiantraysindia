@@ -80,9 +80,14 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Call Our Hotline</p>
-                  <a href="tel:+917318158417" className="text-sm font-semibold text-slate-900 hover:text-brand transition">
-                    +91 731 815 8417
-                  </a>
+                  <div className="flex flex-col">
+                    <a href="tel:+917318158417" className="text-sm font-semibold text-slate-900 hover:text-brand transition">
+                      +91 731 815 8417
+                    </a>
+                    <a href="tel:+919211781378" className="text-sm font-semibold text-slate-900 hover:text-brand transition">
+                      +91 92117 81378
+                    </a>
+                  </div>
                 </div>
               </div>
 

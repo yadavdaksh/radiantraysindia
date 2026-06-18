@@ -53,7 +53,7 @@ export default async function Home() {
     logo: "https://radiantraysindia.com/logo.png",
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+91-731-815-8417",
+      telephone: ["+91-731-815-8417", "+91-92117-81378"],
       contactType: "sales",
       email: "info@radiantraysindia.com",
       areaServed: "IN",

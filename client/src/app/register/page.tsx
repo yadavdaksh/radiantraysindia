@@ -101,7 +101,7 @@ export default function RegisterPage() {
             {([
               { key: "name", label: "Full Name", type: "text", ph: "Your full name", icon: User, auto: "name" },
               { key: "email", label: "Email Address", type: "email", ph: "you@company.com", icon: Mail, auto: "email" },
-              { key: "phone", label: "Phone Number", type: "tel", ph: "7318158417", icon: Phone, auto: "tel" },
+              { key: "phone", label: "Phone Number", type: "tel", ph: "9211781378", icon: Phone, auto: "tel" },
             ] as { key: keyof typeof form; label: string; type: string; ph: string; icon: any; auto: string }[]).map(f => (
               <div key={f.key} className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{f.label}</label>

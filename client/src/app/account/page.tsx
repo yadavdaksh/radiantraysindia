@@ -278,7 +278,7 @@ export default function AccountPage() {
                   <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Phone Number</label>
                   <input type="tel" value={profileForm.phone}
                     onChange={e => setProfileForm(p => ({ ...p, phone: e.target.value }))}
-                    placeholder="7318158417"
+                    placeholder="9211781378"
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-brand focus:bg-white focus:ring-1 focus:ring-brand transition" />
                 </div>
                 <button type="submit" disabled={profileLoading}
