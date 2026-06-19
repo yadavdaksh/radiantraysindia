@@ -6,7 +6,7 @@ import { SiteShell } from "@/components/site-shell";
 import { ProductCard } from "@/components/ProductCard";
 import { apiClient } from "@/lib/api-client";
 import { products as mockProducts, categories as mockCategories } from "@/lib/site-data";
-import { Search, SlidersHorizontal, CircleAlert, X } from "lucide-react";
+import { Search, SlidersHorizontal, CircleAlert, X, ChevronDown } from "lucide-react";
 import { useWishlist } from "@/contexts/wishlist-context";
 
 export default function ProductsPage() {
@@ -116,6 +116,8 @@ export default function ProductsPage() {
     return (b.id || "").localeCompare(a.id || "");
   });
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const activeFilters = [
     productType !== "ALL"        && { label: productType,             clear: () => setTypeAndSync("ALL") },
     selectedCategory !== "all"   && { label: selectedCategory,        clear: () => setCategoryAndSync("all") },
@@ -129,11 +131,19 @@ export default function ProductsPage() {
       title="Cleanroom Products"
       subtitle="Browse and filter our range of B2B equipment and B2C stainless steel modular furniture."
     >
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr] my-6">
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr] my-6">
 
         {/* ── Sidebar Filters ── */}
-        <aside className="space-y-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-5 shadow-sm sticky top-4">
+        <aside className="space-y-2">
+          {/* Mobile toggle */}
+          <button
+            className="lg:hidden w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm"
+            onClick={() => setSidebarOpen(o => !o)}
+          >
+            <span className="flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-brand" /> Filters {activeFilters.length > 0 && <span className="h-5 w-5 rounded-full bg-brand text-white text-[9px] font-extrabold flex items-center justify-center">{activeFilters.length}</span>}</span>
+            <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${sidebarOpen ? "rotate-180" : ""}`} />
+          </button>
+          <div className={`rounded-2xl border border-slate-200 bg-white p-5 space-y-5 shadow-sm lg:sticky lg:top-4 ${sidebarOpen ? "block" : "hidden lg:block"}`}>
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
               <SlidersHorizontal className="h-4 w-4 text-brand" />
               <h3 className="text-sm font-bold text-slate-900">Filters</h3>

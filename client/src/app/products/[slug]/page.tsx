@@ -78,6 +78,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [leadMessage, setLeadMessage] = useState("");
   const [leadLoading, setLeadLoading] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
+  const [leadError, setLeadError] = useState("");
   const [inquiryType, setInquiryType] = useState<"QUOTE" | "CUSTOMIZE">("QUOTE");
 
   // Reviews
@@ -225,7 +226,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       setLeadSuccess(true);
       setLeadName(""); setLeadPhone(""); setLeadEmail(""); setLeadCompany(""); setLeadMessage("");
     } catch (err: any) {
-      alert("Submission error: " + (err.message || "Unknown error"));
+      setLeadError(err.message || "Submission failed. Please try again.");
     } finally {
       setLeadLoading(false);
     }
@@ -246,6 +247,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     setTimeout(() => setReviewSuccess(false), 3000);
   };
 
+  const stripHtml = (html: string) =>
+    html ? html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : "";
+
   const breadcrumbSchema = {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
     itemListElement: [
@@ -256,7 +260,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   };
 
   return (
-    <SiteShell title={product.name} subtitle={product.shortDescription || "High-specification contamination control systems."}>
+    <SiteShell title={product.name} subtitle={stripHtml(product.shortDescription || "") || "High-specification contamination control systems."}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Breadcrumb */}
@@ -282,12 +286,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         {/* LEFT — Images */}
         <div className="space-y-3">
           {/* Main image */}
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm flex items-center justify-center min-h-[460px] lg:min-h-[540px] p-6 group">
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm flex items-center justify-center min-h-[280px] sm:min-h-[380px] lg:min-h-[460px] p-4 sm:p-6 group">
             {activeImage ? (
               <img
                 src={activeImage}
                 alt={product.name}
-                className="max-h-[420px] max-w-full object-contain transition duration-500 group-hover:scale-105"
+                className="max-h-[220px] sm:max-h-[320px] lg:max-h-[420px] max-w-full object-contain transition duration-500 group-hover:scale-105"
               />
             ) : (
               <div className="h-80 w-full rounded-2xl bg-gradient-to-br from-brand/8 to-slate-100 flex items-center justify-center text-slate-400 font-bold text-sm">
@@ -360,7 +364,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         <div className="space-y-5">
 
           {/* Product header card */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm space-y-5">
+          <div className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-7 shadow-sm space-y-5">
             <div>
               {product.categories?.[0] && (
                 <Link href={`/products?category=${product.categories[0].category?.slug}`} className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand hover:underline">
@@ -385,9 +389,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               </div>
             </div>
 
-            <p className="text-sm leading-7 text-slate-600 border-t border-slate-100 pt-4">
-              {product.description || "Durable cleanroom containment systems engineered for compliance and quality."}
-            </p>
+            <div
+              className="product-desc text-sm leading-7 text-slate-600 border-t border-slate-100 pt-4"
+              dangerouslySetInnerHTML={{
+                __html: product.description || "<p>Durable cleanroom containment systems engineered for compliance and quality.</p>",
+              }}
+            />
 
             {/* Features list */}
             {product.features?.length > 0 && (
@@ -478,7 +485,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 )}
 
                 {/* Qty + CTA */}
-                <div className="flex items-center gap-3 flex-wrap pt-1">
+                <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-3 pt-1">
                   <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden">
                     <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">−</button>
                     <span className="px-4 py-2.5 text-sm font-bold text-slate-900 border-x border-slate-200 min-w-12 text-center">{qty}</span>
@@ -553,7 +560,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <a
                     href="#quote-form"
                     onClick={() => setInquiryType("QUOTE")}
@@ -622,7 +629,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
       {/* ── B2B Quote Form ── */}
       {!isB2C && (
-        <section id="quote-form" className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm mb-8">
+        <section id="quote-form" className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm mb-8">
           <div className="flex border-b border-slate-100 mb-6">
             <button
               type="button"
@@ -692,7 +699,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:border-brand focus:bg-white transition resize-none"
                 />
               </div>
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 space-y-3">
+                {leadError && (
+                  <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700">{leadError}</div>
+                )}
                 <button
                   type="submit" disabled={leadLoading}
                   className="inline-flex items-center gap-2.5 rounded-2xl bg-brand px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-brand/20 hover:bg-brand-dark transition disabled:opacity-70"
@@ -706,7 +716,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       )}
 
       {/* ── Reviews Section ── */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm mb-8 space-y-7">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm mb-8 space-y-7">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
             <Star className="h-5 w-5 text-amber-500 fill-amber-500" />

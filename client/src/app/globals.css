@@ -42,3 +42,26 @@ a {
     text-wrap: balance;
   }
 }
+
+/* Rich HTML content from Jodit editor */
+.product-desc h1, .product-desc h2, .product-desc h3, .product-desc h4 {
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+.product-desc h1 { font-size: 1.25rem; }
+.product-desc h2 { font-size: 1.125rem; }
+.product-desc h3 { font-size: 1rem; }
+.product-desc p { margin-bottom: 0.75em; }
+.product-desc ul, .product-desc ol { padding-left: 1.5em; margin-bottom: 0.75em; }
+.product-desc ul { list-style-type: disc; }
+.product-desc ol { list-style-type: decimal; }
+.product-desc li { margin-bottom: 0.25em; }
+.product-desc strong, .product-desc b { font-weight: 700; color: #1e293b; }
+.product-desc a { color: var(--brand); text-decoration: underline; }
+.product-desc table { width: 100%; border-collapse: collapse; margin-bottom: 1em; font-size: 0.875rem; }
+.product-desc th, .product-desc td { border: 1px solid #e2e8f0; padding: 0.5em 0.75em; text-align: left; }
+.product-desc th { background: #f8fafc; font-weight: 700; }
+.product-desc img { max-width: 100%; height: auto; border-radius: 0.75rem; }
