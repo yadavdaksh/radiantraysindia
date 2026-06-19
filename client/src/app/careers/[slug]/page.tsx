@@ -38,7 +38,7 @@ export default function CareerDetailPage() {
       .then(r => setJob(r.data.data))
       .catch(() => router.replace("/careers"))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, router]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,7 +53,6 @@ export default function CareerDetailPage() {
       return;
     }
     setResumeFile(file);
-    setUploadedKey(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
