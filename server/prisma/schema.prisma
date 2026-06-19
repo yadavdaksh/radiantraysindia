@@ -758,3 +758,62 @@ model ShiprocketPickupAddress {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+}
+
+enum JobStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model Job {
+  id            String       @id @default(cuid())
+  title         String
+  slug          String       @unique
+  description   String
+  requirements  String?
+  location      String
+  type          JobType      @default(FULL_TIME)
+  salaryMin     Float?
+  salaryMax     Float?
+  qualification String?
+  experience    String?
+  department    String?
+  status        JobStatus    @default(ACTIVE)
+  applications  JobApplication[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model JobApplication {
+  id         String            @id @default(cuid())
+  jobId      String
+  job        Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name       String
+  email      String
+  phone      String
+  resumeUrl  String
+  coverLetter String?
+  status     ApplicationStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([jobId, status])
+}

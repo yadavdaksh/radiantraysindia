@@ -13,7 +13,7 @@ import {
   IconTarget, IconMail, IconNews, IconMessageCircle,
   IconBuildingFactory, IconPhoto, IconFlag,
   IconUser, IconShieldHalf, IconKey,
-  IconSettings, IconActivity,
+  IconSettings, IconActivity, IconBriefcase,
 } from "@tabler/icons-react";
 import { ModuleView } from "./components/Views";
 import ProductsPage from "./pages/Products";
@@ -27,7 +27,7 @@ import {
 } from "./pages/AdminPages";
 import {
   IndustriesPage, GalleryPage, BannersPage, RolesPage, UsersPage,
-  PermissionsPage, ActivityLogPage,
+  PermissionsPage, ActivityLogPage, CareersPage,
 } from "./pages/MorePages";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -57,6 +57,7 @@ type ModuleKey =
   | "roles"
   | "permissions"
   | "activity-logs"
+  | "careers"
   | "settings";
 
 type SessionUser = {
@@ -178,6 +179,7 @@ const sidebarSections: SidebarSection[] = [
       { key: "industries", label: "Industries", resource: "industry", emoji: "industries", icon: IconBuildingFactory },
       { key: "gallery", label: "Gallery", resource: "gallery", emoji: "gallery", icon: IconPhoto },
       { key: "banners", label: "Banners", resource: "banner", emoji: "banners", icon: IconFlag },
+      { key: "careers", label: "Careers / Jobs", resource: "career", emoji: "careers", icon: IconBriefcase },
     ],
   },
   {
@@ -542,7 +544,7 @@ function App() {
     "dashboard", "products", "categories", "variants", "attributes",
     "orders", "returns", "refunds", "coupons", "customers", "addresses", "wishlist",
     "leads", "contactForms", "newsletter", "testimonials", "industries", "gallery",
-    "banners", "users", "roles", "permissions", "activity-logs",
+    "banners", "careers", "users", "roles", "permissions", "activity-logs",
     "settings",
   ];
   const activeFromUrl = allKeys.includes(pathKey as ModuleKey) ? (pathKey as ModuleKey) : "dashboard";
@@ -691,6 +693,8 @@ function App() {
       users: ["users", "/system/users"],
       roles: ["roles", "/system/roles"],
       permissions: ["permissions", "/system/permissions"],
+      "activity-logs": ["activity-logs", "/system/activity-logs"],
+      careers: ["careers", "/careers/admin/jobs"],
       settings: ["settings", "/content/settings"],
     };
     const entry = map[active];
@@ -979,6 +983,7 @@ function App() {
             <Route path="/users" element={<UsersPage showToast={showToast} can={can} session={session} />} />
             <Route path="/permissions" element={<PermissionsPage can={can} />} />
             <Route path="/activity-logs" element={<ActivityLogPage />} />
+            <Route path="/careers" element={<CareersPage showToast={showToast} />} />
             <Route path="/orders" element={<OrdersPage showToast={showToast} />} />
             <Route path="/settings" element={<SettingsPage showToast={showToast} />} />
           </Routes>

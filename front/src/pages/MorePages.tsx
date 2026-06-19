@@ -9,7 +9,7 @@ import {
   IconBuildingFactory, IconPhoto, IconFlag, IconShieldHalf,
   IconUser, IconPlus, IconEdit, IconTrash, IconX, IconRefresh,
   IconSearch, IconCheck, IconKey, IconEye, IconEyeOff,
-  IconLock,
+  IconLock, IconBriefcase, IconMapPin, IconClock, IconUsers,
 } from "@tabler/icons-react";
 
 const inp = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-sky-500 focus:bg-white transition";
@@ -1015,6 +1015,330 @@ export function ActivityLogPage() {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── CAREERS (ADMIN) ──────────────────────────────────────────────────────────
+const JOB_TYPE_LABELS: Record<string, string> = {
+  FULL_TIME: "Full Time", PART_TIME: "Part Time", CONTRACT: "Contract",
+  INTERNSHIP: "Internship", REMOTE: "Remote",
+};
+const JOB_STATUS_COLORS: Record<string, string> = {
+  ACTIVE: "bg-emerald-100 text-emerald-700",
+  INACTIVE: "bg-amber-100 text-amber-700",
+  CLOSED: "bg-slate-100 text-slate-500",
+};
+const APP_STATUS_COLORS: Record<string, string> = {
+  PENDING: "bg-amber-100 text-amber-700",
+  REVIEWING: "bg-blue-100 text-blue-700",
+  SHORTLISTED: "bg-purple-100 text-purple-700",
+  REJECTED: "bg-red-100 text-red-600",
+  HIRED: "bg-emerald-100 text-emerald-700",
+};
+
+const emptyJob = {
+  title: "", description: "", requirements: "", location: "", type: "FULL_TIME",
+  salaryMin: "", salaryMax: "", qualification: "", experience: "", department: "", status: "ACTIVE",
+};
+
+export function CareersPage({ showToast }: { showToast: (m: string, t?: any) => void }) {
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [modal, setModal] = useState<null | "create" | any>(null);
+  const [form, setForm] = useState<any>(emptyJob);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [appsJob, setAppsJob] = useState<any>(null);
+  const [apps, setApps] = useState<any[]>([]);
+  const [appsLoading, setAppsLoading] = useState(false);
+
+  const load = (quiet = false) => {
+    if (!quiet) setLoading(true); else setRefreshing(true);
+    apiFetch("/careers/admin/jobs")
+      .then(j => setJobs(j.data || []))
+      .catch(e => showToast(e.message, "error"))
+      .finally(() => { setLoading(false); setRefreshing(false); });
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const openCreate = () => { setForm({ ...emptyJob }); setModal("create"); };
+  const openEdit = (job: any) => {
+    setForm({
+      title: job.title, description: job.description, requirements: job.requirements || "",
+      location: job.location, type: job.type, salaryMin: job.salaryMin ?? "",
+      salaryMax: job.salaryMax ?? "", qualification: job.qualification || "",
+      experience: job.experience || "", department: job.department || "", status: job.status,
+    });
+    setModal(job);
+  };
+
+  const save = async () => {
+    if (!form.title.trim() || !form.description.trim() || !form.location.trim()) {
+      showToast("Title, description and location are required", "error"); return;
+    }
+    setSaving(true);
+    try {
+      const body = {
+        ...form,
+        salaryMin: form.salaryMin !== "" ? Number(form.salaryMin) : null,
+        salaryMax: form.salaryMax !== "" ? Number(form.salaryMax) : null,
+      };
+      if (modal === "create") {
+        await apiFetch("/careers/admin/jobs", { method: "POST", body: JSON.stringify(body) });
+        showToast("Job created");
+      } else {
+        await apiFetch(`/careers/admin/jobs/${modal.id}`, { method: "PUT", body: JSON.stringify(body) });
+        showToast("Job updated");
+      }
+      setModal(null); load(true);
+    } catch (e: any) { showToast(e.message, "error"); }
+    finally { setSaving(false); }
+  };
+
+  const toggleStatus = async (job: any) => {
+    const newStatus = job.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    try {
+      await apiFetch(`/careers/admin/jobs/${job.id}`, { method: "PUT", body: JSON.stringify({ status: newStatus }) });
+      showToast(`Job ${newStatus === "ACTIVE" ? "activated" : "deactivated"}`);
+      load(true);
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const closeJob = async (job: any) => {
+    if (!confirm(`Close "${job.title}"? This will remove it from public listings.`)) return;
+    try {
+      await apiFetch(`/careers/admin/jobs/${job.id}`, { method: "DELETE" });
+      showToast("Job closed"); load(true);
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const viewApps = async (job: any) => {
+    setAppsJob(job); setApps([]); setAppsLoading(true);
+    try {
+      const j = await apiFetch(`/careers/admin/applications/${job.id}`);
+      setApps(j.data || []);
+    } catch (e: any) { showToast(e.message, "error"); }
+    finally { setAppsLoading(false); }
+  };
+
+  const updateAppStatus = async (appId: string, status: string) => {
+    try {
+      await apiFetch(`/careers/admin/applications/${appId}`, { method: "PUT", body: JSON.stringify({ status }) });
+      setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
+      showToast("Status updated");
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const filtered = jobs.filter(j => {
+    const matchSearch = !search || j.title.toLowerCase().includes(search.toLowerCase()) || j.location.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "ALL" || j.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  const f = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm((p: any) => ({ ...p, [k]: e.target.value }));
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-5">
+      <PageHeader title="Jobs & Careers" count={jobs.length} onRefresh={() => load(true)} refreshing={refreshing}>
+        <button onClick={openCreate}
+          className="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 transition">
+          <IconPlus size={14} /> Post Job
+        </button>
+      </PageHeader>
+
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search jobs…"
+            className="w-full pl-8 pr-3 h-9 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-sky-500 focus:bg-white transition" />
+        </div>
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+          className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-sky-500 focus:bg-white transition">
+          <option value="ALL">All Status</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+      </div>
+
+      {loading ? <Skeleton /> : filtered.length === 0 ? (
+        <Empty icon={IconBriefcase} msg="No jobs posted yet" />
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(job => (
+            <div key={job.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 className="font-extrabold text-slate-900 truncate">{job.title}</h3>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${JOB_STATUS_COLORS[job.status]}`}>
+                      {job.status}
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-sky-100 text-sky-700">
+                      {JOB_TYPE_LABELS[job.type] || job.type}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><IconMapPin size={11} />{job.location}</span>
+                    {job.department && <span className="flex items-center gap-1"><IconBriefcase size={11} />{job.department}</span>}
+                    {job.experience && <span className="flex items-center gap-1"><IconClock size={11} />{job.experience}</span>}
+                    <span className="flex items-center gap-1 font-semibold text-slate-600">
+                      <IconUsers size={11} />{job._count?.applications || 0} applicants
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button onClick={() => viewApps(job)} title="View Applications"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 transition">
+                    <IconUsers size={14} />
+                  </button>
+                  <button onClick={() => openEdit(job)} title="Edit"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 transition">
+                    <IconEdit size={14} />
+                  </button>
+                  <button onClick={() => toggleStatus(job)} title={job.status === "ACTIVE" ? "Deactivate" : "Activate"}
+                    className={`h-8 w-8 flex items-center justify-center rounded-lg border transition ${job.status === "ACTIVE" ? "border-amber-200 hover:bg-amber-50 text-amber-600" : "border-emerald-200 hover:bg-emerald-50 text-emerald-600"}`}>
+                    {job.status === "ACTIVE" ? <IconEyeOff size={14} /> : <IconEye size={14} />}
+                  </button>
+                  <button onClick={() => closeJob(job)} title="Close Job"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg border border-red-200 hover:bg-red-50 text-red-500 transition">
+                    <IconTrash size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {modal !== null && (
+        <Modal title={modal === "create" ? "Post New Job" : "Edit Job"} onClose={() => setModal(null)}>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Job Title *</label>
+              <input value={form.title} onChange={f("title")} placeholder="e.g. Senior Safety Officer" className={inp} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Location *</label>
+                <input value={form.location} onChange={f("location")} placeholder="e.g. Indore, MP" className={inp} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Department</label>
+                <input value={form.department} onChange={f("department")} placeholder="e.g. Operations" className={inp} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Job Type</label>
+                <select value={form.type} onChange={f("type")} className={inp}>
+                  {Object.entries(JOB_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                <select value={form.status} onChange={f("status")} className={inp}>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Min Salary (₹/yr)</label>
+                <input value={form.salaryMin} onChange={f("salaryMin")} type="number" placeholder="e.g. 300000" className={inp} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Max Salary (₹/yr)</label>
+                <input value={form.salaryMax} onChange={f("salaryMax")} type="number" placeholder="e.g. 600000" className={inp} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Experience</label>
+                <input value={form.experience} onChange={f("experience")} placeholder="e.g. 2-4 years" className={inp} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Qualification</label>
+                <input value={form.qualification} onChange={f("qualification")} placeholder="e.g. B.Tech / Diploma" className={inp} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Description *</label>
+              <textarea value={form.description} onChange={f("description")} rows={4}
+                placeholder="Describe the role, responsibilities and expectations…" className={inp} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Requirements</label>
+              <textarea value={form.requirements} onChange={f("requirements")} rows={3}
+                placeholder="Skills, certifications, or conditions required…" className={inp} />
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button onClick={() => setModal(null)} className="flex-1 h-10 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
+                Cancel
+              </button>
+              <button onClick={save} disabled={saving}
+                className="flex-1 h-10 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 disabled:opacity-50 transition">
+                {saving ? "Saving…" : modal === "create" ? "Post Job" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {appsJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4"
+          onClick={e => e.target === e.currentTarget && setAppsJob(null)}>
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
+              <div>
+                <h3 className="font-extrabold text-slate-900">Applications</h3>
+                <p className="text-xs text-slate-400">{appsJob.title}</p>
+              </div>
+              <button onClick={() => setAppsJob(null)}><IconX size={18} className="text-slate-400" /></button>
+            </div>
+            <div className="overflow-y-auto p-5">
+              {appsLoading ? (
+                <div className="space-y-3 animate-pulse">{[1,2,3].map(i => <div key={i} className="h-16 rounded-xl bg-slate-100" />)}</div>
+              ) : apps.length === 0 ? (
+                <p className="text-center py-12 text-slate-400 text-sm">No applications yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {apps.map(app => (
+                    <div key={app.id} className="rounded-xl border border-slate-200 p-3.5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-bold text-slate-800">{app.name}</p>
+                          <p className="text-xs text-slate-500">{app.email} · {app.phone}</p>
+                          <a href={app.resumeUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-xs text-sky-600 font-semibold hover:underline mt-1 inline-block">
+                            View Resume ↗
+                          </a>
+                          {app.coverLetter && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{app.coverLetter}</p>}
+                        </div>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${APP_STATUS_COLORS[app.status]}`}>
+                            {app.status}
+                          </span>
+                          <select value={app.status} onChange={e => updateAppStatus(app.id, e.target.value)}
+                            className="text-xs rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 outline-none">
+                            {Object.keys(APP_STATUS_COLORS).map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

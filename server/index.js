@@ -27,6 +27,7 @@ import wishlistRoutes from "./routes/wishlist.routes.js";
 import customerRoutes from "./routes/customer.routes.js";
 import couponRoutes from "./routes/coupon.routes.js";
 import attributeRoutes from "./routes/attribute.routes.js";
+import careerRoutes from "./routes/career.routes.js";
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/shipments", shipmentRoutes);
 app.use("/api/v1/coupons", couponRoutes);
 app.use("/api/v1/attributes", attributeRoutes);
+app.use("/api/v1/careers", careerRoutes);
 
 app.get("/health", async (_req, res) => {
   try {

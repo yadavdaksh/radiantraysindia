@@ -596,6 +596,11 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                     Refund & Returns Policy
                   </Link>
                 </li>
+                <li>
+                  <Link href="/careers" className="transition hover:text-brand">
+                    Careers
+                  </Link>
+                </li>
               </ul>
             </div>
 
