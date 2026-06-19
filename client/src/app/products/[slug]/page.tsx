@@ -565,27 +565,18 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <a
-                      href="#quote-form"
-                      onClick={() => setInquiryType("QUOTE")}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand hover:bg-brand-dark py-3.5 text-xs font-bold text-white transition shadow shadow-brand/20"
-                    >
-                      <FileText className="h-4 w-4" /> Get Quote
-                    </a>
-                    <a
-                      href="#quote-form"
-                      onClick={() => setInquiryType("CUSTOMIZE")}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-brand bg-white hover:bg-brand/5 py-3.5 text-xs font-bold text-brand transition"
-                    >
-                      <Zap className="h-4 w-4" /> Customize
-                    </a>
-                  </div>
+                <div className="flex flex-col gap-3">
+                  <a
+                    href="#quote-form"
+                    onClick={() => setInquiryType("QUOTE")}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand hover:bg-brand-dark py-3.5 text-sm font-bold text-white transition shadow shadow-brand/20"
+                  >
+                    <FileText className="h-4 w-4" /> Get Quote / Customize
+                  </a>
                   <a
                     href={`https://wa.me/919211781378?text=Hi%2C%20I%27m%20interested%20in%20${encodeURIComponent(product.name)}.%20Please%20share%20a%20quote.`}
                     target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 py-3.5 text-xs font-bold text-white transition shadow shadow-emerald-600/20"
+                    className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 py-3.5 text-sm font-bold text-white transition shadow shadow-emerald-600/20"
                   >
                     <svg className="h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -628,14 +619,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               });
             }
 
-            // Logistics rows
-            const lg = selectedVariant?.logistics || product.logistics;
-            if (lg) {
-              if (lg.weight)                    specRows.push({ label: "Weight", value: `${lg.weight} kg` });
-              if (lg.length && lg.width && lg.height)
-                specRows.push({ label: "Dimensions (L×W×H)", value: `${lg.length} × ${lg.width} × ${lg.height} cm` });
-              if (lg.hsnCode)                   specRows.push({ label: "HSN Code", value: lg.hsnCode });
-            }
+            // Logistics rows — flat fields on variant (no nested object)
+            const src = selectedVariant || (product.variants?.[0] ?? null);
+            if (src?.weight)                              specRows.push({ label: "Weight", value: `${src.weight} kg` });
+            if (src?.length && src?.width && src?.height) specRows.push({ label: "Dimensions (L×W×H)", value: `${src.length} × ${src.width} × ${src.height} cm` });
+            if (src?.hsnCode)                             specRows.push({ label: "HSN Code", value: src.hsnCode });
+            if (src?.packageDetails)                      specRows.push({ label: "Package Details", value: src.packageDetails });
 
             if (!specRows.length) return null;
 
