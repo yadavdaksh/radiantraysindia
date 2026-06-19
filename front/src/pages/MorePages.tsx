@@ -1069,8 +1069,8 @@ export function CareersPage({ showToast }: { showToast: (m: string, t?: any) => 
   const openEdit = (job: any) => {
     setForm({
       title: job.title, description: job.description, requirements: job.requirements || "",
-      location: job.location, type: job.type, salaryMin: job.salaryMin ?? "",
-      salaryMax: job.salaryMax ?? "", qualification: job.qualification || "",
+      location: job.location, type: job.type, salaryMin: job.salaryMin > 0 ? job.salaryMin : "",
+      salaryMax: job.salaryMax > 0 ? job.salaryMax : "", qualification: job.qualification || "",
       experience: job.experience || "", department: job.department || "", status: job.status,
     });
     setModal(job);

@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { GlobalShell } from "@/components/global-shell";
 import { apiClient } from "@/lib/api-client";
 import { toast } from "sonner";
 
@@ -103,21 +102,18 @@ export default function CareerDetailPage() {
 
   if (loading) {
     return (
-      <GlobalShell>
-        <div className="max-w-3xl mx-auto py-12 space-y-4 animate-pulse">
-          <div className="h-8 bg-slate-200 rounded-xl w-2/3" />
-          <div className="h-4 bg-slate-100 rounded-xl w-1/2" />
-          <div className="h-48 bg-slate-100 rounded-2xl mt-6" />
-        </div>
-      </GlobalShell>
+      <div className="max-w-3xl mx-auto py-12 space-y-4 animate-pulse">
+        <div className="h-8 bg-slate-200 rounded-xl w-2/3" />
+        <div className="h-4 bg-slate-100 rounded-xl w-1/2" />
+        <div className="h-48 bg-slate-100 rounded-2xl mt-6" />
+      </div>
     );
   }
 
   if (!job) return null;
 
   return (
-    <GlobalShell>
-      <div className="max-w-3xl mx-auto py-6 pb-16">
+    <div className="max-w-3xl mx-auto py-6 pb-16">
         {/* Back */}
         <Link href="/careers" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand transition mb-6">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -164,15 +160,15 @@ export default function CareerDetailPage() {
                 <p className="text-sm font-semibold text-slate-700">{job.qualification}</p>
               </div>
             )}
-            {(job.salaryMin || job.salaryMax) && (
+            {(job.salaryMin > 0 || job.salaryMax > 0) && (
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Salary</p>
                 <p className="text-sm font-semibold text-slate-700">
-                  {job.salaryMin && job.salaryMax
+                  {job.salaryMin > 0 && job.salaryMax > 0
                     ? `₹${(job.salaryMin / 100000).toFixed(1)}L – ₹${(job.salaryMax / 100000).toFixed(1)}L / yr`
-                    : job.salaryMin
+                    : job.salaryMin > 0
                     ? `From ₹${(job.salaryMin / 100000).toFixed(1)}L`
-                    : `Up to ₹${(job.salaryMax! / 100000).toFixed(1)}L`}
+                    : `Up to ₹${(job.salaryMax / 100000).toFixed(1)}L`}
                 </p>
               </div>
             )}
@@ -325,7 +321,6 @@ export default function CareerDetailPage() {
             </form>
           )}
         </div>
-      </div>
-    </GlobalShell>
+    </div>
   );
 }
