@@ -149,11 +149,16 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
   if (loading) {
     return (
-      <SiteShell title="Loading..." subtitle="Retrieving product details.">
-        <div className="animate-pulse space-y-6 my-8">
+      <div className="w-full animate-pulse">
+        <div className="mb-8 space-y-2 mt-4">
+          <div className="h-3 bg-slate-100 rounded w-24" />
+          <div className="h-9 bg-slate-100 rounded w-64" />
+          <div className="h-4 bg-slate-100 rounded w-96" />
+        </div>
+        <div className="space-y-6 my-8">
           <div className="h-5 bg-slate-100 rounded w-56" />
           <div className="grid gap-8 lg:grid-cols-2">
-            <div className="bg-slate-100 h-[480px] rounded-3xl" />
+            <div className="bg-slate-100 min-h-[280px] sm:min-h-[380px] lg:min-h-[460px] rounded-3xl" />
             <div className="space-y-4">
               <div className="h-4 bg-slate-100 rounded w-1/3" />
               <div className="h-10 bg-slate-100 rounded w-2/3" />
@@ -164,7 +169,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             </div>
           </div>
         </div>
-      </SiteShell>
+      </div>
     );
   }
 
