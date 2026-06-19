@@ -7,6 +7,8 @@ import { GlobalShell } from "@/components/global-shell";
 import { apiClient } from "@/lib/api-client";
 import { toast } from "sonner";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+
 const JOB_TYPE_LABELS: Record<string, string> = {
   FULL_TIME: "Full Time",
   PART_TIME: "Part Time",
@@ -15,7 +17,7 @@ const JOB_TYPE_LABELS: Record<string, string> = {
   REMOTE: "Remote",
 };
 
-const emptyForm = { name: "", email: "", phone: "", resumeUrl: "", coverLetter: "" };
+const emptyForm = { name: "", email: "", phone: "", coverLetter: "" };
 
 export default function CareerDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,9 +25,12 @@ export default function CareerDetailPage() {
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -35,9 +40,25 @@ export default function CareerDetailPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowed.includes(file.type)) {
+      toast.error("Only PDF or Word (.doc/.docx) files accepted");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File must be under 5 MB");
+      return;
+    }
+    setResumeFile(file);
+    setUploadedKey(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.resumeUrl.trim()) {
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -45,15 +66,35 @@ export default function CareerDetailPage() {
       toast.error("Enter a valid email address");
       return;
     }
+    if (!resumeFile) {
+      toast.error("Please attach your resume");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await apiClient.post(`/careers/${slug}/apply`, form);
+      // Step 1: Upload resume to R2
+      setUploading(true);
+      const fd = new FormData();
+      fd.append("resume", resumeFile);
+      const uploadRes = await fetch(`${API_URL}/careers/upload-resume`, {
+        method: "POST",
+        body: fd,
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.message || "Resume upload failed");
+      const resumeUrl: string = uploadData.data.url;
+      setUploading(false);
+
+      // Step 2: Submit application
+      await apiClient.post(`/careers/${slug}/apply`, { ...form, resumeUrl });
       setSubmitted(true);
       toast.success("Application submitted! We'll be in touch.");
     } catch (err: any) {
       toast.error(err.message || "Failed to submit application");
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
@@ -148,7 +189,7 @@ export default function CareerDetailPage() {
         {/* Description */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm mb-6">
           <h2 className="text-base font-extrabold text-slate-900 mb-3">About the Role</h2>
-          <div className="prose prose-sm prose-slate max-w-none whitespace-pre-wrap text-slate-600 leading-relaxed">
+          <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
             {job.description}
           </div>
         </div>
@@ -157,7 +198,7 @@ export default function CareerDetailPage() {
         {job.requirements && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm mb-6">
             <h2 className="text-base font-extrabold text-slate-900 mb-3">Requirements</h2>
-            <div className="prose prose-sm prose-slate max-w-none whitespace-pre-wrap text-slate-600 leading-relaxed">
+            <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
               {job.requirements}
             </div>
           </div>
@@ -166,7 +207,7 @@ export default function CareerDetailPage() {
         {/* Apply Form */}
         <div ref={formRef} className="rounded-2xl border border-brand/30 bg-white p-6 shadow-sm" id="apply-form">
           <h2 className="text-lg font-extrabold text-slate-900 mb-1">Apply for this Position</h2>
-          <p className="text-sm text-slate-500 mb-5">Fill in your details below. We'll review and get back to you.</p>
+          <p className="text-sm text-slate-500 mb-5">Fill in your details and attach your resume. We'll review and get back to you.</p>
 
           {submitted ? (
             <div className="py-10 text-center">
@@ -217,17 +258,46 @@ export default function CareerDetailPage() {
                 />
               </div>
 
+              {/* Resume Upload */}
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1.5">Resume Link *</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Resume / CV *</label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative flex items-center gap-3 rounded-xl border-2 border-dashed px-4 py-3.5 cursor-pointer transition ${
+                    resumeFile ? "border-brand/40 bg-brand/5" : "border-slate-200 bg-slate-50 hover:border-brand/30 hover:bg-brand/5"
+                  }`}
+                >
+                  <div className={`h-9 w-9 shrink-0 rounded-lg flex items-center justify-center ${resumeFile ? "bg-brand/10 text-brand" : "bg-slate-200 text-slate-500"}`}>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {resumeFile ? (
+                      <>
+                        <p className="text-sm font-semibold text-slate-800 truncate">{resumeFile.name}</p>
+                        <p className="text-xs text-slate-400">{(resumeFile.size / 1024).toFixed(0)} KB — click to change</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-slate-600">Click to upload resume</p>
+                        <p className="text-xs text-slate-400">PDF or Word, max 5 MB</p>
+                      </>
+                    )}
+                  </div>
+                  {resumeFile && (
+                    <button type="button"
+                      onClick={e => { e.stopPropagation(); setResumeFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-slate-200 hover:bg-red-100 hover:text-red-600 text-slate-500 transition text-xs">
+                      ✕
+                    </button>
+                  )}
+                </div>
                 <input
-                  type="url"
-                  value={form.resumeUrl}
-                  onChange={e => setForm(p => ({ ...p, resumeUrl: e.target.value }))}
-                  placeholder="Google Drive / Dropbox / LinkedIn link to your resume"
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 transition"
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Share a public link (Google Drive, Dropbox, or PDF URL)</p>
               </div>
 
               <div>
@@ -244,9 +314,14 @@ export default function CareerDetailPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full h-11 rounded-xl bg-brand text-white text-sm font-bold hover:bg-brand-dark disabled:opacity-50 transition shadow-sm"
+                className="w-full h-11 rounded-xl bg-brand text-white text-sm font-bold hover:bg-brand-dark disabled:opacity-50 transition shadow-sm flex items-center justify-center gap-2"
               >
-                {submitting ? "Submitting…" : "Submit Application"}
+                {submitting ? (
+                  <>
+                    <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    {uploading ? "Uploading resume…" : "Submitting…"}
+                  </>
+                ) : "Submit Application"}
               </button>
             </form>
           )}

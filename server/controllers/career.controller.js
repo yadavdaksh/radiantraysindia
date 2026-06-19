@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { logActivity } from "../utils/logActivity.js";
+import { createR2Key, uploadBufferToR2, deleteObjectFromR2 } from "../utils/r2.js";
 
 function toSlug(title) {
   return title
@@ -24,6 +25,34 @@ async function uniqueSlug(title, excludeId = null) {
   }
   return slug;
 }
+
+// ── Resume Upload (public) ────────────────────────────────────────────────────
+
+export const uploadResume = asyncHandler(async (req, res) => {
+  const file = req.files?.resume?.[0];
+  if (!file) throw new ApiError(400, "Resume file is required");
+
+  const allowed = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+  if (!allowed.includes(file.mimetype)) {
+    throw new ApiError(400, "Only PDF or Word documents are accepted");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new ApiError(400, "File must be under 5 MB");
+  }
+
+  const key = createR2Key("resumes", file.originalname);
+  const uploaded = await uploadBufferToR2({ buffer: file.buffer, key, contentType: file.mimetype });
+
+  res.json(new ApiResponsive(200, { url: uploaded.url, key: uploaded.key }, "Resume uploaded"));
+});
+
+export const deleteResume = asyncHandler(async (req, res) => {
+  const { key } = req.body;
+  if (!key) throw new ApiError(400, "Key required");
+  if (!key.startsWith("resumes/")) throw new ApiError(403, "Invalid key");
+  await deleteObjectFromR2(key);
+  res.json(new ApiResponsive(200, null, "Resume deleted"));
+});
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
