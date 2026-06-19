@@ -6,6 +6,8 @@ import { SiteShell } from "@/components/site-shell";
 import { apiClient } from "@/lib/api-client";
 import { getIndustryBySlug, products as mockProducts } from "@/lib/site-data";
 import { ArrowRight, CircleAlert, Heart } from "lucide-react";
+
+const stripHtml = (h: string) => h ? h.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : "";
 import { useWishlist } from "@/contexts/wishlist-context";
 
 export default function IndustryDetailPage({ params }: { params: { slug: string } }) {
@@ -131,7 +133,7 @@ export default function IndustryDetailPage({ params }: { params: { slug: string 
                       {prod.name}
                     </h3>
                     <p className="mt-2 text-xs text-slate-500 line-clamp-3 leading-relaxed">
-                      {prod.shortDescription || prod.summary || "High specification cleanroom systems."}
+                      {stripHtml(prod.shortDescription || prod.summary || "High specification cleanroom systems.")}
                     </p>
                   </div>
 

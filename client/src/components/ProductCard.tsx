@@ -9,6 +9,10 @@ interface ProductCardProps {
   size?: "sm" | "md";
 }
 
+function stripHtml(html: string) {
+  return html ? html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : "";
+}
+
 export function ProductCard({ prod, isInWishlist, toggleWishlist, size = "md" }: ProductCardProps) {
   const imageUrl = getProductImage(prod.slug, prod.images, prod.variants);
   const isB2C = (prod.productType || prod.type) === "B2C";
@@ -68,7 +72,7 @@ export function ProductCard({ prod, isInWishlist, toggleWishlist, size = "md" }:
           {prod.name}
         </h3>
         <p className="mt-1.5 text-xs text-slate-500 line-clamp-2 leading-relaxed flex-1">
-          {prod.shortDescription || prod.summary || "High-specification cleanroom containment system."}
+          {stripHtml(prod.shortDescription || prod.summary || "High-specification cleanroom containment system.")}
         </p>
 
         {/* Price / CTA row */}
