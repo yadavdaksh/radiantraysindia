@@ -55,7 +55,7 @@ export default async function Home() {
     logo: "https://radiantraysindia.com/logo.png",
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: ["+91-731-815-8417", "+91-92117-81378"],
+      telephone: "+91-92117-81378",
       contactType: "sales",
       email: "info@radiantraysindia.com",
       areaServed: "IN",
@@ -63,7 +63,7 @@ export default async function Home() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden">
+    <main className="min-h-screen overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -mt-8 -mb-20 lg:-mb-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
 
       {/* ── Hero ── */}
@@ -72,10 +72,10 @@ export default async function Home() {
       {/* ── Trust strip ── */}
       <div className="bg-brand/5 border-y border-brand/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center sm:justify-between divide-y sm:divide-y-0 sm:divide-x divide-brand/10">
+          <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between divide-x-0 sm:divide-x divide-brand/10">
             {TRUST_BADGES.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2 px-5 py-3.5 text-xs font-bold text-brand/80">
-                <Icon className="h-4 w-4 text-brand shrink-0" />
+              <div key={label} className="flex items-center gap-2 px-4 py-3 sm:px-5 sm:py-3.5 text-[11px] sm:text-xs font-bold text-brand/80 border-b sm:border-b-0 border-brand/10 last:border-b-0 [&:nth-child(2)]:border-b [&:nth-child(2)]:sm:border-b-0">
+                <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-brand shrink-0" />
                 {label}
               </div>
             ))}
@@ -85,9 +85,9 @@ export default async function Home() {
 
       {/* ── Categories ── */}
       {categories.length > 0 && (
-        <section className="bg-white py-12 sm:py-16">
+        <section className="bg-white py-12 sm:py-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 gap-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Product Ranges</span>
                 <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
@@ -99,12 +99,12 @@ export default async function Home() {
               </Link>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
               {categories.map((cat: any) => (
                 <Link
                   key={cat.slug}
                   href={`/products?category=${cat.slug}`}
-                  className="group rounded-2xl border border-slate-100 bg-slate-50/60 p-5 shadow-sm transition-all hover:bg-white hover:border-brand/25 hover:shadow-lg hover:-translate-y-0.5 duration-200 flex flex-col justify-between"
+                  className="group rounded-2xl border border-slate-100 bg-slate-50/60 p-3 sm:p-5 shadow-sm transition-all hover:bg-white hover:border-brand/25 hover:shadow-lg hover:-translate-y-0.5 duration-200 flex flex-col justify-between"
                 >
                   <div>
                     {cat.imageUrl && (
@@ -137,9 +137,9 @@ export default async function Home() {
 
       {/* ── New Arrivals ── */}
       {newArrivalProducts.length > 0 && (
-        <section className="bg-white py-12 sm:py-16 border-t border-slate-200/50">
+        <section className="bg-white py-12 sm:py-14 border-t border-slate-200/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 gap-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-emerald-600">New Arrivals</span>
                 <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
@@ -157,9 +157,9 @@ export default async function Home() {
 
       {/* ── Trending ── */}
       {trendingProducts.length > 0 && (
-        <section className="bg-slate-50 py-12 sm:py-16 border-t border-slate-200/50">
+        <section className="bg-slate-50 py-12 sm:py-14 border-t border-slate-200/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 gap-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-orange-500">Trending Now</span>
                 <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
@@ -177,9 +177,9 @@ export default async function Home() {
 
       {/* ── Featured Products ── */}
       {featuredProducts.length > 0 && (
-        <section className="bg-white py-12 sm:py-16 border-t border-slate-200/50">
+        <section className="bg-white py-12 sm:py-14 border-t border-slate-200/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 gap-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Featured Products</span>
                 <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
@@ -197,7 +197,7 @@ export default async function Home() {
 
       {/* ── Industries ── */}
       {industries.length > 0 && (
-        <section className="bg-white py-12 sm:py-16 border-t border-slate-200/50">
+        <section className="bg-white py-12 sm:py-14 border-t border-slate-200/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="space-y-1 mb-8">
               <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Sectors Served</span>
@@ -209,7 +209,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid gap-2 sm:gap-3 grid-cols-3 sm:grid-cols-3 lg:grid-cols-6">
               {industries.map((ind: any) => (
                 <Link
                   key={ind.slug}
@@ -241,7 +241,7 @@ export default async function Home() {
 
       {/* ── Testimonials ── */}
       {testimonials.length > 0 && (
-        <section className="bg-slate-50 py-12 sm:py-16 border-t border-slate-200/40">
+        <section className="bg-slate-50 py-12 sm:py-14 border-t border-slate-200/40">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="space-y-1 mb-8">
               <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Testimonials</span>
@@ -256,7 +256,7 @@ export default async function Home() {
 
       {/* ── Gallery ── */}
       {gallery.length > 0 && (
-        <section className="bg-white py-12 sm:py-16 border-t border-slate-200/40">
+        <section className="bg-white py-12 sm:py-14 border-t border-slate-200/40">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="space-y-1 mb-8">
               <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Gallery</span>
@@ -264,20 +264,20 @@ export default async function Home() {
                 Project Deliveries & Floor Deployments
               </h2>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
               {gallery.map((g: any, i: number) => (
                 <div key={i} className="group rounded-2xl border border-slate-100 bg-slate-50 overflow-hidden shadow-sm hover:shadow-lg duration-200 transition-all">
                   {g.imageUrl ? (
-                    <img src={g.imageUrl} alt={g.title} className="w-full h-44 object-cover group-hover:scale-105 transition duration-300" />
+                    <img src={g.imageUrl} alt={g.title} className="w-full h-32 sm:h-44 object-cover group-hover:scale-105 transition duration-300" />
                   ) : (
-                    <div className="h-44 bg-gradient-to-br from-brand/12 to-slate-200/60 flex items-center justify-center">
+                    <div className="h-32 sm:h-44 bg-gradient-to-br from-brand/12 to-slate-200/60 flex items-center justify-center">
                       <span className="text-xs font-bold text-brand/60">{g.category || "Installation"}</span>
                     </div>
                   )}
-                  <div className="p-4">
-                    <p className="text-xs font-extrabold uppercase tracking-wide text-brand/70">{g.category}</p>
-                    <h4 className="text-sm font-bold text-slate-900 mt-0.5">{g.title}</h4>
-                    {g.description && <p className="mt-1 text-xs text-slate-500 line-clamp-2">{g.description}</p>}
+                  <div className="p-2.5 sm:p-4">
+                    <p className="text-[9px] sm:text-xs font-extrabold uppercase tracking-wide text-brand/70">{g.category}</p>
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5 line-clamp-1">{g.title}</h4>
+                    {g.description && <p className="mt-1 text-[10px] sm:text-xs text-slate-500 line-clamp-1 sm:line-clamp-2">{g.description}</p>}
                   </div>
                 </div>
               ))}
@@ -287,9 +287,9 @@ export default async function Home() {
       )}
 
       {/* ── Founders teaser ── */}
-      <section className="bg-white py-12 sm:py-16 border-t border-slate-200/40">
+      <section className="bg-white py-12 sm:py-14 border-t border-slate-200/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 gap-3">
             <div className="space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Leadership</span>
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Meet the Founders</h2>
@@ -299,7 +299,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 max-w-3xl">
             {[
               {
                 name: "Shiwakshi Singh",
@@ -340,34 +340,34 @@ export default async function Home() {
       </section>
 
       {/* ── B2B CTA ── */}
-      <section className="bg-slate-50 py-12 sm:py-16 border-t border-slate-200/40">
+      <section className="bg-slate-50 py-12 sm:py-14 border-t border-slate-200/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-12 shadow-2xl">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-950 px-5 py-10 sm:px-8 sm:py-12 shadow-2xl">
             {/* Glow */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(3,95,150,0.35),transparent_65%)]" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(3,95,150,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(3,95,150,0.04)_1px,transparent_1px)] bg-[size:40px_40px]" />
-            <div className="relative grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="relative grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
               <div className="space-y-3">
                 <span className="inline-block text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand-light bg-brand/15 px-3 py-1 rounded-full">
                   Custom Engineering
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white leading-tight">
                   Need Custom Technical Specifications?
                 </h2>
-                <p className="text-sm text-slate-400 max-w-xl leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-400 max-w-xl leading-relaxed">
                   We engineer custom sizes, sash integrations, HEPA filter options, and materials (SS 304 / 316) to match your GMP audit specifications.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col xs:flex-row sm:flex-col md:flex-col gap-3 w-full md:w-auto">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3.5 text-sm font-bold text-white transition hover:bg-brand-dark shadow-lg shadow-brand/20 hover:-translate-y-0.5 duration-200"
+                  className="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brand-dark shadow-lg shadow-brand/20 hover:-translate-y-0.5 duration-200"
                 >
                   <PhoneCall className="mr-2 h-4 w-4" /> Speak to an Engineer
                 </Link>
                 <Link
                   href="/products"
-                  className="inline-flex items-center justify-center rounded-full border border-slate-700 bg-transparent px-7 py-3.5 text-sm font-bold text-slate-300 transition hover:border-brand hover:text-brand duration-200"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-700 bg-transparent px-6 py-3.5 text-sm font-bold text-slate-300 transition hover:border-brand hover:text-brand duration-200"
                 >
                   Browse Catalog
                 </Link>

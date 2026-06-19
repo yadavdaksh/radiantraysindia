@@ -22,12 +22,13 @@ export default function TestimonialsCarousel({ testimonials }: TestimonialsCarou
   const timer = useRef<NodeJS.Timeout | null>(null);
 
   // Determine items per page based on viewport
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [itemsPerPage, setItemsPerPage] = useState(1);
 
   useEffect(() => {
     function handleResize() {
-      // Mobile & Tablet: show 2 items, Desktop: show 3 items
-      if (window.innerWidth < 1024) {
+      if (window.innerWidth < 640) {
+        setItemsPerPage(1);
+      } else if (window.innerWidth < 1024) {
         setItemsPerPage(2);
       } else {
         setItemsPerPage(3);

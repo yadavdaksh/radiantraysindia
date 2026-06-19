@@ -13,7 +13,7 @@ import {
   IconTarget, IconMail, IconNews, IconMessageCircle,
   IconBuildingFactory, IconPhoto, IconFlag,
   IconUser, IconShieldHalf, IconKey,
-  IconSettings,
+  IconSettings, IconActivity,
 } from "@tabler/icons-react";
 import { ModuleView } from "./components/Views";
 import ProductsPage from "./pages/Products";
@@ -27,6 +27,7 @@ import {
 } from "./pages/AdminPages";
 import {
   IndustriesPage, GalleryPage, BannersPage, RolesPage, UsersPage,
+  PermissionsPage, ActivityLogPage,
 } from "./pages/MorePages";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -55,6 +56,7 @@ type ModuleKey =
   | "users"
   | "roles"
   | "permissions"
+  | "activity-logs"
   | "settings";
 
 type SessionUser = {
@@ -184,6 +186,7 @@ const sidebarSections: SidebarSection[] = [
       { key: "users", label: "Users", resource: "user", emoji: "users", icon: IconUser },
       { key: "roles", label: "Roles", resource: "role", emoji: "roles", icon: IconShieldHalf },
       { key: "permissions", label: "Permissions", resource: "permission", emoji: "permissions", icon: IconKey },
+      { key: "activity-logs", label: "Activity Log", resource: "dashboard", emoji: "activity-logs", icon: IconActivity },
       { key: "settings", label: "Settings", resource: "setting", emoji: "settings", icon: IconSettings },
     ],
   },
@@ -539,7 +542,7 @@ function App() {
     "dashboard", "products", "categories", "variants", "attributes",
     "orders", "returns", "refunds", "coupons", "customers", "addresses", "wishlist",
     "leads", "contactForms", "newsletter", "testimonials", "industries", "gallery",
-    "banners", "users", "roles", "permissions",
+    "banners", "users", "roles", "permissions", "activity-logs",
     "settings",
   ];
   const activeFromUrl = allKeys.includes(pathKey as ModuleKey) ? (pathKey as ModuleKey) : "dashboard";
@@ -974,6 +977,8 @@ function App() {
             <Route path="/banners" element={<BannersPage showToast={showToast} />} />
             <Route path="/roles" element={<RolesPage showToast={showToast} can={can} />} />
             <Route path="/users" element={<UsersPage showToast={showToast} can={can} session={session} />} />
+            <Route path="/permissions" element={<PermissionsPage can={can} />} />
+            <Route path="/activity-logs" element={<ActivityLogPage />} />
             <Route path="/orders" element={<OrdersPage showToast={showToast} />} />
             <Route path="/settings" element={<SettingsPage showToast={showToast} />} />
           </Routes>

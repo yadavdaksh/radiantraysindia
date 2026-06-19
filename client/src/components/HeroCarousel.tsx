@@ -101,7 +101,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Card — aspect matches 1600:560 on desktop, 768:400 on mobile */}
         <div
-          className="relative w-full rounded-3xl overflow-hidden shadow-xl aspect-[3/4] md:aspect-[1920/600]"
+          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl aspect-[4/3] sm:aspect-[16/7] md:aspect-[1920/600]"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -206,7 +206,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
                           {slide.subtitle && (
                             <motion.p
                               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
-                              className="text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed hidden sm:block"
+                              className="text-[11px] sm:text-sm text-white/75 max-w-xl leading-relaxed"
                             >
                               {slide.subtitle}
                             </motion.p>

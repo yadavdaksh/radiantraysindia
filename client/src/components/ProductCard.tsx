@@ -19,7 +19,7 @@ export function ProductCard({ prod, isInWishlist, toggleWishlist, size = "md" }:
   const basePrice = Number(prod.basePrice || 0);
   const salePrice = prod.salePrice ? Number(prod.salePrice) : null;
   const inWishlist = isInWishlist?.(prod.slug || prod.id);
-  const imgH = size === "sm" ? "h-40" : "h-52";
+  const imgH = size === "sm" ? "h-36 sm:h-40" : "h-40 sm:h-52";
 
   return (
     <Link

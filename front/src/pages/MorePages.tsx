@@ -9,6 +9,7 @@ import {
   IconBuildingFactory, IconPhoto, IconFlag, IconShieldHalf,
   IconUser, IconPlus, IconEdit, IconTrash, IconX, IconRefresh,
   IconSearch, IconCheck, IconKey, IconEye, IconEyeOff,
+  IconLock,
 } from "@tabler/icons-react";
 
 const inp = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-sky-500 focus:bg-white transition";
@@ -304,7 +305,7 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
   const save = async () => {
     const mainImg = form.desktopImageUrl || form.mobileImageUrl;
     if (!mainImg) { showToast("At least one image is required", "error"); return; }
-    
+
     const payload = {
       ...form,
       title: form.title.trim(),
@@ -590,7 +591,7 @@ export function RolesPage({ showToast, can }: { showToast: (m: string, t?: any) 
                   <p className="font-extrabold text-slate-900">{selected.label}</p>
                   <p className="text-xs text-slate-400">{permIds.length} of {perms.length} permissions selected</p>
                 </div>
-                {can("permission", "read") && (
+                {can("role", "update") && (
                   <button onClick={savePerms} disabled={savingPerms}
                     className="rounded-xl bg-sky-700 hover:bg-sky-800 px-4 py-2 text-xs font-bold text-white transition disabled:opacity-60">
                     {savingPerms ? "Saving…" : "Save Permissions"}
@@ -848,6 +849,172 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
           </div>
         </Modal>
       )}
+    </div>
+  );
+}
+
+// ── PERMISSIONS PAGE ──────────────────────────────────────────────────────────
+export function PermissionsPage({ can: _can }: { can: (r: string, a: string) => boolean }) {
+  const [perms, setPerms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const pp = await apiFetch("/system/permissions");
+      setPerms(pp.data || []);
+    } catch { /* handled gracefully */ }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const grouped: Record<string, any[]> = {};
+  perms
+    .filter(p => !search || p.resource.includes(search.toLowerCase()) || p.action.includes(search.toLowerCase()))
+    .forEach((p: any) => { if (!grouped[p.resource]) grouped[p.resource] = []; grouped[p.resource].push(p); });
+
+  return (
+    <div className="space-y-5">
+      <PageHeader title="System Permissions" count={perms.length} onRefresh={load} refreshing={loading} />
+
+      <div className="relative max-w-xs">
+        <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Filter by resource or action…"
+          className="w-full rounded-xl border border-slate-200 bg-white pl-8 pr-3 py-2 text-xs outline-none focus:border-sky-500 transition" />
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+          <IconLock size={14} className="text-slate-400" />
+          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Permission Matrix</span>
+        </div>
+        {loading ? (
+          <div className="p-5"><Skeleton /></div>
+        ) : Object.keys(grouped).length === 0 ? (
+          <Empty icon={IconKey} msg="No permissions found" />
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {Object.entries(grouped).map(([resource, pList]) => (
+              <div key={resource} className="flex flex-wrap items-center gap-2 px-5 py-3.5">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 min-w-[140px]">{resource}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {pList.map((p: any) => (
+                    <span key={p.id} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-bold text-slate-700">
+                      <IconCheck size={9} className="text-emerald-500" />
+                      {p.action}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-800">
+        <strong>Note:</strong> Permissions are seeded during server setup. Assign permissions to roles via the <strong>Roles</strong> page.
+      </div>
+    </div>
+  );
+}
+
+// ── ACTIVITY LOG PAGE ─────────────────────────────────────────────────────────
+const TYPE_COLORS: Record<string, string> = {
+  CREATE: "bg-emerald-100 text-emerald-700",
+  UPDATE: "bg-sky-100 text-sky-700",
+  DELETE: "bg-rose-100 text-rose-700",
+  LOGIN: "bg-violet-100 text-violet-700",
+  LOGOUT: "bg-slate-100 text-slate-600",
+  SYSTEM: "bg-amber-100 text-amber-700",
+};
+
+export function ActivityLogPage() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch("/system/activity-logs");
+      setLogs(res.data || []);
+    } catch { /* handled gracefully */ }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const filtered = logs.filter(l => {
+    const matchSearch = !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.actor?.name?.toLowerCase().includes(search.toLowerCase()) || l.entityType?.toLowerCase().includes(search.toLowerCase());
+    const matchType = typeFilter === "ALL" || l.type === typeFilter;
+    return matchSearch && matchType;
+  });
+
+  return (
+    <div className="space-y-5">
+      <PageHeader title="Activity Log" count={logs.length} onRefresh={load} refreshing={loading} />
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search logs…"
+            className="rounded-xl border border-slate-200 bg-white pl-8 pr-3 py-2 text-xs outline-none focus:border-sky-500 transition w-56" />
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {["ALL", "CREATE", "UPDATE", "DELETE", "LOGIN", "SYSTEM"].map(t => (
+            <button key={t} onClick={() => setTypeFilter(t)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase transition border ${typeFilter === t ? "bg-sky-700 text-white border-sky-700" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}>
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                <th className="text-left px-4 py-3 font-extrabold uppercase tracking-wider text-slate-500 w-28">Type</th>
+                <th className="text-left px-4 py-3 font-extrabold uppercase tracking-wider text-slate-500">Action</th>
+                <th className="text-left px-4 py-3 font-extrabold uppercase tracking-wider text-slate-500 hidden sm:table-cell w-28">Entity</th>
+                <th className="text-left px-4 py-3 font-extrabold uppercase tracking-wider text-slate-500 hidden md:table-cell w-36">Actor</th>
+                <th className="text-left px-4 py-3 font-extrabold uppercase tracking-wider text-slate-500 w-36">When</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400">Loading…</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={5} className="px-4 py-12 text-center text-slate-400">No activity logs found</td></tr>
+              ) : filtered.map((log: any) => (
+                <tr key={log.id} className="hover:bg-slate-50/60 transition">
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${TYPE_COLORS[log.type] || "bg-slate-100 text-slate-600"}`}>
+                      {log.type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-slate-800 max-w-[260px] truncate">{log.title}</td>
+                  <td className="px-4 py-3 text-slate-500 hidden sm:table-cell">
+                    {log.entityType && <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">{log.entityType}</span>}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 hidden md:table-cell">
+                    {log.actor ? <span className="font-semibold">{log.actor.name}</span> : <span className="text-slate-400">System</span>}
+                  </td>
+                  <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                    {new Date(log.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

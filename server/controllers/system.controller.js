@@ -7,6 +7,7 @@ import { createSlug } from "../helpers/Slug.js";
 
 import { leadService } from "../services/lead.service.js";
 import { validatePassword } from "../helpers/validatePassword.js";
+import { logActivity } from "../utils/logActivity.js";
 
 export const listUsers = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
@@ -32,6 +33,7 @@ export const createUser = asyncHandler(async (req, res) => {
       phone: phone || null,
     },
   });
+  logActivity({ type: "CREATE", title: `User created: ${name}`, entityType: "user", entityId: user.id, actorId: req.user?.id, metadata: { email } });
   res.status(201).json(new ApiResponsive(201, user, "User created"));
 });
 
@@ -54,6 +56,7 @@ export const updateUser = asyncHandler(async (req, res) => {
   }
 
   const user = await prisma.user.update({ where: { id }, data });
+  logActivity({ type: "UPDATE", title: `User updated: ${user.name}`, entityType: "user", entityId: id, actorId: req.user?.id });
   res.json(new ApiResponsive(200, user, "User updated"));
 });
 
@@ -91,6 +94,7 @@ export const createRole = asyncHandler(async (req, res) => {
     },
   });
 
+  logActivity({ type: "CREATE", title: `Role created: ${role.label}`, entityType: "role", entityId: role.id, actorId: req.user?.id });
   res.status(201).json(new ApiResponsive(201, role, "Role created"));
 });
 
@@ -108,6 +112,7 @@ export const updateRole = asyncHandler(async (req, res) => {
     },
   });
 
+  logActivity({ type: "UPDATE", title: `Role updated: ${updated.label}`, entityType: "role", entityId: id, actorId: req.user?.id });
   res.json(new ApiResponsive(200, updated, "Role updated"));
 });
 
@@ -146,12 +151,14 @@ export const assignPermissionsToRole = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Role and permissions are required");
   }
 
+  const role = await prisma.role.findUnique({ where: { id: roleId } });
   await prisma.rolePermission.deleteMany({ where: { roleId } });
   await prisma.rolePermission.createMany({
     data: permissionIds.map((permissionId) => ({ roleId, permissionId })),
     skipDuplicates: true,
   });
 
+  logActivity({ type: "UPDATE", title: `Permissions updated for role: ${role?.label || roleId}`, entityType: "role", entityId: roleId, actorId: req.user?.id, metadata: { permissionCount: permissionIds.length } });
   res.json(new ApiResponsive(200, null, "Permissions assigned"));
 });
 

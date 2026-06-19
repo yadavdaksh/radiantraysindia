@@ -2,6 +2,7 @@ import { categoryService } from "../services/category.service.js";
 import { prisma } from "../config/db.js";
 import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { logActivity } from "../utils/logActivity.js";
 
 export const listCategories = asyncHandler(async (req, res) => {
   const result = await categoryService.list();
@@ -10,16 +11,19 @@ export const listCategories = asyncHandler(async (req, res) => {
 
 export const createCategory = asyncHandler(async (req, res) => {
   const category = await categoryService.create(req.body);
+  logActivity({ type: "CREATE", title: `Category created: ${category.name}`, entityType: "category", entityId: category.id, actorId: req.user?.id });
   res.status(201).json(new ApiResponsive(201, category, "Category created successfully"));
 });
 
 export const updateCategory = asyncHandler(async (req, res) => {
   const category = await categoryService.update(req.params.id, req.body);
+  logActivity({ type: "UPDATE", title: `Category updated: ${category.name}`, entityType: "category", entityId: category.id, actorId: req.user?.id });
   res.json(new ApiResponsive(200, category, "Category updated successfully"));
 });
 
 export const deleteCategory = asyncHandler(async (req, res) => {
   await categoryService.delete(req.params.id);
+  logActivity({ type: "DELETE", title: `Category deleted: ${req.params.id}`, entityType: "category", entityId: req.params.id, actorId: req.user?.id });
   res.json(new ApiResponsive(200, null, "Category deleted successfully"));
 });
 

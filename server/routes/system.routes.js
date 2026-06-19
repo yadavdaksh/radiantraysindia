@@ -40,7 +40,7 @@ router.delete("/roles/:id", requireAuth, requirePermission("role", "delete"), de
 router.post(
   "/roles/permissions",
   requireAuth,
-  requirePermission("permission", "read"),
+  requirePermission("role", "update"),
   assignPermissionsToRole
 );
 

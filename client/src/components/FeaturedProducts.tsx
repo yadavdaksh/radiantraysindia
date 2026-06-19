@@ -47,7 +47,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
 
   // ≤5 products — responsive grid: 5 big on xl, 3 on lg, 2 on sm
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {products.map((prod) => (
         <ProductCard key={prod.slug} prod={prod} />
       ))}
