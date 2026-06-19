@@ -5,7 +5,7 @@ import HeroCarousel from "@/components/HeroCarousel";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4002/api/v1";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
 async function getHomeData() {
   try {
@@ -20,6 +20,8 @@ async function getHomeData() {
     console.warn("Home API unavailable, using fallbacks:", error instanceof Error ? error.message : "Unknown error");
     return {
       featuredProducts: mockProducts.slice(0, 4),
+      newArrivalProducts: [],
+      trendingProducts: [],
       categories: mockCategories,
       industries: mockIndustries,
       testimonials: mockTestimonials,
@@ -43,7 +45,7 @@ const TRUST_BADGES = [
 
 export default async function Home() {
   const data = await getHomeData();
-  const { featuredProducts = [], categories = [], industries = [], testimonials = [], gallery = [], banners = [] } = data;
+  const { featuredProducts = [], newArrivalProducts = [], trendingProducts = [], categories = [], industries = [], testimonials = [], gallery = [], banners = [] } = data;
 
   const orgSchema = {
     "@context": "https://schema.org",
@@ -133,9 +135,49 @@ export default async function Home() {
         </section>
       )}
 
+      {/* ── New Arrivals ── */}
+      {newArrivalProducts.length > 0 && (
+        <section className="bg-white py-12 sm:py-16 border-t border-slate-200/50">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+              <div className="space-y-1">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-emerald-600">New Arrivals</span>
+                <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                  Just Launched
+                </h2>
+              </div>
+              <Link href="/products" className="text-xs font-bold text-brand hover:underline inline-flex items-center gap-1 shrink-0">
+                All Products <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <FeaturedProducts products={newArrivalProducts} />
+          </div>
+        </section>
+      )}
+
+      {/* ── Trending ── */}
+      {trendingProducts.length > 0 && (
+        <section className="bg-slate-50 py-12 sm:py-16 border-t border-slate-200/50">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
+              <div className="space-y-1">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-orange-500">Trending Now</span>
+                <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                  Most Inquired Products
+                </h2>
+              </div>
+              <Link href="/products" className="text-xs font-bold text-brand hover:underline inline-flex items-center gap-1 shrink-0">
+                All Products <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <FeaturedProducts products={trendingProducts} />
+          </div>
+        </section>
+      )}
+
       {/* ── Featured Products ── */}
       {featuredProducts.length > 0 && (
-        <section className="bg-slate-50 py-12 sm:py-16 border-t border-slate-200/50">
+        <section className="bg-white py-12 sm:py-16 border-t border-slate-200/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-3">
               <div className="space-y-1">

@@ -27,10 +27,22 @@ const selectProduct = {
 };
 
 export const homeData = asyncHandler(async (_req, res) => {
-  const [featuredProducts, categories, industries, testimonials, gallery, banners] =
+  const [featuredProducts, newArrivalProducts, trendingProducts, categories, industries, testimonials, gallery, banners] =
     await prisma.$transaction([
       prisma.product.findMany({
         where: { featured: true, isActive: true },
+        include: selectProduct,
+        take: 8,
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: { newArrival: true, isActive: true },
+        include: selectProduct,
+        take: 8,
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: { trending: true, isActive: true },
         include: selectProduct,
         take: 8,
         orderBy: { updatedAt: "desc" },
@@ -64,6 +76,8 @@ export const homeData = asyncHandler(async (_req, res) => {
   res.json(
     new ApiResponsive(200, {
       featuredProducts,
+      newArrivalProducts,
+      trendingProducts,
       categories,
       industries,
       testimonials,

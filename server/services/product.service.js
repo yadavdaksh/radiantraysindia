@@ -167,6 +167,8 @@ export const productService = {
           salePrice: decimalOrNull(body.salePrice),
           badge: body.badge || null,
           featured: Boolean(body.featured),
+          newArrival: Boolean(body.newArrival),
+          trending: Boolean(body.trending),
           isActive: body.isActive !== false,
           b2bInquiryLabel: body.b2bInquiryLabel || "Request Quote",
           categories: {
@@ -309,6 +311,8 @@ export const productService = {
           salePrice: body.salePrice !== undefined ? decimalOrNull(body.salePrice) : existing.salePrice,
           badge: body.badge !== undefined ? (body.badge || null) : existing.badge,
           featured: body.featured !== undefined ? Boolean(body.featured) : existing.featured,
+          newArrival: body.newArrival !== undefined ? Boolean(body.newArrival) : existing.newArrival,
+          trending: body.trending !== undefined ? Boolean(body.trending) : existing.trending,
           isActive: body.isActive !== undefined ? Boolean(body.isActive) : existing.isActive,
           b2bInquiryLabel: body.b2bInquiryLabel !== undefined ? body.b2bInquiryLabel : existing.b2bInquiryLabel,
         },

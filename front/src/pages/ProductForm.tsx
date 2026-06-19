@@ -51,7 +51,7 @@ const emptyForm = {
   productType: "B2B",
   basePrice: "", salePrice: "", badge: "",
   shortDescription: "", description: "",
-  featured: false, isActive: true,
+  featured: false, newArrival: false, trending: false, isActive: true,
   b2bInquiryLabel: "Request Quote",
   hasVariants: false,
   categoryIds: [] as string[],
@@ -157,6 +157,8 @@ export default function ProductForm({ showToast }: {
           shortDescription: p.shortDescription || "",
           description: p.description || "",
           featured: p.featured,
+          newArrival: p.newArrival ?? false,
+          trending: p.trending ?? false,
           isActive: p.isActive,
           b2bInquiryLabel: p.b2bInquiryLabel || "Request Quote",
           hasVariants: (p.variants?.length || 0) > 1 || (p.variants?.[0]?.name !== "Standard"),
@@ -294,6 +296,8 @@ export default function ProductForm({ showToast }: {
       shortDescription: form.shortDescription,
       description: form.description,
       featured: form.featured,
+      newArrival: form.newArrival,
+      trending: form.trending,
       isActive: form.isActive,
       b2bInquiryLabel: form.b2bInquiryLabel,
       categoryIds: form.categoryIds,
@@ -497,7 +501,15 @@ export default function ProductForm({ showToast }: {
               <div className="flex flex-wrap gap-5 pt-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.featured} onChange={e => setForm(f => ({ ...f, featured: e.target.checked }))} className="h-4 w-4 rounded border-slate-300 text-sky-700" />
-                  <span className="text-sm font-semibold text-slate-700">Show on Homepage Featured</span>
+                  <span className="text-sm font-semibold text-slate-700">⭐ Featured</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.newArrival} onChange={e => setForm(f => ({ ...f, newArrival: e.target.checked }))} className="h-4 w-4 rounded border-slate-300 text-sky-700" />
+                  <span className="text-sm font-semibold text-slate-700">🆕 New Arrival</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.trending} onChange={e => setForm(f => ({ ...f, trending: e.target.checked }))} className="h-4 w-4 rounded border-slate-300 text-sky-700" />
+                  <span className="text-sm font-semibold text-slate-700">🔥 Trending</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))} className="h-4 w-4 rounded border-slate-300 text-sky-700" />
