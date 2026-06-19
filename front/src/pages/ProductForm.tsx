@@ -135,7 +135,7 @@ export default function ProductForm({ showToast }: {
           length: String(v.length || 10.0),
           width: String(v.width || 10.0),
           height: String(v.height || 10.0),
-          hsn: v.hsn || "9403",
+          hsn: v.hsnCode || v.hsn || "9403",
           packageDetails: v.packageDetails || "",
         }));
         const selectedAttributeIds = Array.from(
