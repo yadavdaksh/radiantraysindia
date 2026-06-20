@@ -32,11 +32,6 @@ async function getCategories() {
   }
 }
 
-export const metadata = {
-  title: "Product Categories — Radiant Rays",
-  description: "Browse cleanroom equipment categories: biosafety cabinets, laminar air flow, pass boxes, and modular furniture.",
-};
-
 export default async function CategoriesPage() {
   const categories = await getCategories();
 

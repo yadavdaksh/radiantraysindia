@@ -42,11 +42,6 @@ async function getIndustries() {
   }
 }
 
-export const metadata = {
-  title: "Industries",
-  description: "Industry-specific cleanroom use cases for Radiant Rays products.",
-};
-
 export default async function IndustriesPage() {
   const industriesList = await getIndustries();
 
