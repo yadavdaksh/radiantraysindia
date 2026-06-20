@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     description:
       "Enterprise-grade cleanroom equipment and contamination-control systems for regulated industries.",
   },
+  verification: {
+    google: "5rpas7khMdhvoukTd9MLr1DfuPzz7tuXhIpdX3uyDgM",
+  },
 };
 
 import { AuthProvider } from "@/contexts/auth-context";

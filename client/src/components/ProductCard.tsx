@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import { getProductImage } from "@/lib/site-data";
 import { useWishlist } from "@/contexts/wishlist-context";
+import { cardHref } from "@/lib/variant-cards";
 
 interface ProductCardProps {
   prod: any;
@@ -27,16 +28,17 @@ function stripHtml(html: string) {
 
 export function ProductCard({ prod, size = "md" }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const imageUrl = getProductImage(prod.slug, prod.images, prod.variants);
+  const imageUrl = prod._variantImageUrl || getProductImage(prod._productSlug || prod.slug, prod.images, prod.variants);
   const isB2C = (prod.productType || prod.type) === "B2C";
   const basePrice = Number(prod.basePrice || 0);
   const salePrice = prod.salePrice ? Number(prod.salePrice) : null;
   const inWishlist = isInWishlist(prod.slug || prod.id);
   const imgH = size === "sm" ? "h-36 sm:h-40" : "h-40 sm:h-52";
+  const href = cardHref(prod);
 
   return (
     <Link
-      href={`/products/${prod.slug}`}
+      href={href}
       className="group flex flex-col rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-all hover:shadow-xl hover:border-brand/30 hover:-translate-y-1 duration-200 overflow-hidden relative"
     >
       {/* Image */}

@@ -1,19 +1,21 @@
 "use client";
 
 import { ProductCard } from "./ProductCard";
+import { expandToVariantCards } from "@/lib/variant-cards";
 
 interface FeaturedProductsProps {
   products: any[];
 }
 
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
-  if (!products.length) return null;
+  const cards = expandToVariantCards(products);
+  if (!cards.length) return null;
 
-  const showCarousel = products.length > 5;
+  const showCarousel = cards.length > 5;
 
   if (showCarousel) {
     // Duplicate list enough times to fill and loop seamlessly
-    const items = [...products, ...products, ...products];
+    const items = [...cards, ...cards, ...cards];
 
     return (
       <div className="relative overflow-hidden">
@@ -23,7 +25,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
 
         <div className="flex gap-5 animate-marquee" style={{ width: "max-content" }}>
           {items.map((prod, i) => (
-            <div key={`${prod.slug}-${i}`} className="w-64 shrink-0">
+            <div key={`${prod._productSlug || prod.slug}-${prod._variantSlug || i}`} className="w-64 shrink-0">
               <ProductCard prod={prod} size="sm" />
             </div>
           ))}
@@ -35,7 +37,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             100% { transform: translateX(calc(-100% / 3)); }
           }
           .animate-marquee {
-            animation: marquee ${products.length * 3.5}s linear infinite;
+            animation: marquee ${cards.length * 3.5}s linear infinite;
           }
           .animate-marquee:hover {
             animation-play-state: paused;
@@ -45,11 +47,11 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
     );
   }
 
-  // ≤5 products — responsive grid: 5 big on xl, 3 on lg, 2 on sm
+  // ≤5 cards — responsive grid
   return (
     <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      {products.map((prod) => (
-        <ProductCard key={prod.slug} prod={prod} />
+      {cards.map((prod, i) => (
+        <ProductCard key={`${prod._productSlug || prod.slug}-${prod._variantSlug || i}`} prod={prod} />
       ))}
     </div>
   );

@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { apiClient } from "@/lib/api-client";
 import { products as mockProducts, categories as mockCategories } from "@/lib/site-data";
 import { Search, SlidersHorizontal, CircleAlert, X, ChevronDown } from "lucide-react";
+import { expandToVariantCards } from "@/lib/variant-cards";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -90,9 +91,13 @@ export default function ProductsPage() {
 
   // Filter
   const filtered = products.filter((p) => {
+    const variantNames = (p.variants || []).map((v: any) => v.name || "").join(" ");
+    const variantSkus  = (p.variants || []).map((v: any) => v.sku  || "").join(" ");
     const matchQ   = !search ||
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      (p.shortDescription || p.summary || "").toLowerCase().includes(search.toLowerCase());
+      (p.shortDescription || p.summary || "").toLowerCase().includes(search.toLowerCase()) ||
+      variantNames.toLowerCase().includes(search.toLowerCase()) ||
+      variantSkus.toLowerCase().includes(search.toLowerCase());
 
     const matchCat = selectedCategory === "all" ||
       p.categories?.some((c: any) => c.category?.slug === selectedCategory || c.category?.id === selectedCategory) ||
@@ -107,12 +112,14 @@ export default function ProductsPage() {
     return matchQ && matchCat && matchType && matchPrice;
   });
 
-  // Sort
-  const sorted = [...filtered].sort((a, b) => {
-    if (sortOrder === "PRICE_ASC") return Number(a.basePrice || 0) - Number(b.basePrice || 0);
-    if (sortOrder === "PRICE_DESC") return Number(b.basePrice || 0) - Number(a.basePrice || 0);
-    return (b.id || "").localeCompare(a.id || "");
-  });
+  // Sort then expand each product into per-variant cards
+  const sorted = expandToVariantCards(
+    [...filtered].sort((a, b) => {
+      if (sortOrder === "PRICE_ASC") return Number(a.basePrice || 0) - Number(b.basePrice || 0);
+      if (sortOrder === "PRICE_DESC") return Number(b.basePrice || 0) - Number(a.basePrice || 0);
+      return (b.id || "").localeCompare(a.id || "");
+    })
+  );
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -287,9 +294,9 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {sorted.map((prod) => (
+              {sorted.map((prod, i) => (
                 <ProductCard
-                  key={prod.slug || prod.id}
+                  key={`${prod._productSlug || prod.slug}-${prod._variantSlug || i}`}
                   prod={prod}
                 />
               ))}

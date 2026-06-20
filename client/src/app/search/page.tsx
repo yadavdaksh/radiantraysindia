@@ -8,6 +8,7 @@ import { apiClient } from "@/lib/api-client";
 import { products as mockProducts } from "@/lib/site-data";
 import { Search } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
+import { expandToVariantCards } from "@/lib/variant-cards";
 
 export default function SearchResultsPage() {
   const searchParams = useSearchParams();
@@ -21,12 +22,19 @@ export default function SearchResultsPage() {
       try {
         const res = await apiClient.get("/public/products");
         const allProds = res.data.data;
-        const filtered = allProds.filter((p: any) =>
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          (p.shortDescription || "").toLowerCase().includes(query.toLowerCase()) ||
-          (p.sku || "").toLowerCase().includes(query.toLowerCase())
-        );
-        setProducts(filtered);
+        const q = query.toLowerCase();
+        const filtered = allProds.filter((p: any) => {
+          const variantNames = (p.variants || []).map((v: any) => v.name || "").join(" ");
+          const variantSkus  = (p.variants || []).map((v: any) => v.sku  || "").join(" ");
+          return (
+            p.name.toLowerCase().includes(q) ||
+            (p.shortDescription || "").toLowerCase().includes(q) ||
+            (p.sku || "").toLowerCase().includes(q) ||
+            variantNames.toLowerCase().includes(q) ||
+            variantSkus.toLowerCase().includes(q)
+          );
+        });
+        setProducts(expandToVariantCards(filtered));
       } catch {
         const filteredMock = mockProducts.filter((p) =>
           p.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -71,8 +79,8 @@ export default function SearchResultsPage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((prod) => (
-              <ProductCard key={prod.slug || prod.id} prod={prod} />
+            {products.map((prod, i) => (
+              <ProductCard key={`${prod._productSlug || prod.slug}-${prod._variantSlug || i}`} prod={prod} />
             ))}
           </div>
         )}

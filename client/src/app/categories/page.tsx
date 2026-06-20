@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Layers, Tag } from "lucide-react";
 import { categories as mockCategories } from "@/lib/site-data";
+
+export const metadata: Metadata = {
+  title: "Cleanroom Equipment Categories | Radiant Rays India",
+  description: "Explore cleanroom equipment categories — biosafety cabinets, laminar airflow units, pass boxes, air showers, modular furniture and more from Radiant Rays India.",
+  alternates: { canonical: "https://radiantraysindia.com/categories" },
+  openGraph: {
+    title: "Cleanroom Equipment Categories | Radiant Rays India",
+    description: "Browse all cleanroom equipment categories from Radiant Rays — ISO 9001:2015 certified manufacturer.",
+    url: "https://radiantraysindia.com/categories",
+    type: "website",
+    siteName: "Radiant Rays India",
+  },
+};
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 

@@ -1,7 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/site-shell";
 import { Tag } from "lucide-react";
 import { industries as mockIndustries } from "@/lib/site-data";
+
+export const metadata: Metadata = {
+  title: "Industries We Serve | Cleanroom Solutions | Radiant Rays India",
+  description: "Radiant Rays serves pharma, biotech, healthcare, electronics, and food industries with ISO-certified cleanroom containment systems. Explore industry applications.",
+  alternates: { canonical: "https://radiantraysindia.com/industries" },
+  openGraph: {
+    title: "Industries We Serve | Radiant Rays India",
+    description: "Cleanroom solutions for pharma, biotech, healthcare, electronics, and food industries.",
+    url: "https://radiantraysindia.com/industries",
+    type: "website",
+    siteName: "Radiant Rays India",
+  },
+};
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 

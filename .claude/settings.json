@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"d:/radiant-rays/client/src/app/products/[slug]/page.tsx\" \"d:/radiant-rays/client/src/app/products/[slug]/_client.tsx\")",
+      "Bash(cp \"d:/radiant-rays/client/src/app/categories/[slug]/page.tsx\" \"d:/radiant-rays/client/src/app/categories/[slug]/_client.tsx\")",
+      "Bash(cp \"d:/radiant-rays/client/src/app/industries/[slug]/page.tsx\" \"d:/radiant-rays/client/src/app/industries/[slug]/_client.tsx\")",
+      "Bash(sed -i 's/export default function ProductDetailPage/export function ProductDetailClient/' \"d:/radiant-rays/client/src/app/products/[slug]/_client.tsx\")",
+      "Bash(sed -i 's/export default function CategoryDetailPage/export function CategoryDetailClient/' \"d:/radiant-rays/client/src/app/categories/[slug]/_client.tsx\")",
+      "Bash(sed -i 's/export default function IndustryDetailPage/export function IndustryDetailClient/' \"d:/radiant-rays/client/src/app/industries/[slug]/_client.tsx\")"
+    ]
+  }
+}
