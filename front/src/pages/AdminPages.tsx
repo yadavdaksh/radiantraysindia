@@ -8,8 +8,51 @@ import {
   IconUsers, IconMapPin, IconHeart, IconTarget, IconMail,
   IconNews, IconMessageCircle, IconCheck, IconX, IconRefresh,
   IconSearch, IconChevronDown, IconChevronRight, IconTrash, IconPhoneCall, IconBuildingStore,
-  IconShoppingCart, IconStar, IconEye, IconLock,
+  IconShoppingCart, IconStar, IconEye, IconLock, IconTableExport,
 } from "@tabler/icons-react";
+import { ExportModal } from "../components/ExportModal";
+
+const ORDERS_EXPORT_COLUMNS = [
+  { key: "orderNumber", label: "Order Number" },
+  { key: "status", label: "Status" },
+  { key: "paymentStatus", label: "Payment Status" },
+  { key: "customerName", label: "Customer Name" },
+  { key: "customerEmail", label: "Customer Email" },
+  { key: "customerPhone", label: "Customer Phone" },
+  { key: "total", label: "Total" },
+  { key: "subtotal", label: "Subtotal" },
+  { key: "discount", label: "Discount" },
+  { key: "couponCode", label: "Coupon Code" },
+  { key: "tax", label: "Tax" },
+  { key: "shipping", label: "Shipping" },
+  { key: "createdAt", label: "Created At" },
+];
+
+const LEADS_EXPORT_COLUMNS = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "company", label: "Company" },
+  { key: "source", label: "Source" },
+  { key: "status", label: "Status" },
+  { key: "message", label: "Message" },
+  { key: "createdAt", label: "Created At" },
+];
+
+const CONTACT_EXPORT_COLUMNS = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "company", label: "Company" },
+  { key: "message", label: "Message" },
+  { key: "createdAt", label: "Created At" },
+];
+
+const NEWSLETTER_EXPORT_COLUMNS = [
+  { key: "email", label: "Email" },
+  { key: "isActive", label: "Active" },
+  { key: "createdAt", label: "Created At" },
+];
 
 // ── shared ──────────────────────────────────────────────────────────────────
 
@@ -394,6 +437,7 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [viewingLead, setViewingLead] = useState<any | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -434,7 +478,11 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
 
   return (
     <div className="space-y-5">
-      <PageHeader title="B2B Leads & Inquiries" count={total} onRefresh={load} refreshing={loading} />
+      <PageHeader title="B2B Leads & Inquiries" count={total} onRefresh={load} refreshing={loading}>
+        <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+          <IconTableExport size={14} /> Export
+        </button>
+      </PageHeader>
       <div className="space-y-3">
         {loading ? <Skeleton />
           : items.length === 0 ? <Empty icon={IconTarget} msg="No leads yet" />
@@ -571,6 +619,14 @@ export function LeadsPage({ showToast }: { showToast: (m: string, t?: any) => vo
           </div>
         </div>
       )}
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Leads"
+        columns={LEADS_EXPORT_COLUMNS}
+        data={items}
+      />
     </div>
   );
 }
@@ -582,6 +638,7 @@ export function ContactFormsPage({ showToast }: { showToast: (m: string, t?: any
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -595,7 +652,11 @@ export function ContactFormsPage({ showToast }: { showToast: (m: string, t?: any
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Contact Form Submissions" count={total} onRefresh={load} refreshing={loading} />
+      <PageHeader title="Contact Form Submissions" count={total} onRefresh={load} refreshing={loading}>
+        <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+          <IconTableExport size={14} /> Export
+        </button>
+      </PageHeader>
       {loading ? <Skeleton />
         : items.length === 0 ? <Empty icon={IconMail} msg="No contact submissions yet" />
           : (
@@ -626,6 +687,14 @@ export function ContactFormsPage({ showToast }: { showToast: (m: string, t?: any
               ))}
             </div>
           )}
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Contact Forms"
+        columns={CONTACT_EXPORT_COLUMNS}
+        data={items}
+      />
     </div>
   );
 }
@@ -635,6 +704,7 @@ export function ContactFormsPage({ showToast }: { showToast: (m: string, t?: any
 export function NewsletterPage({ showToast }: { showToast: (m: string, t?: any) => void }) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -667,6 +737,9 @@ export function NewsletterPage({ showToast }: { showToast: (m: string, t?: any) 
       <PageHeader title="Newsletter Subscribers" count={items.length} onRefresh={load} refreshing={loading}>
         <button onClick={exportCSV} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition">
           Export CSV
+        </button>
+        <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+          <IconTableExport size={14} /> Export Excel
         </button>
       </PageHeader>
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -706,6 +779,14 @@ export function NewsletterPage({ showToast }: { showToast: (m: string, t?: any) 
           </tbody>
         </table>
       </div>
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Newsletter Subscribers"
+        columns={NEWSLETTER_EXPORT_COLUMNS}
+        data={items}
+      />
     </div>
   );
 }
@@ -878,6 +959,7 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
   const [rates, setRates] = useState<Record<string, any[]>>({});
   const [loadingRates, setLoadingRates] = useState<Record<string, boolean>>({});
   const [selectedCourier, setSelectedCourier] = useState<Record<string, any>>({});
+  const [exportOpen, setExportOpen] = useState(false);
 
   const fetchRates = async (orderId: string) => {
     setLoadingRates(prev => ({ ...prev, [orderId]: true }));
@@ -977,6 +1059,9 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
     <div className="space-y-5">
       <PageHeader title="Orders Management" count={filteredItems.length} onRefresh={load} refreshing={loading}>
         <div className="flex gap-2">
+          <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+            <IconTableExport size={14} /> Export
+          </button>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
@@ -1245,6 +1330,14 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
           ))
         )}
       </div>
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Orders"
+        columns={ORDERS_EXPORT_COLUMNS}
+        data={items}
+      />
     </div>
   );
 }

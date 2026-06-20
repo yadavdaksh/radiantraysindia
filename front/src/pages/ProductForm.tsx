@@ -706,7 +706,7 @@ export default function ProductForm({ showToast }: {
               {(form.metaTitle || form.name) && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-1">
                   <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Search Preview</p>
-                  <p className="text-[#1a0dab] text-sm font-medium hover:underline cursor-pointer">{form.metaTitle || form.name} | Radiant Rays India</p>
+                  <p className="text-[#1a0dab] text-sm font-medium hover:underline cursor-pointer">{form.metaTitle || form.name} | Radiant Rays Pvt. Ltd.</p>
                   <p className="text-xs text-slate-500 line-clamp-2">{form.metaDescription || form.shortDescription?.replace(/<[^>]*>/g, "") || `High-specification cleanroom containment systems.`}</p>
                 </div>
               )}

@@ -15,11 +15,11 @@ import {
 import Script from "next/script";
 
 const INDIAN_STATES = [
-  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
-  "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh",
-  "Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab",
-  "Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh",
-  "Uttarakhand","West Bengal","Delhi","Jammu & Kashmir","Ladakh",
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+  "Uttarakhand", "West Bengal", "Delhi", "Jammu & Kashmir", "Ladakh",
 ];
 
 type Addr = {
@@ -126,7 +126,7 @@ export default function CheckoutPage() {
           order_id: razorpayOrder.id,
           amount: razorpayOrder.amount,
           currency: "INR",
-          name: "Radiant Rays India",
+          name: "Radiant Rays Pvt. Ltd. ",
           description: `Order ${order.orderNumber}`,
           prefill: {
             name: customer?.name,
@@ -220,7 +220,7 @@ export default function CheckoutPage() {
                 {showForm ? (
                   <form onSubmit={handleSaveAddress} className="p-6 space-y-4">
                     <div className="flex gap-2 flex-wrap">
-                      {["Home","Office","Factory","Other"].map(l => (
+                      {["Home", "Office", "Factory", "Other"].map(l => (
                         <button key={l} type="button" onClick={() => setLabel(l)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${label === l ? "bg-brand text-white border-brand" : "border-slate-200 text-slate-600 hover:border-brand/40"}`}>
                           {l}
@@ -260,15 +260,14 @@ export default function CheckoutPage() {
                   </form>
                 ) : addrLoading ? (
                   <div className="p-6 space-y-3">
-                    {[1,2].map(i => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
+                    {[1, 2].map(i => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
                   </div>
                 ) : (
                   <div className="p-4 space-y-3">
                     {addresses.map(addr => (
                       <label key={addr.id}
-                        className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition ${
-                          selectedId === addr.id ? "border-brand bg-brand/5" : "border-slate-200 hover:border-slate-300"
-                        }`}>
+                        className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition ${selectedId === addr.id ? "border-brand bg-brand/5" : "border-slate-200 hover:border-slate-300"
+                          }`}>
                         <input type="radio" name="addr" checked={selectedId === addr.id}
                           onChange={() => setSelectedId(addr.id)} className="mt-1 accent-brand" />
                         <div className="flex-1 text-sm">

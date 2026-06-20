@@ -83,7 +83,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex flex-col items-center gap-1">
-            <span className="text-2xl font-extrabold tracking-tight text-slate-950">Radiant Rays</span>
+            <span className="text-2xl font-extrabold tracking-tight text-slate-950">Radiant Rays Pvt. Ltd.</span>
             <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-brand">India · Cleanroom</span>
           </Link>
         </div>

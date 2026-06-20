@@ -52,7 +52,7 @@ export default async function Home() {
     "@type": "Organization",
     name: "Radiant Rays",
     url: "https://radiantraysindia.com",
-    logo: "https://radiantraysindia.com/logo.png",
+    logo: "https://radiantraysindia.com/logo-nobg.png",
     contactPoint: {
       "@type": "ContactPoint",
       telephone: "+91-92117-81378",

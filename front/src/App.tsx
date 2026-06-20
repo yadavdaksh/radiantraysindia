@@ -27,7 +27,7 @@ import {
 } from "./pages/AdminPages";
 import {
   IndustriesPage, GalleryPage, BannersPage, RolesPage, UsersPage,
-  PermissionsPage, ActivityLogPage, CareersPage,
+  PermissionsPage, ActivityLogPage, CareersPage, ManufacturingLeadsPage,
 } from "./pages/MorePages";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -47,6 +47,7 @@ type ModuleKey =
   | "addresses"
   | "wishlist"
   | "leads"
+  | "manufacturing"
   | "contactForms"
   | "newsletter"
   | "testimonials"
@@ -168,6 +169,7 @@ const sidebarSections: SidebarSection[] = [
     title: "Marketing",
     items: [
       { key: "leads", label: "Leads", resource: "lead", emoji: "leads", icon: IconTarget },
+      { key: "manufacturing", label: "Manufacturing", resource: "lead", emoji: "manufacturing", icon: IconBriefcase },
       { key: "contactForms", label: "Contact Forms", resource: "contact", emoji: "contactForms", icon: IconMail },
       { key: "newsletter", label: "Newsletter", resource: "newsletter", emoji: "newsletter", icon: IconNews },
       { key: "testimonials", label: "Testimonials", resource: "testimonial", emoji: "testimonials", icon: IconMessageCircle },
@@ -359,7 +361,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
       <div className="relative w-full max-w-md space-y-6">
         <div className="text-center space-y-1">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/70">
-            Radiant Rays India
+            Radiant Rays Pvt. Ltd.
           </div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight mt-2">Admin Console</h1>
           <p className="text-sm text-white/50">{modeSubtitle[mode]}</p>
@@ -525,7 +527,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
         </div>
 
         <p className="text-center text-xs text-white/20">
-          © {new Date().getFullYear()} Radiant Rays India · Admin Console
+          © {new Date().getFullYear()} Radiant Rays Pvt. Ltd. · Admin Console
         </p>
       </div>
     </div>
@@ -543,7 +545,7 @@ function App() {
   const allKeys: ModuleKey[] = [
     "dashboard", "products", "categories", "variants", "attributes",
     "orders", "returns", "refunds", "coupons", "customers", "addresses", "wishlist",
-    "leads", "contactForms", "newsletter", "testimonials", "industries", "gallery",
+    "leads", "manufacturing", "contactForms", "newsletter", "testimonials", "industries", "gallery",
     "banners", "careers", "users", "roles", "permissions", "activity-logs",
     "settings",
   ];
@@ -684,6 +686,7 @@ function App() {
       addresses: ["addresses", "/system/addresses"],
       wishlist: ["wishlist", "/system/wishlists"],
       leads: ["leads", "/leads?limit=50"],
+      manufacturing: ["manufacturing", "/leads?limit=500"],
       contactForms: ["contactForms", "/system/contact-submissions?limit=50"],
       newsletter: ["newsletter", "/public/home"],
       testimonials: ["testimonials", "/content/testimonials"],
@@ -795,7 +798,7 @@ function App() {
               {/* Logo */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 {!isSidebarCollapsed && (
-                  <p className="text-xs font-extrabold uppercase tracking-[0.35em] text-sky-700">Radiant Rays</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.35em] text-sky-700">Radiant Rays Pvt. Ltd.</p>
                 )}
                 <button
                   onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -872,7 +875,7 @@ function App() {
               </button>
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.35em] text-sky-700 border-b border-slate-100 pb-3">
-                  Radiant Rays
+                  Radiant Rays Pvt. Ltd.
                 </p>
                 <div className="mt-4 rounded-2xl bg-sky-50 p-4">
                   <p className="text-sm font-bold text-slate-950">{session.name}</p>
@@ -973,6 +976,7 @@ function App() {
             <Route path="/addresses" element={<AddressesPage showToast={showToast} />} />
             <Route path="/wishlist" element={<WishlistPage showToast={showToast} />} />
             <Route path="/leads" element={<LeadsPage showToast={showToast} />} />
+            <Route path="/manufacturing" element={<ManufacturingLeadsPage showToast={showToast} />} />
             <Route path="/contactForms" element={<ContactFormsPage showToast={showToast} />} />
             <Route path="/newsletter" element={<NewsletterPage showToast={showToast} />} />
             <Route path="/testimonials" element={<TestimonialsPage showToast={showToast} />} />

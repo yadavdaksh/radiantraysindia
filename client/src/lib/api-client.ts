@@ -10,10 +10,13 @@ export const apiClient = axios.create({
   },
 });
 
-// Response interceptor to handle api errors cleanly
+// Response interceptor — pass through 401 as-is so auth context can handle it silently
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      return Promise.reject(error);
+    }
     const message = error.response?.data?.message || "Something went wrong";
     return Promise.reject(new Error(message));
   }

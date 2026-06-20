@@ -9,8 +9,40 @@ import {
   IconBuildingFactory, IconPhoto, IconFlag, IconShieldHalf,
   IconUser, IconPlus, IconEdit, IconTrash, IconX, IconRefresh,
   IconSearch, IconCheck, IconKey, IconEye, IconEyeOff,
-  IconLock, IconBriefcase, IconMapPin, IconClock, IconUsers,
+  IconLock, IconBriefcase, IconMapPin, IconClock, IconUsers, IconTableExport,
+  IconChevronDown, IconChevronRight, IconNotes, IconPhone, IconMail,
+  IconPackage, IconTruck, IconTool, IconBox, IconCircleCheck, IconAlertCircle,
+  IconTarget, IconBuildingStore,
 } from "@tabler/icons-react";
+import { ExportModal } from "../components/ExportModal";
+
+const USERS_EXPORT_COLUMNS = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "isActive", label: "Active" },
+  { key: "createdAt", label: "Created At" },
+];
+
+const ACTIVITY_EXPORT_COLUMNS = [
+  { key: "type", label: "Type" },
+  { key: "title", label: "Title" },
+  { key: "entityType", label: "Entity Type" },
+  { key: "actor.name", label: "Actor" },
+  { key: "createdAt", label: "Created At" },
+];
+
+const CAREERS_EXPORT_COLUMNS = [
+  { key: "title", label: "Title" },
+  { key: "status", label: "Status" },
+  { key: "type", label: "Type" },
+  { key: "location", label: "Location" },
+  { key: "department", label: "Department" },
+  { key: "experience", label: "Experience" },
+  { key: "salaryMin", label: "Salary Min" },
+  { key: "salaryMax", label: "Salary Max" },
+  { key: "createdAt", label: "Created At" },
+];
 
 const inp = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-sky-500 focus:bg-white transition";
 
@@ -654,6 +686,7 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", roleId: "" });
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -715,6 +748,9 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users…"
             className="pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 bg-white outline-none focus:border-sky-500 w-44 transition" />
         </div>
+        <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+          <IconTableExport size={14} /> Export
+        </button>
         {can("user", "create") && (
           <button onClick={openCreate} className="inline-flex items-center gap-1.5 rounded-xl bg-sky-700 hover:bg-sky-800 px-4 py-2 text-xs font-bold text-white transition">
             <IconPlus size={14} /> Add User
@@ -849,6 +885,14 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
           </div>
         </Modal>
       )}
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Users"
+        columns={USERS_EXPORT_COLUMNS}
+        data={users}
+      />
     </div>
   );
 }
@@ -936,6 +980,7 @@ export function ActivityLogPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -956,7 +1001,11 @@ export function ActivityLogPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Activity Log" count={logs.length} onRefresh={load} refreshing={loading} />
+      <PageHeader title="Activity Log" count={logs.length} onRefresh={load} refreshing={loading}>
+        <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+          <IconTableExport size={14} /> Export
+        </button>
+      </PageHeader>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative">
@@ -1015,6 +1064,14 @@ export function ActivityLogPage() {
           </table>
         </div>
       </div>
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Activity Logs"
+        columns={ACTIVITY_EXPORT_COLUMNS}
+        data={logs}
+      />
     </div>
   );
 }
@@ -1054,6 +1111,7 @@ export function CareersPage({ showToast }: { showToast: (m: string, t?: any) => 
   const [appsJob, setAppsJob] = useState<any>(null);
   const [apps, setApps] = useState<any[]>([]);
   const [appsLoading, setAppsLoading] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = (quiet = false) => {
     if (!quiet) setLoading(true); else setRefreshing(true);
@@ -1145,6 +1203,9 @@ export function CareersPage({ showToast }: { showToast: (m: string, t?: any) => 
   return (
     <div className="max-w-5xl mx-auto space-y-5">
       <PageHeader title="Jobs & Careers" count={jobs.length} onRefresh={() => load(true)} refreshing={refreshing}>
+        <button onClick={() => setExportOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+          <IconTableExport size={14} /> Export
+        </button>
         <button onClick={openCreate}
           className="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 transition">
           <IconPlus size={14} /> Post Job
@@ -1339,6 +1400,754 @@ export function CareersPage({ showToast }: { showToast: (m: string, t?: any) => 
           </div>
         </div>
       )}
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Jobs"
+        columns={CAREERS_EXPORT_COLUMNS}
+        data={jobs}
+      />
+    </div>
+  );
+}
+
+// ── MANUFACTURING / LEAD PIPELINE ───────────────────────────────────────────
+
+const MFG_STATUSES = [
+  { key: "NEW",           label: "New",            color: "bg-sky-100 text-sky-800",       icon: IconAlertCircle },
+  { key: "CONTACTED",     label: "Contacted",      color: "bg-blue-100 text-blue-800",     icon: IconPhone },
+  { key: "QUALIFIED",     label: "Qualified",      color: "bg-violet-100 text-violet-800", icon: IconTarget },
+  { key: "QUOTED",        label: "Quoted",         color: "bg-amber-100 text-amber-800",   icon: IconNotes },
+  { key: "APPROVED",      label: "Approved",       color: "bg-teal-100 text-teal-800",     icon: IconCircleCheck },
+  { key: "DESIGNING",     label: "Designing",      color: "bg-purple-100 text-purple-800", icon: IconTool },
+  { key: "CUTTING",       label: "Cutting",        color: "bg-orange-100 text-orange-800", icon: IconTool },
+  { key: "FABRICATION",   label: "Fabrication",    color: "bg-yellow-100 text-yellow-800", icon: IconBuildingFactory },
+  { key: "PACKAGING",     label: "Packaging",      color: "bg-lime-100 text-lime-800",     icon: IconBox },
+  { key: "READY_TO_SHIP", label: "Ready to Ship",  color: "bg-emerald-100 text-emerald-800", icon: IconPackage },
+  { key: "DISPATCHED",    label: "Dispatched",     color: "bg-cyan-100 text-cyan-800",     icon: IconTruck },
+  { key: "DELIVERED",     label: "Delivered",      color: "bg-green-100 text-green-800",   icon: IconCircleCheck },
+  { key: "WON",           label: "Won",            color: "bg-green-200 text-green-900",   icon: IconCircleCheck },
+  { key: "LOST",          label: "Lost",           color: "bg-rose-100 text-rose-800",     icon: IconAlertCircle },
+  { key: "CLOSED",        label: "Closed",         color: "bg-slate-100 text-slate-600",   icon: IconCircleCheck },
+];
+
+const MFG_PIPELINE_STAGES = [
+  { keys: ["NEW", "CONTACTED", "QUALIFIED", "QUOTED", "APPROVED"], label: "Pre-Production" },
+  { keys: ["DESIGNING", "CUTTING", "FABRICATION", "PACKAGING"], label: "Manufacturing" },
+  { keys: ["READY_TO_SHIP", "DISPATCHED", "DELIVERED"], label: "Dispatch" },
+  { keys: ["WON", "LOST", "CLOSED"], label: "Closed" },
+];
+
+const MFG_EXPORT_COLUMNS = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "company", label: "Company" },
+  { key: "source", label: "Source" },
+  { key: "status", label: "Status" },
+  { key: "product.name", label: "Product" },
+  { key: "variant.name", label: "Variant" },
+  { key: "adminNotes", label: "Admin Notes" },
+  { key: "message", label: "Message" },
+  { key: "createdAt", label: "Created" },
+];
+
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  source?: string;
+  productType?: string;
+  status: string;
+  message?: string;
+  adminNotes?: string;
+  customProduct?: string;
+  createdAt: string;
+  product?: { id: string; name: string; slug?: string; images?: { url: string }[]; variants?: { id: string; name: string }[] };
+  variant?: { id: string; name: string };
+  customer?: { id: string; name: string };
+}
+
+interface ProductOption { id: string; name: string; slug?: string; images?: { url: string }[] }
+
+const SOURCE_COLORS: Record<string, string> = {
+  "Meta": "bg-purple-100 text-purple-800",
+  "Facebook": "bg-purple-100 text-purple-800",
+  "Instagram": "bg-pink-100 text-pink-800",
+  "Website": "bg-blue-100 text-blue-800",
+  "Website Product Inquiry": "bg-blue-100 text-blue-800",
+  "Referral": "bg-green-100 text-green-800",
+  "Call": "bg-orange-100 text-orange-800",
+  "Walk-in": "bg-teal-100 text-teal-800",
+  "WhatsApp": "bg-emerald-100 text-emerald-800",
+  "Email": "bg-sky-100 text-sky-800",
+  "Exhibition": "bg-yellow-100 text-yellow-800",
+};
+
+function sourceColor(src?: string) {
+  if (!src) return "bg-slate-100 text-slate-600";
+  return SOURCE_COLORS[src] || "bg-slate-100 text-slate-600";
+}
+
+function statusMeta(key: string) {
+  return MFG_STATUSES.find(s => s.key === key) || MFG_STATUSES[0];
+}
+
+function leadImg(lead: Lead): string | null {
+  return lead.product?.images?.[0]?.url || null;
+}
+
+const EMPTY_FORM = {
+  name: "", email: "", phone: "", company: "", source: "",
+  productType: "B2B", status: "NEW", message: "", adminNotes: "",
+  productId: "", customProduct: "", variantId: "",
+};
+
+export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t?: "success" | "error" | "info") => void }) {
+  const [items, setItems] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [filterType, setFilterType] = useState("ALL");
+  const [filterSource, setFilterSource] = useState("ALL");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [editNotes, setEditNotes] = useState<{ id: string; notes: string } | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [view, setView] = useState<"list" | "kanban">("list");
+
+  // Add / Edit lead modal
+  const [addOpen, setAddOpen] = useState(false);
+  const [editLead, setEditLead] = useState<Lead | null>(null);
+  const [form, setForm] = useState({ ...EMPTY_FORM });
+  const [saving, setSaving] = useState(false);
+
+  // Product search for modal
+  const [products, setProducts] = useState<ProductOption[]>([]);
+  const [prodSearch, setProdSearch] = useState("");
+
+  const load = () => {
+    setLoading(true);
+    apiFetch("/leads?limit=500")
+      .then((j: { data?: { items?: Lead[] } }) => { setItems(j.data?.items || []); })
+      .catch((e: { message: string }) => showToast(e.message, "error"))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    apiFetch("/leads?limit=500")
+      .then((j: { data?: { items?: Lead[] } }) => { setItems(j.data?.items || []); })
+      .catch((e: { message: string }) => showToast(e.message, "error"))
+      .finally(() => setLoading(false));
+    // load products for modal
+    apiFetch("/products?limit=200&fields=id,name,slug,images")
+      .then((j: { data?: { items?: ProductOption[] } }) => setProducts(j.data?.items || []))
+      .catch(() => {/* non-critical */});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const openAdd = () => {
+    setForm({ ...EMPTY_FORM });
+    setProdSearch("");
+    setEditLead(null);
+    setAddOpen(true);
+  };
+
+  const openEdit = (lead: Lead) => {
+    setForm({
+      name: lead.name || "",
+      email: lead.email || "",
+      phone: lead.phone || "",
+      company: lead.company || "",
+      source: lead.source || "",
+      productType: lead.productType || (lead.company ? "B2B" : "B2C"),
+      status: lead.status,
+      message: lead.message || "",
+      adminNotes: lead.adminNotes || "",
+      productId: lead.product?.id || "",
+      customProduct: lead.customProduct || "",
+      variantId: lead.variant?.id || "",
+    });
+    setProdSearch(lead.product?.name || "");
+    setEditLead(lead);
+    setAddOpen(true);
+  };
+
+  const saveLead = async () => {
+    if (!form.name.trim() || !form.email.trim()) {
+      showToast("Name and email required", "error"); return;
+    }
+    setSaving(true);
+    try {
+      const body: Record<string, string> = {
+        name: form.name, email: form.email, phone: form.phone,
+        company: form.company, source: form.source, productType: form.productType,
+        status: form.status, message: form.message, adminNotes: form.adminNotes,
+      };
+      if (form.productId) body.productId = form.productId;
+      if (form.variantId) body.variantId = form.variantId;
+      if (!form.productId && form.customProduct) body.customProduct = form.customProduct;
+
+      if (editLead) {
+        const res = await apiFetch(`/leads/${editLead.id}`, { method: "PUT", body: JSON.stringify(body) });
+        const updated: Lead = res.data || { ...editLead, ...body };
+        setItems(prev => prev.map(l => l.id === editLead.id ? updated : l));
+        showToast("Lead updated");
+      } else {
+        const res = await apiFetch("/leads", { method: "POST", body: JSON.stringify(body) });
+        const created: Lead = res.data;
+        setItems(prev => [created, ...prev]);
+        showToast("Lead added");
+      }
+      setAddOpen(false);
+    } catch (e: any) { showToast(e.message, "error"); }
+    finally { setSaving(false); }
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    try {
+      await apiFetch(`/leads/${id}`, { method: "PUT", body: JSON.stringify({ status }) });
+      setItems(prev => prev.map(l => l.id === id ? { ...l, status } : l));
+      showToast("Status updated");
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const saveNotes = async () => {
+    if (!editNotes) return;
+    try {
+      await apiFetch(`/leads/${editNotes.id}`, { method: "PUT", body: JSON.stringify({ adminNotes: editNotes.notes }) });
+      setItems(prev => prev.map(l => l.id === editNotes.id ? { ...l, adminNotes: editNotes.notes } : l));
+      showToast("Notes saved");
+      setEditNotes(null);
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const deleteLead = async (id: string) => {
+    if (!confirm("Delete this lead?")) return;
+    try {
+      await apiFetch(`/leads/${id}`, { method: "DELETE" });
+      setItems(prev => prev.filter(l => l.id !== id));
+      showToast("Deleted");
+    } catch (e: any) { showToast(e.message, "error"); }
+  };
+
+  const filtered = items.filter(l => {
+    const q = search.toLowerCase();
+    const matchSearch = !q
+      || l.name?.toLowerCase().includes(q)
+      || l.email?.toLowerCase().includes(q)
+      || l.company?.toLowerCase().includes(q)
+      || l.product?.name?.toLowerCase().includes(q)
+      || l.customProduct?.toLowerCase().includes(q)
+      || l.phone?.includes(q);
+    const matchStatus = filterStatus === "ALL" || l.status === filterStatus;
+    const matchType = filterType === "ALL" || (l.productType || (l.company ? "B2B" : "B2C")) === filterType;
+    const matchSource = filterSource === "ALL" || l.source === filterSource;
+    return matchSearch && matchStatus && matchType && matchSource;
+  });
+
+  const counts: Record<string, number> = {};
+  items.forEach(l => { counts[l.status] = (counts[l.status] || 0) + 1; });
+
+  const allSources = [...new Set(items.map(l => l.source).filter(Boolean))] as string[];
+
+  const filteredProducts = prodSearch
+    ? products.filter(p => p.name.toLowerCase().includes(prodSearch.toLowerCase())).slice(0, 8)
+    : products.slice(0, 8);
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-extrabold text-slate-900">Lead Pipeline</h1>
+          <p className="text-xs text-slate-500 mt-0.5">{items.length} total · {filtered.length} shown · track every enquiry from source to delivery</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={openAdd}
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-white bg-brand hover:bg-brand-dark transition shadow-sm">
+            <IconPlus size={14} /> Add Lead
+          </button>
+          <div className="flex rounded-xl border border-slate-200 overflow-hidden">
+            <button onClick={() => setView("list")}
+              className={`px-3 py-1.5 text-xs font-bold transition ${view === "list" ? "bg-brand text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
+              List
+            </button>
+            <button onClick={() => setView("kanban")}
+              className={`px-3 py-1.5 text-xs font-bold transition ${view === "kanban" ? "bg-brand text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
+              Kanban
+            </button>
+          </div>
+          <button onClick={() => setExportOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+            <IconTableExport size={14} /> Export
+          </button>
+          <button onClick={load}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 transition">
+            <IconRefresh size={14} className={loading ? "animate-spin" : ""} />
+          </button>
+          <a href="/activity-logs" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 transition"
+            title="View activity log">
+            <IconClock size={14} /> Activity
+          </a>
+        </div>
+      </div>
+
+      {/* Pipeline summary strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {MFG_PIPELINE_STAGES.map(stage => {
+          const count = stage.keys.reduce((s, k) => s + (counts[k] || 0), 0);
+          return (
+            <div key={stage.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{stage.label}</p>
+              <p className="text-2xl font-extrabold text-slate-900 mt-1">{count}</p>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {stage.keys.map(k => counts[k] ? (
+                  <button key={k} onClick={() => setFilterStatus(filterStatus === k ? "ALL" : k)}
+                    className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full transition hover:opacity-80 ${statusMeta(k).color} ${filterStatus === k ? "ring-2 ring-offset-1 ring-current" : ""}`}>
+                    {statusMeta(k).label} {counts[k]}
+                  </button>
+                ) : null)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-48">
+          <IconSearch size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search name, email, phone, company, product…"
+            className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-white outline-none focus:border-brand" />
+        </div>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          className="text-xs rounded-xl border border-slate-200 bg-white px-2 py-2 outline-none focus:border-brand">
+          <option value="ALL">All Statuses</option>
+          {MFG_STATUSES.map(s => (
+            <option key={s.key} value={s.key}>{s.label}{counts[s.key] ? ` (${counts[s.key]})` : ""}</option>
+          ))}
+        </select>
+        <select value={filterType} onChange={e => setFilterType(e.target.value)}
+          className="text-xs rounded-xl border border-slate-200 bg-white px-2 py-2 outline-none focus:border-brand">
+          <option value="ALL">B2B + B2C</option>
+          <option value="B2B">B2B</option>
+          <option value="B2C">B2C</option>
+        </select>
+        {allSources.length > 0 && (
+          <select value={filterSource} onChange={e => setFilterSource(e.target.value)}
+            className="text-xs rounded-xl border border-slate-200 bg-white px-2 py-2 outline-none focus:border-brand">
+            <option value="ALL">All Sources</option>
+            {allSources.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        )}
+        {(filterStatus !== "ALL" || filterType !== "ALL" || filterSource !== "ALL" || search) && (
+          <button onClick={() => { setFilterStatus("ALL"); setFilterType("ALL"); setFilterSource("ALL"); setSearch(""); }}
+            className="text-xs text-slate-400 hover:text-slate-700 underline transition">
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* LIST VIEW */}
+      {view === "list" && (
+        <div className="space-y-2">
+          {loading ? (
+            <div className="space-y-2 animate-pulse">{[1,2,3].map(i => <div key={i} className="h-24 rounded-2xl bg-slate-100" />)}</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 rounded-2xl border border-dashed border-slate-200">
+              <IconBuildingStore size={32} className="text-slate-300 mx-auto mb-3" />
+              <p className="text-sm font-bold text-slate-500">No leads match filters</p>
+              <button onClick={openAdd} className="mt-3 text-xs text-brand hover:underline font-semibold">+ Add manually</button>
+            </div>
+          ) : filtered.map(lead => {
+            const sm = statusMeta(lead.status);
+            const isOpen = expanded === lead.id;
+            const img = leadImg(lead);
+            const lType = lead.productType || (lead.company ? "B2B" : "B2C");
+            return (
+              <div key={lead.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <div className="flex items-start gap-3 p-4">
+                  {/* Product image or initial */}
+                  <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
+                    {img
+                      ? <img src={img} alt="" className="w-full h-full object-cover" />
+                      : <span className="text-lg font-extrabold text-slate-300">{lead.name?.[0]?.toUpperCase()}</span>
+                    }
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                      <span className="font-extrabold text-slate-900 text-sm">{lead.name}</span>
+                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide ${sm.color}`}>{sm.label}</span>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${lType === "B2B" ? "bg-indigo-100 text-indigo-700" : "bg-amber-100 text-amber-700"}`}>{lType}</span>
+                      {lead.source && (
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${sourceColor(lead.source)}`}>{lead.source}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-slate-500">
+                      {lead.email && <span className="flex items-center gap-1"><IconMail size={10}/>{lead.email}</span>}
+                      {lead.phone && <span className="flex items-center gap-1"><IconPhone size={10}/>{lead.phone}</span>}
+                      {lead.company && <span className="flex items-center gap-1"><IconBuildingStore size={10}/>{lead.company}</span>}
+                    </div>
+                    {(lead.product || lead.customProduct) && (
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <IconBox size={10} className="text-brand shrink-0"/>
+                        <span className="text-[11px] font-semibold text-brand">
+                          {lead.product ? lead.product.name : lead.customProduct}
+                          {lead.variant ? ` · ${lead.variant.name}` : ""}
+                          {!lead.product && lead.customProduct && <span className="ml-1 text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold uppercase">Custom</span>}
+                        </span>
+                      </div>
+                    )}
+                    {lead.adminNotes && (
+                      <p className="mt-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5 line-clamp-2">
+                        <IconNotes size={11} className="shrink-0 mt-0.5" />{lead.adminNotes}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
+                    <select value={lead.status} onChange={e => updateStatus(lead.id, e.target.value)}
+                      className="text-[11px] rounded-lg border border-slate-200 bg-white px-1.5 py-1 outline-none focus:border-brand max-w-36">
+                      {MFG_STATUSES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                    </select>
+                    <button onClick={() => openEdit(lead)} title="Edit lead"
+                      className="p-1.5 text-slate-400 hover:text-brand transition rounded-lg">
+                      <IconEdit size={14}/>
+                    </button>
+                    <button onClick={() => setEditNotes({ id: lead.id, notes: lead.adminNotes || "" })}
+                      title="Notes"
+                      className={`p-1.5 rounded-lg transition ${lead.adminNotes ? "text-amber-500 hover:text-amber-700" : "text-slate-400 hover:text-slate-700"}`}>
+                      <IconNotes size={14} />
+                    </button>
+                    <button onClick={() => setExpanded(isOpen ? null : lead.id)}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 transition rounded-lg">
+                      {isOpen ? <IconChevronDown size={14}/> : <IconChevronRight size={14}/>}
+                    </button>
+                    <button onClick={() => deleteLead(lead.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 transition rounded-lg">
+                      <IconTrash size={14}/>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded panel */}
+                {isOpen && (
+                  <div className="border-t border-slate-100 px-4 pb-4 pt-3 space-y-3 bg-slate-50/50">
+                    {/* Pipeline progress stepper */}
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Pipeline Progress — click to jump</p>
+                      <div className="flex flex-wrap gap-1">
+                        {MFG_STATUSES.filter(s => !["WON","LOST","CLOSED"].includes(s.key)).map((s, i, arr) => {
+                          const idx = arr.findIndex(x => x.key === lead.status);
+                          const done = i < idx;
+                          const active = s.key === lead.status;
+                          return (
+                            <button key={s.key} onClick={() => updateStatus(lead.id, s.key)}
+                              className={`text-[9px] font-bold px-2 py-1 rounded-full border transition ${
+                                active ? `${s.color} border-current shadow-sm` :
+                                done ? "bg-slate-100 text-slate-400 border-slate-200 line-through" :
+                                "bg-white text-slate-400 border-slate-200 hover:border-brand hover:text-brand"
+                              }`}>
+                              {i + 1}. {s.label}
+                            </button>
+                          );
+                        })}
+                        <span className="text-slate-200 self-center">|</span>
+                        {["WON","LOST","CLOSED"].map(k => (
+                          <button key={k} onClick={() => updateStatus(lead.id, k)}
+                            className={`text-[9px] font-bold px-2 py-1 rounded-full border transition ${
+                              lead.status === k ? `${statusMeta(k).color} border-current shadow-sm` :
+                              "bg-white text-slate-400 border-slate-200 hover:border-slate-300"
+                            }`}>
+                            {statusMeta(k).label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Message */}
+                    {lead.message && (
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Message / Requirements</p>
+                        <p className="text-xs text-slate-700 bg-white border border-slate-200 rounded-xl p-3 leading-relaxed whitespace-pre-wrap">{lead.message}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-slate-400">Received: {new Date(lead.createdAt).toLocaleString("en-IN")}</p>
+                      <a href={`/activity-logs`} target="_blank" rel="noopener noreferrer"
+                        className="text-[10px] text-sky-600 hover:underline flex items-center gap-1 font-semibold">
+                        <IconClock size={10}/> View activity log ↗
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* KANBAN VIEW */}
+      {view === "kanban" && (
+        <div className="overflow-x-auto pb-4">
+          <div className="flex gap-3 min-w-max">
+            {MFG_STATUSES.map(s => {
+              const cards = filtered.filter(l => l.status === s.key);
+              return (
+                <div key={s.key} className="w-60 shrink-0">
+                  <div className={`flex items-center justify-between px-3 py-2 rounded-t-xl ${s.color}`}>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wide">{s.label}</span>
+                    <span className="text-[10px] font-extrabold bg-white/60 rounded-full px-1.5 py-0.5">{cards.length}</span>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 border-t-0 rounded-b-xl p-2 space-y-2 min-h-20 max-h-[65vh] overflow-y-auto">
+                    {cards.length === 0 && (
+                      <p className="text-center text-[10px] text-slate-300 py-4">Empty</p>
+                    )}
+                    {cards.map(lead => {
+                      const img = leadImg(lead);
+                      const lType = lead.productType || (lead.company ? "B2B" : "B2C");
+                      return (
+                        <div key={lead.id} className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm space-y-2">
+                          <div className="flex items-start gap-2">
+                            <div className="shrink-0 w-9 h-9 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
+                              {img
+                                ? <img src={img} alt="" className="w-full h-full object-cover"/>
+                                : <span className="text-sm font-extrabold text-slate-300">{lead.name?.[0]?.toUpperCase()}</span>
+                              }
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-slate-900 leading-tight truncate">{lead.name}</p>
+                              {lead.company && <p className="text-[10px] text-slate-500 truncate">{lead.company}</p>}
+                              <div className="flex gap-1 mt-0.5">
+                                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase ${lType === "B2B" ? "bg-indigo-100 text-indigo-700" : "bg-amber-100 text-amber-700"}`}>{lType}</span>
+                                {lead.source && <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase ${sourceColor(lead.source)}`}>{lead.source}</span>}
+                              </div>
+                            </div>
+                          </div>
+                          {(lead.product || lead.customProduct) && (
+                            <p className="text-[10px] font-semibold text-brand truncate flex items-center gap-1">
+                              <IconBox size={9}/>{lead.product ? lead.product.name : lead.customProduct}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
+                            <select value={lead.status} onChange={e => updateStatus(lead.id, e.target.value)}
+                              className="text-[9px] rounded-lg border border-slate-200 bg-white px-1 py-0.5 outline-none focus:border-brand flex-1">
+                              {MFG_STATUSES.map(st => <option key={st.key} value={st.key}>{st.label}</option>)}
+                            </select>
+                            <button onClick={() => openEdit(lead)} className="p-1 text-slate-400 hover:text-brand transition rounded">
+                              <IconEdit size={10}/>
+                            </button>
+                            <button onClick={() => setEditNotes({ id: lead.id, notes: lead.adminNotes || "" })}
+                              className={`p-1 rounded transition ${lead.adminNotes ? "text-amber-500" : "text-slate-300 hover:text-slate-500"}`}>
+                              <IconNotes size={10}/>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ADD / EDIT LEAD MODAL */}
+      {addOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/50 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={e => e.target === e.currentTarget && setAddOpen(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
+              <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <IconTarget size={16} className="text-brand"/>
+                {editLead ? "Edit Lead" : "Add Lead Manually"}
+              </h3>
+              <button onClick={() => setAddOpen(false)} className="text-slate-400 hover:text-slate-700"><IconX size={18}/></button>
+            </div>
+            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Name + Email */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Name *</label>
+                  <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
+                    placeholder="Full name"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition"/>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Email *</label>
+                  <input value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))}
+                    type="email" placeholder="email@example.com"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition"/>
+                </div>
+              </div>
+              {/* Phone + Company */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Phone</label>
+                  <input value={form.phone} onChange={e => setForm(f => ({...f, phone: e.target.value}))}
+                    placeholder="+91 98765 43210"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition"/>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Company</label>
+                  <input value={form.company} onChange={e => setForm(f => ({...f, company: e.target.value}))}
+                    placeholder="Company name (B2B)"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition"/>
+                </div>
+              </div>
+              {/* Source + Type */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Source</label>
+                  <select value={form.source} onChange={e => setForm(f => ({...f, source: e.target.value}))}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition">
+                    <option value="">— Select source —</option>
+                    <option>Website</option>
+                    <option>Meta</option>
+                    <option>Instagram</option>
+                    <option>Facebook</option>
+                    <option>WhatsApp</option>
+                    <option>Call</option>
+                    <option>Referral</option>
+                    <option>Walk-in</option>
+                    <option>Exhibition</option>
+                    <option>Email</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Type</label>
+                  <div className="flex rounded-xl border border-slate-200 overflow-hidden">
+                    {["B2B","B2C"].map(t => (
+                      <button key={t} type="button" onClick={() => setForm(f => ({...f, productType: t}))}
+                        className={`flex-1 py-2 text-xs font-bold transition ${form.productType === t ? "bg-brand text-white" : "bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Status */}
+              <div>
+                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Status</label>
+                <select value={form.status} onChange={e => setForm(f => ({...f, status: e.target.value}))}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition">
+                  {MFG_STATUSES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                </select>
+              </div>
+              {/* Product search */}
+              <div>
+                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Product (from catalogue)</label>
+                <input value={prodSearch} onChange={e => { setProdSearch(e.target.value); setForm(f => ({...f, productId: "", variantId: ""})); }}
+                  placeholder="Search product name…"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition"/>
+                {filteredProducts.length > 0 && !form.productId && (
+                  <div className="mt-1 rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100 max-h-40 overflow-y-auto">
+                    {filteredProducts.map(p => (
+                      <button key={p.id} type="button" onClick={() => { setForm(f => ({...f, productId: p.id, customProduct: ""})); setProdSearch(p.name); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition text-left">
+                        <div className="w-8 h-8 rounded-lg border border-slate-100 overflow-hidden bg-slate-50 shrink-0 flex items-center justify-center">
+                          {p.images?.[0]?.url
+                            ? <img src={p.images[0].url} alt="" className="w-full h-full object-cover"/>
+                            : <IconBox size={14} className="text-slate-300"/>
+                          }
+                        </div>
+                        <span className="text-xs font-semibold text-slate-800 truncate">{p.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {form.productId && (
+                  <div className="mt-1.5 flex items-center gap-2 text-xs text-brand font-semibold">
+                    <IconCheck size={13}/> {prodSearch}
+                    <button type="button" onClick={() => { setForm(f => ({...f, productId: "", variantId: ""})); setProdSearch(""); }}
+                      className="text-slate-400 hover:text-rose-500 transition ml-1"><IconX size={12}/></button>
+                  </div>
+                )}
+              </div>
+              {/* Custom product (if none selected from catalogue) */}
+              {!form.productId && (
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Custom / New Product <span className="normal-case font-normal text-slate-400">(not in catalogue)</span>
+                  </label>
+                  <input value={form.customProduct} onChange={e => setForm(f => ({...f, customProduct: e.target.value}))}
+                    placeholder="e.g. Custom 500L Cleanroom Panel, ISO 7 ceiling grid…"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white transition"/>
+                </div>
+              )}
+              {/* Message */}
+              <div>
+                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Message / Requirements</label>
+                <textarea value={form.message} onChange={e => setForm(f => ({...f, message: e.target.value}))}
+                  rows={3} placeholder="Specs, quantity, delivery date, special requirements…"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-brand focus:bg-white resize-none transition"/>
+              </div>
+              {/* Admin notes */}
+              <div>
+                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Admin Notes <span className="normal-case font-normal text-slate-400">(internal)</span></label>
+                <textarea value={form.adminNotes} onChange={e => setForm(f => ({...f, adminNotes: e.target.value}))}
+                  rows={2} placeholder="Quoted price, follow-up date, call notes…"
+                  className="w-full rounded-xl border border-slate-200 bg-amber-50 px-3 py-2 text-sm outline-none focus:border-amber-400 focus:bg-white resize-none transition"/>
+              </div>
+            </div>
+            <div className="flex gap-3 px-5 py-4 bg-slate-50 border-t border-slate-100 justify-end">
+              <button onClick={() => setAddOpen(false)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+                Cancel
+              </button>
+              <button onClick={saveLead} disabled={saving}
+                className="px-5 py-2 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand-dark transition disabled:opacity-50 inline-flex items-center gap-1.5">
+                {saving && <IconRefresh size={12} className="animate-spin"/>}
+                {editLead ? "Save Changes" : "Add Lead"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notes modal */}
+      {editNotes && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4"
+          onClick={e => e.target === e.currentTarget && setEditNotes(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
+              <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <IconNotes size={16} className="text-amber-500"/> Admin Notes
+              </h3>
+              <button onClick={() => setEditNotes(null)} className="text-slate-400 hover:text-slate-700"><IconX size={18}/></button>
+            </div>
+            <div className="p-5">
+              <textarea value={editNotes.notes} onChange={e => setEditNotes({ ...editNotes, notes: e.target.value })}
+                rows={5} placeholder="Quoted price, promised delivery date, special requirements, follow-up notes…"
+                className="w-full rounded-xl border border-slate-200 bg-amber-50 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:bg-white resize-none transition"/>
+            </div>
+            <div className="flex gap-3 px-5 py-4 bg-slate-50 border-t border-slate-100 justify-end">
+              <button onClick={() => setEditNotes(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+                Cancel
+              </button>
+              <button onClick={saveNotes}
+                className="px-4 py-2 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand-dark transition">
+                Save Notes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Lead Pipeline"
+        columns={MFG_EXPORT_COLUMNS}
+        data={items}
+      />
     </div>
   );
 }

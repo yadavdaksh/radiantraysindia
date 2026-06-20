@@ -115,9 +115,8 @@ export function GlobalShell({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
-            <Link href="/" className="flex flex-col flex-shrink-0 group">
-
-              <Image src="/logo.png" alt="Radiant Rays Logo" width={60} height={60} className="rounded-full" />
+            <Link href="/" className="flex-shrink-0 group">
+              <Image src="/logo-nobg.png" alt="Radiant Rays Logo" width={110} height={110} className="w-[120px] sm:w-[150px] h-auto" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -271,10 +270,10 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 <Search className="h-5 w-5" />
               </button>
 
-              {/* Wishlist Link */}
+              {/* Wishlist Link — desktop only */}
               <Link
-                href="/account?tab=wishlist"
-                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 relative"
+                href="/wishlist"
+                className="hidden sm:flex rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 relative"
                 aria-label="Wishlist"
               >
                 <Heart className="h-5 w-5" />
@@ -285,10 +284,10 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 )}
               </Link>
 
-              {/* Cart Drawer Link */}
+              {/* Cart — desktop only */}
               <Link
                 href="/cart"
-                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 relative"
+                className="hidden sm:flex rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 relative"
                 aria-label="Cart"
               >
                 <ShoppingBag className="h-5 w-5" />
@@ -314,7 +313,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                     {profileDropdownOpen && (
                       <div className="absolute right-0 mt-2.5 w-48 origin-top-right rounded-2xl border border-slate-200 bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                         <div className="border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
-                           Account Menu
+                          Account Menu
                         </div>
                         <Link
                           href="/account"
@@ -353,10 +352,10 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 ) : (
                   <Link
                     href="/login"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 p-2 sm:px-4 sm:py-2 text-xs font-bold text-white transition hover:bg-slate-800 shadow-md whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-3 py-2 sm:px-4 sm:py-2 text-xs font-bold text-white transition hover:bg-slate-800 shadow-md whitespace-nowrap"
                   >
-                    <User className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Sign In</span>
+                    <User className="h-3.5 w-3.5" />
+                    <span>Sign In</span>
                   </Link>
                 )}
               </div>
@@ -449,7 +448,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 <Link href="/industries" onClick={() => setMobileMenuOpen(false)} className="font-bold text-base hover:text-brand block mb-2">
                   Industries
                 </Link>
-                 <div className="flex flex-wrap gap-1 ml-3">
+                <div className="flex flex-wrap gap-1 ml-3">
                   {navIndustries.map((ind) => (
                     <Link key={ind.slug} href={`/industries/${ind.slug}`} onClick={() => setMobileMenuOpen(false)}
                       className="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full hover:text-brand hover:border-brand transition">
@@ -492,7 +491,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
             {/* Col 1 */}
             <div className="space-y-4">
               <Link href="/" className="flex flex-col group">
-                <Image src="/logo.png" alt="Radiant Rays Logo" width={100} height={100} className="rounded-full" />
+                <Image src="/logo-nobg.png" alt="Radiant Rays Logo" width={200} height={100} className="rounded-full" />
               </Link>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Precision-engineered cleanroom cabinets, containment boxes, air flow benches,
@@ -642,7 +641,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="mt-12 border-t border-slate-200 pt-6 text-center text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} Radiant Rays. All rights reserved. Precision-engineered solutions for controlled contamination.
+            &copy; {new Date().getFullYear()} Radiant Rays Pvt. Ltd. All rights reserved. Precision-engineered solutions for controlled contamination.
           </div>
         </div>
       </footer>
@@ -666,7 +665,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
           )}
           <span className="text-[10px] font-bold">Cart</span>
         </Link>
-        <Link href="/account?tab=wishlist" className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3 relative">
+        <Link href="/wishlist" className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-brand transition py-1 px-3 relative">
           <Heart className="h-5 w-5" />
           {wishlist.length > 0 && (
             <span className="absolute top-0 right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white">
@@ -680,6 +679,17 @@ export function GlobalShell({ children }: { children: ReactNode }) {
           <span className="text-[10px] font-bold">Account</span>
         </Link>
       </div>
+
+      {/* WhatsApp float button */}
+      <a
+        href="https://wa.me/919211781378?text=Hello%2C%20I%20have%20an%20inquiry%20about%20your%20products."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-20 right-4 sm:bottom-8 sm:right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-2xl hover:scale-110 transition-transform duration-200"
+        aria-label="Chat on WhatsApp"
+      >
+        <Image src="/whatsapp.png" alt="WhatsApp" width={56} height={56} className="w-14 h-14 rounded-full" />
+      </a>
     </div>
   );
 }

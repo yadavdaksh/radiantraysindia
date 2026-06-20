@@ -3,10 +3,22 @@ import { useNavigate } from "react-router-dom";
 import {
   IconPlus, IconSearch, IconEdit, IconTrash, IconDots,
   IconBox, IconFilter, IconChevronLeft, IconChevronRight,
-  IconCheck, IconX, IconPhoto,
+  IconCheck, IconX, IconPhoto, IconTableExport,
 } from "@tabler/icons-react";
 
 import { apiFetch } from "../lib/api";
+import { ExportModal } from "../components/ExportModal";
+
+const PRODUCT_EXPORT_COLUMNS = [
+  { key: "name", label: "Name" },
+  { key: "sku", label: "SKU" },
+  { key: "productType", label: "Product Type" },
+  { key: "basePrice", label: "Base Price" },
+  { key: "salePrice", label: "Sale Price" },
+  { key: "isActive", label: "Active" },
+  { key: "badge", label: "Badge" },
+  { key: "createdAt", label: "Created At" },
+];
 
 const CLIENT_URL = "http://localhost:3000";
 function getSlugFallback(slug: string): string {
@@ -88,6 +100,7 @@ export default function ProductsPage({ showToast }: { showToast: (msg: string, t
   const [typeFilter, setTypeFilter] = useState<"ALL"|"B2B"|"B2C">("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL"|"active"|"inactive">("ALL");
   const [deleting, setDeleting] = useState<string|null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -135,12 +148,20 @@ export default function ProductsPage({ showToast }: { showToast: (msg: string, t
           <h1 className="text-xl font-extrabold text-slate-950">Products</h1>
           <p className="text-xs text-slate-400 mt-0.5">{total} total products in catalog</p>
         </div>
-        <button
-          onClick={() => navigate("/products/add")}
-          className="inline-flex items-center gap-2 rounded-xl bg-sky-700 hover:bg-sky-800 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition"
-        >
-          <IconPlus size={16} /> Add Product
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setExportOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+          >
+            <IconTableExport size={14} /> Export
+          </button>
+          <button
+            onClick={() => navigate("/products/add")}
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-700 hover:bg-sky-800 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition"
+          >
+            <IconPlus size={16} /> Add Product
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -284,6 +305,14 @@ export default function ProductsPage({ showToast }: { showToast: (msg: string, t
           </div>
         )}
       </div>
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Products"
+        columns={PRODUCT_EXPORT_COLUMNS}
+        data={products}
+      />
     </div>
   );
 }

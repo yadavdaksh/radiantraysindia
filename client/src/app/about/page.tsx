@@ -15,7 +15,7 @@ const FOUNDERS = [
     title: "Co-Founder & Director and Technical Director",
     initial: "S",
     image: "/images/founders/shiwakshi-singh.jpeg",
-    bio: "Shiwakshi holds deep experience in product design and manufacturing development. With a degree in Mechanical Engineering and practical experience in machine design and production, he founded the organisation with an objective to ensure quality products with an optimum service experience for clients. He believes quality manufacturing is rooted in trust, constancy, and commitment to excellence.",
+    bio: "He holds deep experience in the area of Product Design and Manufacturing development. Having earned a degree in Mechanical Engineering and practical experience in the field of machine design and production, he founded the Organization with the objective of ensuring a quality product with an optimum service experience to its valued clients. He opines that Quality Manufacturing is rooted with trust, constancy and commitment to excellence.",
     expertise: ["GMP Compliance", "Client Strategy", "Quality Assurance", "ISO Standards"],
     email: "shiwakshi@radiantraysindia.com",
   },
@@ -24,14 +24,14 @@ const FOUNDERS = [
     title: "Co-Founder",
     initial: "D",
     image: "/images/founders/daksh.png",
-    bio: "Daksh possesses a strong understanding of manufacturing processes and engineering execution. He is dedicated to delivering quality-driven solutions that ensure both performance and reliability consistently. By combining his academic foundation with practical industry experience, he focuses on developing efficient solutions that create long-term value for clients and industry partners.",
+    bio: "He possesses a strong understanding of manufacturing processes and engineering execution. He is dedicated to delivering quality-driven solutions that ensure both performance and reliability consistently throughout. By combining his academic foundation with his practical industry experience, he focuses on developing efficient solutions that create long-term value for both his valued clients and industry partners.",
     expertise: ["Manufacturing Processes", "Engineering Execution", "Business Development", "Client Relations"],
     email: "daksh@radiantraysindia.com",
   },
 ];
 
 const MILESTONES = [
-  { year: "2009", label: "Founded", desc: "Company established in Noida with focus on cleanroom containment systems." },
+  { year: "2009", label: "Founded", desc: "Company established in Gurugram, Haryana with focus on cleanroom containment systems." },
   { year: "2013", label: "ISO Certified", desc: "Achieved ISO 9001 certification for manufacturing excellence." },
   { year: "2017", label: "500 Clients", desc: "Crossed 500 active facility partnerships across pharma, biotech, and hospital sectors." },
   { year: "2020", label: "B2C Launch", desc: "Launched direct e-commerce channel for stainless steel cleanroom furniture." },
@@ -68,7 +68,7 @@ export default function AboutPage() {
             <span className="bg-gradient-to-r from-brand-light via-sky-300 to-white bg-clip-text text-transparent">Controlled Environments</span>
           </h1>
           <p className="text-slate-300 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed">
-            Radiant Rays manufactures high-specification, compliance-driven cleanroom equipment trusted by over 500+ pharmaceutical, biotechnology, and healthcare facilities nationwide.
+            Radiant Rays Pvt. Ltd. manufactures high-specification, compliance-driven cleanroom equipment trusted by over 500+ pharmaceutical, biotechnology, and healthcare facilities nationwide.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <Link href="/products" className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 text-xs font-bold text-white hover:bg-brand-dark transition shadow-lg shadow-brand/20 hover:-translate-y-0.5 duration-200">
@@ -174,7 +174,7 @@ export default function AboutPage() {
               </h2>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed">
-              Radiant Rays was founded in 2009 in Noida with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop grew into a full-scale ISO-certified manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
+              Radiant Rays Pvt. Ltd. was founded in 2009 in Gurugram, Haryana with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop at Jagaram 406/21, Shanti Nagar, Gurugram grew into a full-scale ISO-certified manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
             </p>
             <p className="text-slate-600 text-sm leading-relaxed">
               Today we manufacture and deliver across all 28 Indian states, serving pharmaceutical manufacturers, biotech R&D centres, hospital operation theatres, electronics assembly plants, and food processing facilities that require clean, controlled working environments.

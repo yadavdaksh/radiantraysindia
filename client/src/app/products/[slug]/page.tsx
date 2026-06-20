@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { SiteShell } from "@/components/site-shell";
 import { ProductCard } from "@/components/ProductCard";
 import { apiClient } from "@/lib/api-client";
 import { getProductBySlug, getProductImage } from "@/lib/site-data";
@@ -185,7 +184,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     : null;
   const displayPrice = salePrice || basePrice;
   const discount = salePrice && basePrice > 0 ? Math.round((1 - salePrice / basePrice) * 100) : 0;
-  const inWishlist = isInWishlist(product.id || product.slug, selectedVariant?.id || null);
+  const inWishlist = isInWishlist(product.slug || product.id, null);
   const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
   const ratingCounts = [5, 4, 3, 2, 1].map((n) => ({ star: n, count: reviews.filter((r) => r.rating === n).length }));
 
@@ -265,11 +264,11 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   };
 
   return (
-    <SiteShell title={product.name} subtitle={stripHtml(product.shortDescription || "") || "High-specification contamination control systems."}>
+    <div className="w-full">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-6">
+      <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-6 mt-4">
         <Link href="/" className="hover:text-brand transition">Home</Link>
         <ChevronRight className="h-3.5 w-3.5 text-slate-300" />
         <Link href="/products" className="hover:text-brand transition">Products</Link>
@@ -286,7 +285,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       </nav>
 
       {/* ── Main 2-col grid ── */}
-      <div className="grid gap-8 lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_520px] mb-10">
+      <div className="grid gap-8 lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_520px] mb-8 items-start">
 
         {/* LEFT — Images */}
         <div className="space-y-3">
@@ -323,7 +322,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             )}
             {/* Wishlist */}
               <button
-              onClick={() => toggleWishlist(product.id || product.slug, selectedVariant?.id || null)}
+              onClick={() => toggleWishlist(product.slug || product.id, null)}
               className="absolute bottom-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-white shadow border border-slate-200 hover:border-rose-300 transition"
             >
               <Heart className={`h-5 w-5 ${inWishlist ? "fill-rose-600 text-rose-600" : "text-slate-400"}`} />
@@ -392,26 +391,13 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   </div>
                 )}
               </div>
+              {/* Short description */}
+              {product.shortDescription && (
+                <p className="mt-3 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                  {stripHtml(product.shortDescription)}
+                </p>
+              )}
             </div>
-
-            <div
-              className="product-desc text-sm leading-7 text-slate-600 border-t border-slate-100 pt-4"
-              dangerouslySetInnerHTML={{
-                __html: product.description || "<p>Durable cleanroom containment systems engineered for compliance and quality.</p>",
-              }}
-            />
-
-            {/* Features list */}
-            {product.features?.length > 0 && (
-              <ul className="space-y-1.5">
-                {product.features.slice(0, 5).map((f: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-brand mt-0.5 shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            )}
 
             {/* B2C Pricing */}
             {isB2C ? (
@@ -621,10 +607,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
             // Logistics rows — flat fields on variant (no nested object)
             const src = selectedVariant || (product.variants?.[0] ?? null);
-            if (src?.weight)                              specRows.push({ label: "Weight", value: `${src.weight} kg` });
-            if (src?.length && src?.width && src?.height) specRows.push({ label: "Dimensions (L×W×H)", value: `${src.length} × ${src.width} × ${src.height} cm` });
-            if (src?.hsnCode)                             specRows.push({ label: "HSN Code", value: src.hsnCode });
-            if (src?.packageDetails)                      specRows.push({ label: "Package Details", value: src.packageDetails });
+            if (src?.weight && Number(src.weight) > 0)                                          specRows.push({ label: "Weight", value: `${src.weight} kg` });
+            if (src?.length && src?.width && src?.height && Number(src.length) > 0)             specRows.push({ label: "Dimensions (L×W×H)", value: `${src.length} × ${src.width} × ${src.height} cm` });
+            if (src?.hsnCode && String(src.hsnCode).trim())                                     specRows.push({ label: "HSN Code", value: src.hsnCode });
+            if (src?.packageDetails && String(src.packageDetails).trim())                       specRows.push({ label: "Package Details", value: src.packageDetails });
 
             if (!specRows.length) return null;
 
@@ -671,6 +657,42 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           )}
         </div>
       </div>
+
+      {/* ── Full Description + Features ── */}
+      {(product.description || product.features?.length > 0) && (
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm mb-8">
+          <div className={product.features?.length > 0 ? "grid gap-10 lg:grid-cols-[1fr_320px] items-start" : ""}>
+            {/* Description */}
+            {product.description && (
+              <div>
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 mb-5 flex items-center gap-2">
+                  <span className="h-1.5 w-5 bg-brand rounded-full" /> Product Description
+                </h2>
+                <div
+                  className="product-desc prose prose-sm max-w-none text-slate-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </div>
+            )}
+            {/* Features sidebar */}
+            {product.features?.length > 0 && (
+              <div className="lg:border-l lg:border-slate-100 lg:pl-10">
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 mb-5 flex items-center gap-2">
+                  <span className="h-1.5 w-5 bg-brand rounded-full" /> Key Features
+                </h2>
+                <ul className="space-y-3">
+                  {product.features.map((f: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
+                      <CheckCircle2 className="h-4 w-4 text-brand mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── B2B Quote Form ── */}
       {!isB2C && (
@@ -891,6 +913,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           </div>
         </section>
       )}
-    </SiteShell>
+    </div>
   );
 }

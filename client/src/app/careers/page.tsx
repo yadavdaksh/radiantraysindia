@@ -37,7 +37,7 @@ export default function CareersPage() {
           </span>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight">
             Build a Safer World<br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-brand-light via-sky-300 to-white bg-clip-text text-transparent"> with Radiant Rays</span>
+            <span className="bg-gradient-to-r from-brand-light via-sky-300 to-white bg-clip-text text-transparent"> with Radiant Rays Pvt. Ltd.</span>
           </h1>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
             Join our growing team dedicated to manufacturing world-class safety and cleanroom equipment for India and beyond.

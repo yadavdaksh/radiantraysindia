@@ -81,7 +81,7 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
 
   // All settings keyed
   const [company, setCompany] = useState({
-    brandName: "Radiant Rays India", phone: "+91 731 815 8417 / +91 92117 81378",
+    brandName: "Radiant Rays Pvt. Ltd. ", phone: "+91 731 815 8417 / +91 92117 81378",
     email: "info@radiantraysindia.com", gstin: "36AAAAA1111A1Z1",
     address: "Plot 42, Sector II, Tech Park, Hyderabad",
     website: "https://radiantraysindia.com",
@@ -89,7 +89,7 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
   const [smtp, setSmtp] = useState({
     host: "smtp-relay.brevo.com", port: "587",
     user: "", pass: "", from: "no-reply@radiantraysindia.com",
-    fromName: "Radiant Rays India",
+    fromName: "Radiant Rays Pvt. Ltd. ",
   });
   const [r2, setR2] = useState({
     accountId: "", accessKeyId: "", secretAccessKey: "",
@@ -221,7 +221,7 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
               <F label="Username / Login Email"><input value={smtp.user} onChange={e => setSmtp(p => ({ ...p, user: e.target.value }))} className={inp} placeholder="your@brevo-login.com" /></F>
               <F label="SMTP API Key / Password"><PwdInput value={smtp.pass} onChange={v => setSmtp(p => ({ ...p, pass: v }))} placeholder="xkeysib-xxxxx" /></F>
               <F label="From Email"><input value={smtp.from} onChange={e => setSmtp(p => ({ ...p, from: e.target.value }))} className={inp} placeholder="no-reply@radiantraysindia.com" /></F>
-              <F label="From Name"><input value={smtp.fromName} onChange={e => setSmtp(p => ({ ...p, fromName: e.target.value }))} className={inp} placeholder="Radiant Rays India" /></F>
+              <F label="From Name"><input value={smtp.fromName} onChange={e => setSmtp(p => ({ ...p, fromName: e.target.value }))} className={inp} placeholder="Radiant Rays Pvt. Ltd. " /></F>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <button type="submit" disabled={saving} className="rounded-xl bg-sky-700 hover:bg-sky-800 px-6 py-3 text-sm font-bold text-white transition disabled:opacity-60">

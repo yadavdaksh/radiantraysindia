@@ -1,11 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import { getProductImage } from "@/lib/site-data";
+import { useWishlist } from "@/contexts/wishlist-context";
 
 interface ProductCardProps {
   prod: any;
-  isInWishlist?: (id: string) => boolean;
-  toggleWishlist?: (id: string) => void;
   size?: "sm" | "md";
 }
 
@@ -13,12 +14,13 @@ function stripHtml(html: string) {
   return html ? html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : "";
 }
 
-export function ProductCard({ prod, isInWishlist, toggleWishlist, size = "md" }: ProductCardProps) {
+export function ProductCard({ prod, size = "md" }: ProductCardProps) {
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const imageUrl = getProductImage(prod.slug, prod.images, prod.variants);
   const isB2C = (prod.productType || prod.type) === "B2C";
   const basePrice = Number(prod.basePrice || 0);
   const salePrice = prod.salePrice ? Number(prod.salePrice) : null;
-  const inWishlist = isInWishlist?.(prod.slug || prod.id);
+  const inWishlist = isInWishlist(prod.slug || prod.id);
   const imgH = size === "sm" ? "h-36 sm:h-40" : "h-40 sm:h-52";
 
   return (
@@ -55,15 +57,13 @@ export function ProductCard({ prod, isInWishlist, toggleWishlist, size = "md" }:
         )}
 
         {/* Wishlist */}
-        {toggleWishlist && (
-          <button
-            onClick={(e) => { e.preventDefault(); toggleWishlist(prod.slug || prod.id); }}
-            className="absolute bottom-2.5 right-2.5 h-7 w-7 flex items-center justify-center rounded-full bg-white/90 shadow-sm border border-slate-200/60 text-slate-400 hover:text-rose-600 transition"
-            aria-label="Toggle wishlist"
-          >
-            <Heart className={`h-3.5 w-3.5 ${inWishlist ? "fill-rose-600 text-rose-600" : ""}`} />
-          </button>
-        )}
+        <button
+          onClick={(e) => { e.preventDefault(); toggleWishlist(prod.slug || prod.id, null); }}
+          className="absolute bottom-2.5 right-2.5 h-7 w-7 flex items-center justify-center rounded-full bg-white/90 shadow-sm border border-slate-200/60 text-slate-400 hover:text-rose-600 transition"
+          aria-label="Toggle wishlist"
+        >
+          <Heart className={`h-3.5 w-3.5 ${inWishlist ? "fill-rose-600 text-rose-600" : ""}`} />
+        </button>
       </div>
 
       {/* Body */}

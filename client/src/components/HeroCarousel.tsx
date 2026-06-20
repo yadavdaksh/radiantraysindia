@@ -20,13 +20,6 @@ interface HeroCarouselProps {
   banners: Banner[];
 }
 
-/**
- * Desktop banner: 1600 × 560 px  (image fills full card, object-cover)
- * Mobile banner:  768  × 400 px
- *
- * Fallback (no image): brand-gradient card with centered text — same shape/size.
- * When API image present: same card shape, image fills it via object-cover, slight overlay for text legibility.
- */
 
 const FALLBACK_BANNERS: Banner[] = [
   {
@@ -101,7 +94,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Card — aspect matches 1600:560 on desktop, 768:400 on mobile */}
         <div
-          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl aspect-[4/3] sm:aspect-[16/7] md:aspect-[1920/600]"
+          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl aspect-[4/5] sm:aspect-[16/7] md:aspect-[1920/600]"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -149,32 +142,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
                           />
                         )}
 
-                        {/* Title and subtitle overlay: only show if explicitly set and not default "Banner" or empty */}
-                        {/* {slide.title && slide.title !== "Banner" && slide.title.trim() !== "" && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 sm:px-16 space-y-3 sm:space-y-4 bg-black/10">
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
-                              className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white uppercase tracking-widest"
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full bg-brand animate-ping" />
-                              Radiant Rays
-                            </motion.div>
-                            <motion.h2
-                              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
-                              className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-3xl"
-                            >
-                              {slide.title}
-                            </motion.h2>
-                            {slide.subtitle && (
-                              <motion.p
-                                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
-                                className="text-xs sm:text-sm text-white/80 max-w-xl leading-relaxed hidden sm:block"
-                              >
-                                {slide.subtitle}
-                              </motion.p>
-                            )}
-                          </div>
-                        )} */}
+
                       </>
                     ) : (
                       /* ── No image: styled gradient card like screenshot ── */
@@ -195,7 +163,7 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
                             className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white/90 uppercase tracking-widest"
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
-                            Radiant Rays
+                            Radiant Rays Pvt. Ltd.
                           </motion.div>
                           <motion.h2
                             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
