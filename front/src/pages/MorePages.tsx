@@ -2076,10 +2076,7 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
                       <button key={p.id} type="button" onClick={() => { setForm(f => ({...f, productId: p.id, customProduct: ""})); setProdSearch(p.name); }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition text-left">
                         <div className="w-8 h-8 rounded-lg border border-slate-100 overflow-hidden bg-slate-50 shrink-0 flex items-center justify-center">
-                          {productOptionImg(p)
-                            ? <img src={productOptionImg(p)!} alt="" className="w-full h-full object-cover"/>
-                            : <IconBox size={14} className="text-slate-300"/>
-                          }
+                          {(() => { const u = productOptionImg(p); return u ? <img src={u} alt="" className="w-full h-full object-cover"/> : <IconBox size={14} className="text-slate-300"/>; })()}
                         </div>
                         <span className="text-xs font-semibold text-slate-800 truncate">{p.name}</span>
                       </button>
