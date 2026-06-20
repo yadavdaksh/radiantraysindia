@@ -5,15 +5,15 @@ import { Tag } from "lucide-react";
 import { industries as mockIndustries } from "@/lib/site-data";
 
 export const metadata: Metadata = {
-  title: "Industries We Serve | Cleanroom Solutions | Radiant Rays India",
+  title: "Industries We Serve | Cleanroom Solutions | Radiant Rays Pvt. Ltd.",
   description: "Radiant Rays serves pharma, biotech, healthcare, electronics, and food industries with ISO-certified cleanroom containment systems. Explore industry applications.",
   alternates: { canonical: "https://radiantraysindia.com/industries" },
   openGraph: {
-    title: "Industries We Serve | Radiant Rays India",
+    title: "Industries We Serve | Radiant Rays Pvt. Ltd.",
     description: "Cleanroom solutions for pharma, biotech, healthcare, electronics, and food industries.",
     url: "https://radiantraysindia.com/industries",
     type: "website",
-    siteName: "Radiant Rays India",
+    siteName: "Radiant Rays Pvt. Ltd.",
   },
 };
 

@@ -34,21 +34,72 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<"categories" | "industries" | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Close dropdown on outside click
+  // Close nav dropdown on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpenDropdown(null);
       }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Debounced search
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    const q = searchQuery.trim();
+    if (!q || q.length < 2) { setSearchResults([]); setSearchLoading(false); return; }
+    setSearchLoading(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await apiClient.get("/public/products");
+        const all: any[] = res.data.data || [];
+        const ql = q.toLowerCase();
+        const matched = all.filter((p: any) => {
+          const variantNames   = (p.variants || []).map((v: any) => v.name || "").join(" ");
+          const compositeNames = (p.variants || []).map((v: any) => `${p.name} — ${v.name}`).join(" ");
+          return (
+            p.name?.toLowerCase().includes(ql) ||
+            (p.shortDescription || "").toLowerCase().includes(ql) ||
+            (p.sku || "").toLowerCase().includes(ql) ||
+            variantNames.toLowerCase().includes(ql) ||
+            compositeNames.toLowerCase().includes(ql)
+          );
+        });
+        // Expand to variant cards, cap at 8
+        const expanded: any[] = [];
+        for (const p of matched) {
+          const variants: any[] = (p.variants || []).filter((v: any) => v.isActive !== false);
+          if (variants.length === 0) {
+            expanded.push({ ...p, _href: `/products/${p.slug}`, _displayName: p.name });
+          } else {
+            for (const v of variants) {
+              const img = v.images?.find((i: any) => i.isPrimary)?.url || v.images?.[0]?.url || v.imageUrl
+                || p.images?.find((i: any) => i.isPrimary)?.url || p.images?.[0]?.url || null;
+              expanded.push({ ...p, _href: `/products/${p.slug}?variant=${v.slug}`, _displayName: `${p.name} — ${v.name}`, _img: img });
+            }
+          }
+          if (expanded.length >= 8) break;
+        }
+        setSearchResults(expanded.slice(0, 8));
+      } catch { setSearchResults([]); }
+      finally { setSearchLoading(false); }
+    }, 280);
+  }, [searchQuery]);
 
   // Newsletter state
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -372,7 +423,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* Global Expandable Search Bar */}
+        {/* Global Expandable Search Bar with live dropdown */}
         <AnimatePresence>
           {searchOpen && (
             <motion.div
@@ -382,25 +433,106 @@ export function GlobalShell({ children }: { children: ReactNode }) {
               className="border-b border-slate-200 bg-white"
             >
               <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                <form onSubmit={handleSearchSubmit} className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                    <input
-                      type="search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search for biosafety cabinets, laminar flows, static pass boxes..."
-                      className="w-full rounded-full border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-brand focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand"
-                      autoFocus
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
-                  >
-                    Search
-                  </button>
-                </form>
+                <div ref={searchRef} className="relative">
+                  <form onSubmit={handleSearchSubmit} className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400 pointer-events-none" />
+                      {searchLoading && (
+                        <span className="absolute right-3 top-3 h-5 w-5 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
+                      )}
+                      <input
+                        type="search"
+                        value={searchQuery}
+                        onChange={(e) => { setSearchQuery(e.target.value); setSearchFocused(true); }}
+                        onFocus={() => setSearchFocused(true)}
+                        placeholder="Search biosafety cabinets, laminar flows, pass boxes..."
+                        className="w-full rounded-full border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:border-brand focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        autoFocus
+                        autoComplete="off"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                    >
+                      Search
+                    </button>
+                  </form>
+
+                  {/* Live results dropdown */}
+                  <AnimatePresence>
+                    {searchFocused && searchQuery.trim().length >= 2 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        transition={{ duration: 0.12 }}
+                        className="absolute top-full left-0 right-[88px] mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 z-50 overflow-hidden"
+                      >
+                        {searchLoading && searchResults.length === 0 ? (
+                          <div className="flex items-center gap-3 px-4 py-4 text-sm text-slate-400">
+                            <span className="h-4 w-4 border-2 border-brand/30 border-t-brand rounded-full animate-spin shrink-0" />
+                            Searching…
+                          </div>
+                        ) : searchResults.length === 0 ? (
+                          <div className="px-4 py-4 text-sm text-slate-400">
+                            No results for <span className="font-bold text-slate-600">"{searchQuery}"</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="px-4 pt-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                              {searchResults.length} result{searchResults.length !== 1 ? "s" : ""}
+                            </div>
+                            <ul>
+                              {searchResults.map((item, i) => {
+                                const img = item._img
+                                  || item.images?.find((x: any) => x.isPrimary)?.url
+                                  || item.images?.[0]?.url
+                                  || null;
+                                const isB2C = (item.productType || item.type) === "B2C";
+                                return (
+                                  <li key={`${item.slug}-${i}`}>
+                                    <Link
+                                      href={item._href || `/products/${item.slug}`}
+                                      onClick={() => { setSearchOpen(false); setSearchQuery(""); setSearchResults([]); setSearchFocused(false); }}
+                                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition group"
+                                    >
+                                      <div className="h-10 w-10 shrink-0 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden">
+                                        {img ? (
+                                          <img src={img} alt="" className="h-full w-full object-contain p-1" />
+                                        ) : (
+                                          <Search className="h-4 w-4 text-slate-300" />
+                                        )}
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-semibold text-slate-800 group-hover:text-brand truncate transition">
+                                          {item._displayName || item.name}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 truncate">
+                                          {item.sku && <span className="font-mono mr-2">{item.sku}</span>}
+                                          <span className={`font-bold ${isB2C ? "text-emerald-600" : "text-amber-600"}`}>{isB2C ? "B2C" : "B2B"}</span>
+                                        </p>
+                                      </div>
+                                      <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-brand shrink-0 transition" />
+                                    </Link>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                            <div className="border-t border-slate-100 px-4 py-2.5">
+                              <button
+                                onClick={() => { router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`); setSearchOpen(false); setSearchQuery(""); setSearchResults([]); setSearchFocused(false); }}
+                                className="text-xs font-bold text-brand hover:underline"
+                              >
+                                See all results for "{searchQuery}" →
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </motion.div>
           )}

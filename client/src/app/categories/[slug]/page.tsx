@@ -21,9 +21,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const category = await getCategory(params.slug);
   const name = category?.name || params.slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
   const description = category?.description ||
-    `Browse ${name} cleanroom systems from Radiant Rays India — ISO certified biosafety cabinets, laminar flow units, and containment solutions.`;
+    `Browse ${name} cleanroom systems from Radiant Rays Pvt. Ltd. — ISO certified biosafety cabinets, laminar flow units, and containment solutions.`;
 
-  const title = `${name} | Cleanroom Equipment | Radiant Rays India`;
+  const title = `${name} | Cleanroom Equipment | Radiant Rays Pvt. Ltd.`;
   const url = `${BASE_URL}/categories/${params.slug}`;
   const image = category?.imageUrl || `${BASE_URL}/og-default.jpg`;
 
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       url,
       type: "website",
       images: [{ url: image, width: 1200, height: 630, alt: name }],
-      siteName: "Radiant Rays India",
+      siteName: "Radiant Rays Pvt. Ltd.",
     },
     twitter: {
       card: "summary_large_image",
@@ -54,7 +54,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       <div className="space-y-6 my-6 animate-pulse">
         <div className="h-8 bg-slate-100 rounded w-64" />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {[1,2,3,4,5,6].map((i) => <div key={i} className="rounded-2xl bg-slate-100 h-64" />)}
+          {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="rounded-2xl bg-slate-100 h-64" />)}
         </div>
       </div>
     }>

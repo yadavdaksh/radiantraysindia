@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const description = industry?.description || industry?.summary ||
     `Radiant Rays supplies ISO-certified cleanroom containment systems for ${name}. Custom biosafety cabinets, pass boxes, air showers and more.`;
 
-  const title = `${name} Cleanroom Solutions | Radiant Rays India`;
+  const title = `${name} Cleanroom Solutions | Radiant Rays Pvt. Ltd.`;
   const url = `${BASE_URL}/industries/${params.slug}`;
   const image = industry?.imageUrl || `${BASE_URL}/og-default.jpg`;
 
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       url,
       type: "website",
       images: [{ url: image, width: 1200, height: 630, alt: name }],
-      siteName: "Radiant Rays India",
+      siteName: "Radiant Rays Pvt. Ltd.",
     },
     twitter: {
       card: "summary_large_image",

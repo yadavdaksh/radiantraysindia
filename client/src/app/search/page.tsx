@@ -24,14 +24,16 @@ export default function SearchResultsPage() {
         const allProds = res.data.data;
         const q = query.toLowerCase();
         const filtered = allProds.filter((p: any) => {
-          const variantNames = (p.variants || []).map((v: any) => v.name || "").join(" ");
-          const variantSkus  = (p.variants || []).map((v: any) => v.sku  || "").join(" ");
+          const variantNames    = (p.variants || []).map((v: any) => v.name || "").join(" ");
+          const variantSkus     = (p.variants || []).map((v: any) => v.sku  || "").join(" ");
+          const compositeNames  = (p.variants || []).map((v: any) => `${p.name} — ${v.name}`).join(" ");
           return (
             p.name.toLowerCase().includes(q) ||
             (p.shortDescription || "").toLowerCase().includes(q) ||
             (p.sku || "").toLowerCase().includes(q) ||
             variantNames.toLowerCase().includes(q) ||
-            variantSkus.toLowerCase().includes(q)
+            variantSkus.toLowerCase().includes(q) ||
+            compositeNames.toLowerCase().includes(q)
           );
         });
         setProducts(expandToVariantCards(filtered));

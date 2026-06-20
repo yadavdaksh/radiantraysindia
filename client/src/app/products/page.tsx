@@ -93,11 +93,15 @@ export default function ProductsPage() {
   const filtered = products.filter((p) => {
     const variantNames = (p.variants || []).map((v: any) => v.name || "").join(" ");
     const variantSkus  = (p.variants || []).map((v: any) => v.sku  || "").join(" ");
+    // Also match composite "Product — Variant" names (what cards show)
+    const compositeNames = (p.variants || []).map((v: any) => `${p.name} — ${v.name}`).join(" ");
+    const q = search.toLowerCase();
     const matchQ   = !search ||
-      p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      (p.shortDescription || p.summary || "").toLowerCase().includes(search.toLowerCase()) ||
-      variantNames.toLowerCase().includes(search.toLowerCase()) ||
-      variantSkus.toLowerCase().includes(search.toLowerCase());
+      p.name?.toLowerCase().includes(q) ||
+      (p.shortDescription || p.summary || "").toLowerCase().includes(q) ||
+      variantNames.toLowerCase().includes(q) ||
+      variantSkus.toLowerCase().includes(q) ||
+      compositeNames.toLowerCase().includes(q);
 
     const matchCat = selectedCategory === "all" ||
       p.categories?.some((c: any) => c.category?.slug === selectedCategory || c.category?.id === selectedCategory) ||

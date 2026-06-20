@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     return { title: "Product Not Found | Radiant Rays" };
   }
 
-  const title = `${product.name} | Radiant Rays India`;
+  const title = `${product.name} | Radiant Rays Pvt. Ltd.`;
   const description = product.shortDescription
     ? product.shortDescription.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)
     : `Buy ${product.name} from Radiant Rays — ISO 9001:2015 certified cleanroom equipment manufacturer. Get quote or buy online.`;
@@ -46,24 +46,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     url,
     ...(product.productType === "B2C" && product.basePrice
       ? {
-          offers: {
-            "@type": "Offer",
-            price: product.salePrice || product.basePrice,
-            priceCurrency: "INR",
-            availability: "https://schema.org/InStock",
-            url,
-          },
-        }
+        offers: {
+          "@type": "Offer",
+          price: product.salePrice || product.basePrice,
+          priceCurrency: "INR",
+          availability: "https://schema.org/InStock",
+          url,
+        },
+      }
       : {
-          offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "INR",
-            availability: "https://schema.org/InStock",
-            priceSpecification: { "@type": "PriceSpecification", description: "Price on request" },
-            url,
-          },
-        }),
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "INR",
+          availability: "https://schema.org/InStock",
+          priceSpecification: { "@type": "PriceSpecification", description: "Price on request" },
+          url,
+        },
+      }),
   };
 
   return {
@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       url,
       type: "website",
       images: [{ url: image, width: 1200, height: 630, alt: product.name }],
-      siteName: "Radiant Rays India",
+      siteName: "Radiant Rays Pvt. Ltd.",
     },
     twitter: {
       card: "summary_large_image",
