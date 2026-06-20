@@ -6,11 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { getCategoryBySlug, products as mockProducts } from "@/lib/site-data";
 import { ProductCard } from "@/components/ProductCard";
-import { useWishlist } from "@/contexts/wishlist-context";
 import { ChevronRight, CircleAlert, Layers, Tag, ArrowRight } from "lucide-react";
 
 export default function CategoryDetailPage({ params }: { params: { slug: string } }) {
-  const { toggleWishlist, isInWishlist } = useWishlist();
   const searchParams = useSearchParams();
 
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -188,8 +186,6 @@ export default function CategoryDetailPage({ params }: { params: { slug: string 
             <ProductCard
               key={prod.slug || prod.id}
               prod={prod}
-              isInWishlist={isInWishlist}
-              toggleWishlist={toggleWishlist}
             />
           ))}
         </div>
