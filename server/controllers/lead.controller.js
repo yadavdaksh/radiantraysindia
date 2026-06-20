@@ -18,8 +18,7 @@ export const listLeads = asyncHandler(async (req, res) => {
 });
 
 export const updateLead = asyncHandler(async (req, res) => {
-  const { status, adminNotes } = req.body;
-  const lead = await leadService.updateStatus(req.params.id, status, adminNotes);
+  const lead = await leadService.updateLead(req.params.id, req.body);
   res.json(new ApiResponsive(200, lead, "Lead updated successfully"));
 });
 

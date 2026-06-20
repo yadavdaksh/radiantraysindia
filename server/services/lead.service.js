@@ -111,7 +111,7 @@ export const leadService = {
     return lead;
   },
 
-  updateStatus: async (id, status, adminNotes) => {
+  updateLead: async (id, body) => {
     const existing = await prisma.lead.findUnique({ where: { id } });
     if (!existing) throw new ApiError(404, "Lead not found");
 
@@ -121,17 +121,31 @@ export const leadService = {
       "READY_TO_SHIP", "DISPATCHED", "DELIVERED",
       "WON", "LOST", "CLOSED",
     ];
-    if (status && !validStatuses.includes(status)) {
+    if (body.status && !validStatuses.includes(body.status)) {
       throw new ApiError(400, "Invalid lead status");
     }
 
+    const data = {};
+    if (body.status !== undefined) data.status = body.status;
+    if (body.adminNotes !== undefined) data.adminNotes = body.adminNotes;
+    if (body.name !== undefined) data.name = body.name;
+    if (body.email !== undefined) data.email = body.email;
+    if (body.phone !== undefined) data.phone = body.phone;
+    if (body.company !== undefined) data.company = body.company;
+    if (body.source !== undefined) data.source = body.source;
+    if (body.message !== undefined) data.message = body.message;
+    if (body.productId !== undefined) data.productId = body.productId || null;
+    if (body.variantId !== undefined) data.variantId = body.variantId || null;
+
     return prisma.lead.update({
       where: { id },
-      data: {
-        ...(status ? { status } : {}),
-        ...(adminNotes !== undefined ? { adminNotes } : {}),
-      },
+      data,
+      include: { product: true, variant: true },
     });
+  },
+
+  updateStatus: async (id, status, adminNotes) => {
+    return leadService.updateLead(id, { status, adminNotes });
   },
 
   delete: async (id) => {
