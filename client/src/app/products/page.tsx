@@ -7,13 +7,11 @@ import { ProductCard } from "@/components/ProductCard";
 import { apiClient } from "@/lib/api-client";
 import { products as mockProducts, categories as mockCategories } from "@/lib/site-data";
 import { Search, SlidersHorizontal, CircleAlert, X, ChevronDown } from "lucide-react";
-import { useWishlist } from "@/contexts/wishlist-context";
 
 export default function ProductsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -293,8 +291,6 @@ export default function ProductsPage() {
                 <ProductCard
                   key={prod.slug || prod.id}
                   prod={prod}
-                  isInWishlist={isInWishlist}
-                  toggleWishlist={toggleWishlist}
                 />
               ))}
             </div>
