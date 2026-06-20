@@ -55,8 +55,8 @@ export const leadService = {
   },
 
   create: async (body) => {
-    if (!body.name || !body.phone || !body.message) {
-      throw new ApiError(400, "Name, phone, and inquiry message are required");
+    if (!body.name) {
+      throw new ApiError(400, "Name is required");
     }
 
     const lead = await prisma.lead.create({
@@ -69,8 +69,9 @@ export const leadService = {
         message: body.message,
         productId: body.productId || null,
         variantId: body.variantId || null,
-        status: "NEW",
-        source: body.source || "WEBSITE", // WEBSITE, WHATSAPP, QUOTE
+        status: body.status || "NEW",
+        adminNotes: body.adminNotes || null,
+        source: body.source || null,
       },
       include: {
         product: true,
@@ -114,7 +115,12 @@ export const leadService = {
     const existing = await prisma.lead.findUnique({ where: { id } });
     if (!existing) throw new ApiError(404, "Lead not found");
 
-    const validStatuses = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED"];
+    const validStatuses = [
+      "NEW", "CONTACTED", "QUALIFIED", "QUOTED", "APPROVED",
+      "DESIGNING", "CUTTING", "FABRICATION", "PACKAGING",
+      "READY_TO_SHIP", "DISPATCHED", "DELIVERED",
+      "WON", "LOST", "CLOSED",
+    ];
     if (status && !validStatuses.includes(status)) {
       throw new ApiError(400, "Invalid lead status");
     }
