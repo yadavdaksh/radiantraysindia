@@ -1466,12 +1466,22 @@ interface Lead {
   adminNotes?: string;
   customProduct?: string;
   createdAt: string;
-  product?: { id: string; name: string; slug?: string; images?: { url: string }[]; variants?: { id: string; name: string }[] };
+  product?: {
+    id: string; name: string; slug?: string;
+    images?: { url: string; isPrimary?: boolean }[];
+    variants?: { id: string; name: string; isDefault?: boolean; images?: { url: string }[]; imageUrl?: string }[];
+  };
   variant?: { id: string; name: string };
   customer?: { id: string; name: string };
 }
 
-interface ProductOption { id: string; name: string; slug?: string; images?: { url: string }[] }
+interface ProductOption {
+  id: string;
+  name: string;
+  slug?: string;
+  images?: { url: string; isPrimary?: boolean }[];
+  variants?: { id: string; name: string; isDefault?: boolean; images?: { url: string }[]; imageUrl?: string }[];
+}
 
 const SOURCE_COLORS: Record<string, string> = {
   "Meta": "bg-purple-100 text-purple-800",
@@ -1497,7 +1507,21 @@ function statusMeta(key: string) {
 }
 
 function leadImg(lead: Lead): string | null {
-  return lead.product?.images?.[0]?.url || null;
+  const p = lead.product;
+  if (!p) return null;
+  // primary image first
+  const primary = p.images?.find(i => i.isPrimary)?.url || p.images?.[0]?.url;
+  if (primary) return primary;
+  // fall back to default variant image
+  const defVar = p.variants?.find(v => v.isDefault) || p.variants?.[0];
+  return defVar?.images?.[0]?.url || defVar?.imageUrl || null;
+}
+
+function productOptionImg(p: ProductOption): string | null {
+  const primary = p.images?.find(i => i.isPrimary)?.url || p.images?.[0]?.url;
+  if (primary) return primary;
+  const defVar = p.variants?.find(v => v.isDefault) || p.variants?.[0];
+  return defVar?.images?.[0]?.url || defVar?.imageUrl || null;
 }
 
 const EMPTY_FORM = {
@@ -1542,7 +1566,7 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
       .catch((e: { message: string }) => showToast(e.message, "error"))
       .finally(() => setLoading(false));
     // load products for modal
-    apiFetch("/products?limit=200&fields=id,name,slug,images")
+    apiFetch("/products?limit=200")
       .then((j: { data?: { items?: ProductOption[] } }) => setProducts(j.data?.items || []))
       .catch(() => {/* non-critical */});
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1660,10 +1684,10 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900">Lead Pipeline</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{items.length} total · {filtered.length} shown · track every enquiry from source to delivery</p>
+          <p className="text-xs text-slate-500 mt-0.5">{items.length} total · {filtered.length} shown</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={openAdd}
@@ -2052,8 +2076,8 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
                       <button key={p.id} type="button" onClick={() => { setForm(f => ({...f, productId: p.id, customProduct: ""})); setProdSearch(p.name); }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition text-left">
                         <div className="w-8 h-8 rounded-lg border border-slate-100 overflow-hidden bg-slate-50 shrink-0 flex items-center justify-center">
-                          {p.images?.[0]?.url
-                            ? <img src={p.images[0].url} alt="" className="w-full h-full object-cover"/>
+                          {productOptionImg(p)
+                            ? <img src={productOptionImg(p)!} alt="" className="w-full h-full object-cover"/>
                             : <IconBox size={14} className="text-slate-300"/>
                           }
                         </div>
