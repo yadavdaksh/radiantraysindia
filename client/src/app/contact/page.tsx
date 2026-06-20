@@ -11,7 +11,7 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState("General Inquiry");
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -60,7 +60,7 @@ export default function ContactPage() {
         <div className="space-y-6">
           <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-slate-950">Contact Information</h2>
-            
+
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <div className="h-10 w-10 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
@@ -95,7 +95,7 @@ export default function ContactPage() {
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Registered Office</p>
                   <p className="text-sm font-semibold text-slate-900 leading-relaxed">
-                    JAGRAM 406/21, SHANTI NAGAR, GURUGRAM, HARYANA - 122022
+                    JAGRAM 406/21, SHANTI NAGAR, GURUGRAM, HARYANA - 122001
                   </p>
                 </div>
               </div>

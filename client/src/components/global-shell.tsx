@@ -510,7 +510,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                 </span>
                 <span className="flex items-center gap-2">
                   <MapPin className="h-3.5 w-3.5 text-brand" />
-                  JAGRAM 406/21, SHANTI NAGAR, GURUGRAM, HARYANA - 122022
+                  JAGRAM 406/21, SHANTI NAGAR, GURUGRAM, HARYANA - 122001
                 </span>
               </div>
             </div>
