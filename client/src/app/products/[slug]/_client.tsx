@@ -279,7 +279,19 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
   };
 
   const stripHtml = (html: string) =>
-    html ? html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : "";
+    html
+      ? html
+          .replace(/<[^>]*>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/&[a-z]+;/gi, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+      : "";
 
   const breadcrumbSchema = {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
