@@ -40,7 +40,7 @@ const MILESTONES = [
 ];
 
 const VALUES = [
-  { icon: Target, title: "Precision First", desc: "Every dimension, weld, and filter tolerance is engineered to spec — not approximated." },
+  { icon: Target, title: "Safety First", desc: "Every dimension, weld, and filter tolerance is engineered to spec — not approximated." },
   { icon: Award, title: "Compliance Ready", desc: "Products comply with WHO GMP, ISO Class 1–9, and CE safety directives." },
   { icon: Zap, title: "Fast Turnaround", desc: "Standard configs ship in 7–14 days. Custom builds quoted within 24 hours." },
   { icon: Users, title: "Client-Led Design", desc: "Non-standard sizes, materials, and integrations welcomed. We build what you spec." },

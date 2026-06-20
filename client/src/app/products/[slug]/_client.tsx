@@ -584,9 +584,9 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
                           key={v.id}
                           onClick={() => {
                             setSelectedVariant(v);
-                            // Switch image to variant's first image if it has one
                             const varImg = v.images?.find((i: any) => i.isPrimary)?.url || v.images?.[0]?.url || v.imageUrl;
                             if (varImg) setActiveImage(varImg);
+                            if (v.slug) router.replace(`/products/${product.slug}?variant=${v.slug}`, { scroll: false });
                           }}
                           className={`flex flex-col items-center justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
                             selectedVariant?.id === v.id
@@ -662,9 +662,9 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
                           key={v.id}
                           onClick={() => {
                             setSelectedVariant(v);
-                            // Switch image to variant's first image if it has one
                             const varImg = v.images?.find((i: any) => i.isPrimary)?.url || v.images?.[0]?.url || v.imageUrl;
                             if (varImg) setActiveImage(varImg);
+                            if (v.slug) router.replace(`/products/${product.slug}?variant=${v.slug}`, { scroll: false });
                           }}
                           className={`flex flex-col items-center justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
                             selectedVariant?.id === v.id
