@@ -95,12 +95,15 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         const data = res.data.data;
         if (!data) throw new Error("Not found");
         setProduct(data);
-        const img = data.images?.find((i: any) => i.isPrimary)?.url
-          || data.images?.[0]?.url
-          || getProductImage(data.slug, data.images, data.variants);
-        setActiveImage(img);
         const defVar = data.variants?.find((v: any) => v.isDefault) || data.variants?.[0] || null;
         setSelectedVariant(defVar);
+        const img = data.images?.find((i: any) => i.isPrimary)?.url
+          || data.images?.[0]?.url
+          || defVar?.images?.find((i: any) => i.isPrimary)?.url
+          || defVar?.images?.[0]?.url
+          || defVar?.imageUrl
+          || getProductImage(data.slug, data.images, data.variants);
+        setActiveImage(img);
 
         // Fetch related — same category, exclude current
         try {
