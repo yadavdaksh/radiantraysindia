@@ -421,57 +421,54 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           {/* LIGHTBOX */}
           {lightboxOpen && imgUrls.length > 0 && (
             <div
-              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
-              onClick={() => setLightboxOpen(false)}
+              style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.95)", display: "flex", flexDirection: "column", overflow: "hidden" }}
               onTouchStart={e => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
               onTouchEnd={e => {
                 const dx = e.changedTouches[0].clientX - touchStartX.current;
                 const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
-                if (Math.abs(dx) > 40 && dy < 60) {
-                  setZoom(1);
-                  setLightboxIdx(i => (i + (dx < 0 ? 1 : -1) + imgUrls.length) % imgUrls.length);
-                }
+                if (Math.abs(dx) > 40 && dy < 60) { setZoom(1); setLightboxIdx(i => (i + (dx < 0 ? 1 : -1) + imgUrls.length) % imgUrls.length); }
               }}
             >
-              {/* Close */}
-              <button onClick={() => setLightboxOpen(false)}
-                className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                <X className="h-5 w-5 text-white" />
-              </button>
-              {/* Counter */}
-              <span className="absolute top-4 left-4 text-white/60 text-xs font-bold z-10">{lightboxIdx + 1} / {imgUrls.length}</span>
-              {/* Zoom controls */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-                <button onClick={e => { e.stopPropagation(); setZoom(z => Math.max(1, +(z - 0.5).toFixed(1))); }}
-                  className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg transition">−</button>
-                <span className="text-white/70 text-xs font-bold min-w-10 text-center">{Math.round(zoom * 100)}%</span>
-                <button onClick={e => { e.stopPropagation(); setZoom(z => Math.min(4, +(z + 0.5).toFixed(1))); }}
-                  className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg transition">+</button>
-                <button onClick={e => { e.stopPropagation(); setZoom(1); }}
-                  className="h-7 px-3 rounded-full bg-white/10 hover:bg-white/20 text-white/70 text-xs font-bold transition">Reset</button>
+              {/* Top bar */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", flexShrink: 0 }}>
+                <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, fontWeight: 700 }}>{lightboxIdx + 1} / {imgUrls.length}</span>
+                <button onClick={() => setLightboxOpen(false)}
+                  style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff" }}>
+                  <X size={20} />
+                </button>
               </div>
-              {/* Prev/Next */}
-              {imgUrls.length > 1 && (
-                <>
-                  <button onClick={e => { e.stopPropagation(); setZoom(1); setLightboxIdx(i => (i - 1 + imgUrls.length) % imgUrls.length); }}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition z-10">
-                    <ChevronLeft className="h-6 w-6 text-white" />
+
+              {/* Image area — flex-1, no scroll */}
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", minHeight: 0 }}>
+                {imgUrls.length > 1 && (
+                  <button onClick={() => { setZoom(1); setLightboxIdx(i => (i - 1 + imgUrls.length) % imgUrls.length); }}
+                    style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff", zIndex: 2 }}>
+                    <ChevronLeft size={24} />
                   </button>
-                  <button onClick={e => { e.stopPropagation(); setZoom(1); setLightboxIdx(i => (i + 1) % imgUrls.length); }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition z-10">
-                    <ChevronRight className="h-6 w-6 text-white" />
-                  </button>
-                </>
-              )}
-              {/* Image */}
-              <div className="overflow-auto max-w-full max-h-full flex items-center justify-center p-16" onClick={e => e.stopPropagation()}>
+                )}
                 <img
                   src={imgUrls[lightboxIdx]}
                   alt=""
-                  style={{ transform: `scale(${zoom})`, transformOrigin: "center", transition: "transform 0.2s" }}
-                  className="max-w-[90vw] max-h-[80vh] object-contain rounded-xl"
+                  style={{ maxWidth: "calc(100vw - 120px)", maxHeight: "100%", objectFit: "contain", transform: `scale(${zoom})`, transformOrigin: "center", transition: "transform 0.2s", display: "block" }}
                   draggable={false}
                 />
+                {imgUrls.length > 1 && (
+                  <button onClick={() => { setZoom(1); setLightboxIdx(i => (i + 1) % imgUrls.length); }}
+                    style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff", zIndex: 2 }}>
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+              </div>
+
+              {/* Bottom zoom bar */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, padding: "14px 16px", flexShrink: 0 }}>
+                <button onClick={() => setZoom(z => Math.max(1, +(z - 0.5).toFixed(1)))}
+                  style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: "50%", width: 38, height: 38, color: "#fff", fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: 700, minWidth: 44, textAlign: "center" }}>{Math.round(zoom * 100)}%</span>
+                <button onClick={() => setZoom(z => Math.min(4, +(z + 0.5).toFixed(1)))}
+                  style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: "50%", width: 38, height: 38, color: "#fff", fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                <button onClick={() => setZoom(1)}
+                  style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 20, padding: "6px 14px", color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Reset</button>
               </div>
             </div>
           )}
