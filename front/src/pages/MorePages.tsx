@@ -1691,16 +1691,21 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={openAdd}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-white bg-brand hover:bg-brand-dark transition shadow-sm">
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-white transition shadow-sm"
+            style={{ backgroundColor: "#035f96" }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#024769")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#035f96")}>
             <IconPlus size={14} /> Add Lead
           </button>
           <div className="flex rounded-xl border border-slate-200 overflow-hidden">
             <button onClick={() => setView("list")}
-              className={`px-3 py-1.5 text-xs font-bold transition ${view === "list" ? "bg-brand text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
+              className="px-3 py-1.5 text-xs font-bold transition"
+              style={view === "list" ? { backgroundColor: "#035f96", color: "#fff" } : { backgroundColor: "#fff", color: "#64748b" }}>
               List
             </button>
             <button onClick={() => setView("kanban")}
-              className={`px-3 py-1.5 text-xs font-bold transition ${view === "kanban" ? "bg-brand text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
+              className="px-3 py-1.5 text-xs font-bold transition"
+              style={view === "kanban" ? { backgroundColor: "#035f96", color: "#fff" } : { backgroundColor: "#fff", color: "#64748b" }}>
               Kanban
             </button>
           </div>
@@ -2049,7 +2054,8 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
                   <div className="flex rounded-xl border border-slate-200 overflow-hidden">
                     {["B2B","B2C"].map(t => (
                       <button key={t} type="button" onClick={() => setForm(f => ({...f, productType: t}))}
-                        className={`flex-1 py-2 text-xs font-bold transition ${form.productType === t ? "bg-brand text-white" : "bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
+                        className={`flex-1 py-2 text-xs font-bold transition ${form.productType === t ? "text-white" : "bg-slate-50 text-slate-500 hover:bg-slate-100"}`}
+                        style={form.productType === t ? { backgroundColor: "#035f96" } : {}}>
                         {t}
                       </button>
                     ))}
@@ -2123,7 +2129,8 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
                 Cancel
               </button>
               <button onClick={saveLead} disabled={saving}
-                className="px-5 py-2 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand-dark transition disabled:opacity-50 inline-flex items-center gap-1.5">
+                className="px-5 py-2 rounded-xl text-white text-xs font-bold transition disabled:opacity-50 inline-flex items-center gap-1.5"
+                style={{ backgroundColor: "#035f96" }}>
                 {saving && <IconRefresh size={12} className="animate-spin"/>}
                 {editLead ? "Save Changes" : "Add Lead"}
               </button>
@@ -2154,7 +2161,8 @@ export function ManufacturingLeadsPage({ showToast }: { showToast: (m: string, t
                 Cancel
               </button>
               <button onClick={saveNotes}
-                className="px-4 py-2 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand-dark transition">
+                className="px-4 py-2 rounded-xl text-white text-xs font-bold transition"
+                style={{ backgroundColor: "#035f96" }}>
                 Save Notes
               </button>
             </div>
