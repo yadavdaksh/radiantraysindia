@@ -35,14 +35,16 @@ export const metadata: Metadata = {
     description:
       "Enterprise-grade cleanroom equipment and contamination-control systems for regulated industries.",
     url: "https://radiantraysindia.com",
-    siteName: "Radiant Rays",
+    siteName: "Radiant Rays Pvt. Ltd.",
     type: "website",
+    images: [{ url: "https://radiantraysindia.com/logo.png", width: 2024, height: 777, alt: "Radiant Rays Pvt. Ltd." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Radiant Rays",
     description:
       "Enterprise-grade cleanroom equipment and contamination-control systems for regulated industries.",
+    images: ["https://radiantraysindia.com/logo.png"],
   },
   verification: {
     google: "5rpas7khMdhvoukTd9MLr1DfuPzz7tuXhIpdX3uyDgM",

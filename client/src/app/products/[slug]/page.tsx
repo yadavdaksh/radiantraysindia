@@ -27,11 +27,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     ? product.shortDescription.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)
     : `Buy ${product.name} from Radiant Rays — ISO 9001:2015 certified cleanroom equipment manufacturer. Get quote or buy online.`;
 
-  const image =
+  const rawImage =
     product.images?.find((i: any) => i.isPrimary)?.url ||
     product.images?.[0]?.url ||
     product.variants?.[0]?.images?.[0]?.url ||
-    `${BASE_URL}/og-default.jpg`;
+    product.variants?.find((v: any) => v.isDefault)?.images?.[0]?.url ||
+    null;
+  const image = rawImage
+    ? rawImage.startsWith("http") ? rawImage : `${BASE_URL}${rawImage}`
+    : `${BASE_URL}/logo.png`;
 
   const url = `${BASE_URL}/products/${params.slug}`;
 

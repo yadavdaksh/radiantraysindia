@@ -25,7 +25,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const title = `${name} | Cleanroom Equipment | Radiant Rays Pvt. Ltd.`;
   const url = `${BASE_URL}/categories/${params.slug}`;
-  const image = category?.imageUrl || `${BASE_URL}/og-default.jpg`;
+  const rawImage = category?.imageUrl;
+  const image = rawImage
+    ? rawImage.startsWith("http") ? rawImage : `${BASE_URL}${rawImage}`
+    : `${BASE_URL}/logo.png`;
 
   return {
     title,

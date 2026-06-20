@@ -7,6 +7,18 @@ import {
 export const metadata = {
   title: "About Us — Radiant Rays",
   description: "Meet the founders and team behind Radiant Rays — precision cleanroom equipment manufacturers trusted by 500+ pharma and biotech facilities.",
+  openGraph: {
+    title: "About Radiant Rays Pvt. Ltd.",
+    description: "Meet the founders and team behind Radiant Rays — precision cleanroom equipment manufacturers.",
+    url: "https://radiantraysindia.com/about",
+    type: "website",
+    siteName: "Radiant Rays Pvt. Ltd.",
+    images: [{ url: "https://radiantraysindia.com/logo.png", width: 2024, height: 777, alt: "Radiant Rays Pvt. Ltd." }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["https://radiantraysindia.com/logo.png"],
+  },
 };
 
 const FOUNDERS = [
