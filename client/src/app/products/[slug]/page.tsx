@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import { ProductCard } from "@/components/ProductCard";
@@ -13,6 +13,7 @@ import {
   FileText, MessageSquare, ShoppingCart, Send, Loader2,
   Heart, Star, CheckCircle2, ChevronRight,
   ShieldCheck, Truck, Award, Package, ArrowRight, Zap,
+  ZoomIn, X, ChevronLeft,
 } from "lucide-react";
 
 // ── Star rating click input ─────────────────────────────────
@@ -68,6 +69,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+
+  // Lightbox
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIdx, setLightboxIdx] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  // Touch swipe
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
 
   // Lead form
   const [leadName, setLeadName] = useState("");
@@ -291,17 +300,52 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       <div className="grid gap-8 lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_520px] mb-8 items-start">
 
         {/* LEFT — Images */}
+        {(() => {
+          const varImgs: any[] = selectedVariant?.images?.length ? selectedVariant.images : [];
+          const prodImgs: any[] = product.images || [];
+          const allImgs: any[] = (varImgs.length ? varImgs : prodImgs);
+          const imgUrls: string[] = allImgs.map((i: any) => i.url).filter(Boolean);
+          if (activeImage && !imgUrls.includes(activeImage)) imgUrls.unshift(activeImage);
+          const activeIdx = imgUrls.indexOf(activeImage);
+          const currentIdx = activeIdx >= 0 ? activeIdx : 0;
+
+          const goTo = (idx: number) => {
+            const next = (idx + imgUrls.length) % imgUrls.length;
+            setActiveImage(imgUrls[next]);
+          };
+
+          const handleTouchStart = (e: React.TouchEvent) => {
+            touchStartX.current = e.touches[0].clientX;
+            touchStartY.current = e.touches[0].clientY;
+          };
+          const handleTouchEnd = (e: React.TouchEvent) => {
+            const dx = e.changedTouches[0].clientX - touchStartX.current;
+            const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+            if (Math.abs(dx) > 40 && dy < 60) {
+              goTo(dx < 0 ? currentIdx + 1 : currentIdx - 1);
+            }
+          };
+
+          const openLightbox = (idx: number) => { setLightboxIdx(idx); setZoom(1); setLightboxOpen(true); };
+
+          return (
         <div className="space-y-3">
           {/* Main image */}
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm flex items-center justify-center min-h-[280px] sm:min-h-[380px] lg:min-h-[460px] p-4 sm:p-6 group">
+          <div
+            className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm flex items-center justify-center min-h-[280px] sm:min-h-[380px] lg:min-h-[460px] p-4 sm:p-6 group cursor-zoom-in select-none"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onClick={() => activeImage && openLightbox(currentIdx)}
+          >
             {activeImage ? (
               <img
                 src={activeImage}
                 alt={product.name}
-                className="max-h-[220px] sm:max-h-[320px] lg:max-h-[420px] max-w-full object-contain transition duration-500 group-hover:scale-105"
+                className="max-h-[220px] sm:max-h-[320px] lg:max-h-[420px] max-w-full object-contain transition duration-500 group-hover:scale-105 pointer-events-none"
+                draggable={false}
               />
             ) : (
-              <div className="h-80 w-full rounded-2xl bg-gradient-to-br from-brand/8 to-slate-100 flex items-center justify-center text-slate-400 font-bold text-sm">
+              <div className="h-80 w-full rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-400 font-bold text-sm">
                 Cleanroom System Image
               </div>
             )}
@@ -311,46 +355,126 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             }`}>
               {isB2C ? "B2C" : "B2B"}
             </span>
-            {/* NEW/SALE/HOT */}
+            {/* badge */}
             {product.badge && (
               <span className={`absolute top-4 right-4 rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider shadow-md ${
                 product.badge === "SALE" ? "bg-rose-500 text-white" :
                 product.badge === "NEW" ? "bg-sky-500 text-white" :
                 product.badge === "HOT" ? "bg-orange-500 text-white" :
-                product.badge === "BESTSELLER" ? "bg-violet-500 text-white" :
                 "bg-slate-700 text-white"
-              }`}>
-                {product.badge}
-              </span>
+              }`}>{product.badge}</span>
+            )}
+            {/* Zoom hint */}
+            {activeImage && (
+              <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                <ZoomIn className="h-4 w-4 text-slate-600" />
+              </div>
+            )}
+            {/* Prev/Next arrows — only if multiple images */}
+            {imgUrls.length > 1 && (
+              <>
+                <button
+                  onClick={e => { e.stopPropagation(); goTo(currentIdx - 1); }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 border border-slate-200 shadow flex items-center justify-center hover:bg-white transition z-10"
+                >
+                  <ChevronLeft className="h-4 w-4 text-slate-600" />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); goTo(currentIdx + 1); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 border border-slate-200 shadow flex items-center justify-center hover:bg-white transition z-10"
+                >
+                  <ChevronRight className="h-4 w-4 text-slate-600" />
+                </button>
+                {/* Dot indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                  {imgUrls.map((_, i) => (
+                    <button key={i} onClick={e => { e.stopPropagation(); goTo(i); }}
+                      className={`h-1.5 rounded-full transition-all ${i === currentIdx ? "w-5 bg-brand" : "w-1.5 bg-slate-300 hover:bg-slate-400"}`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
             {/* Wishlist */}
-              <button
-              onClick={() => toggleWishlist(product.slug || product.id, null)}
-              className="absolute bottom-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-white shadow border border-slate-200 hover:border-rose-300 transition"
+            <button
+              onClick={e => { e.stopPropagation(); toggleWishlist(product.slug || product.id, null); }}
+              className="absolute bottom-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-white shadow border border-slate-200 hover:border-rose-300 transition z-10"
             >
               <Heart className={`h-5 w-5 ${inWishlist ? "fill-rose-600 text-rose-600" : "text-slate-400"}`} />
             </button>
           </div>
 
-          {/* Thumbnail rail — shows variant images when variant selected, else product images */}
-          {(() => {
-            const varImgs: any[] = selectedVariant?.images?.length ? selectedVariant.images : [];
-            const prodImgs: any[] = product.images || [];
-            const thumbs = varImgs.length ? varImgs : prodImgs;
-            if (thumbs.length <= 1) return null;
-            return (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {thumbs.map((img: any, idx: number) => (
-                  <button key={idx} onClick={() => setActiveImage(img.url)}
-                    className={`h-20 w-20 shrink-0 rounded-2xl border-2 p-1.5 bg-white flex items-center justify-center transition ${
-                      activeImage === img.url ? "border-brand shadow-sm" : "border-slate-200 hover:border-slate-300"
-                    }`}>
-                    <img src={img.url} alt="" className="max-h-full max-w-full object-contain" />
-                  </button>
-                ))}
+          {/* Thumbnail rail */}
+          {imgUrls.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {imgUrls.map((url, idx) => (
+                <button key={idx} onClick={() => setActiveImage(url)}
+                  className={`h-20 w-20 shrink-0 rounded-2xl border-2 p-1.5 bg-white flex items-center justify-center transition ${
+                    activeImage === url ? "border-brand shadow-sm" : "border-slate-200 hover:border-slate-300"
+                  }`}>
+                  <img src={url} alt="" className="max-h-full max-w-full object-contain" draggable={false} />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* LIGHTBOX */}
+          {lightboxOpen && imgUrls.length > 0 && (
+            <div
+              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+              onClick={() => setLightboxOpen(false)}
+              onTouchStart={e => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
+              onTouchEnd={e => {
+                const dx = e.changedTouches[0].clientX - touchStartX.current;
+                const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+                if (Math.abs(dx) > 40 && dy < 60) {
+                  setZoom(1);
+                  setLightboxIdx(i => (i + (dx < 0 ? 1 : -1) + imgUrls.length) % imgUrls.length);
+                }
+              }}
+            >
+              {/* Close */}
+              <button onClick={() => setLightboxOpen(false)}
+                className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                <X className="h-5 w-5 text-white" />
+              </button>
+              {/* Counter */}
+              <span className="absolute top-4 left-4 text-white/60 text-xs font-bold z-10">{lightboxIdx + 1} / {imgUrls.length}</span>
+              {/* Zoom controls */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+                <button onClick={e => { e.stopPropagation(); setZoom(z => Math.max(1, +(z - 0.5).toFixed(1))); }}
+                  className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg transition">−</button>
+                <span className="text-white/70 text-xs font-bold min-w-10 text-center">{Math.round(zoom * 100)}%</span>
+                <button onClick={e => { e.stopPropagation(); setZoom(z => Math.min(4, +(z + 0.5).toFixed(1))); }}
+                  className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg transition">+</button>
+                <button onClick={e => { e.stopPropagation(); setZoom(1); }}
+                  className="h-7 px-3 rounded-full bg-white/10 hover:bg-white/20 text-white/70 text-xs font-bold transition">Reset</button>
               </div>
-            );
-          })()}
+              {/* Prev/Next */}
+              {imgUrls.length > 1 && (
+                <>
+                  <button onClick={e => { e.stopPropagation(); setZoom(1); setLightboxIdx(i => (i - 1 + imgUrls.length) % imgUrls.length); }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition z-10">
+                    <ChevronLeft className="h-6 w-6 text-white" />
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); setZoom(1); setLightboxIdx(i => (i + 1) % imgUrls.length); }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition z-10">
+                    <ChevronRight className="h-6 w-6 text-white" />
+                  </button>
+                </>
+              )}
+              {/* Image */}
+              <div className="overflow-auto max-w-full max-h-full flex items-center justify-center p-16" onClick={e => e.stopPropagation()}>
+                <img
+                  src={imgUrls[lightboxIdx]}
+                  alt=""
+                  style={{ transform: `scale(${zoom})`, transformOrigin: "center", transition: "transform 0.2s" }}
+                  className="max-w-[90vw] max-h-[80vh] object-contain rounded-xl"
+                  draggable={false}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Trust badges strip */}
           <div className="grid grid-cols-3 gap-2 pt-1">
@@ -366,6 +490,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             ))}
           </div>
         </div>
+          );
+        })()}
 
         {/* RIGHT — Details */}
         <div className="space-y-5">
