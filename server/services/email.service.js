@@ -1,6 +1,5 @@
 import sendEmail from "../utils/sendEmail.js";
 import { prisma } from "../config/db.js";
-import { getStoreConfig } from "../utils/storeConfig.js";
 
 const BASE_STYLES = `
   body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; background-color: #f8fafc; margin: 0; padding: 0; }

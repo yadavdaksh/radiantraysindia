@@ -42,6 +42,7 @@ const selectProductDetails = {
   variants: {
     include: {
       images: true,
+      documents: true,
       attributes: {
         include: {
           attributeValue: {
@@ -236,6 +237,21 @@ export const productService = {
               });
             }
           }
+
+          // Handle variant documents if specified
+          const variantDocuments = Array.isArray(variant.documents) ? variant.documents : [];
+          if (variantDocuments.length) {
+            await tx.productDocument.createMany({
+              data: variantDocuments.map((doc) => ({
+                productId: created.id,
+                variantId: createdVariant.id,
+                title: doc.title,
+                url: doc.url,
+                key: doc.key || null,
+                mimeType: doc.mimeType || null,
+              })),
+            });
+          }
         }
       }
 
@@ -427,6 +443,21 @@ export const productService = {
               });
             }
           }
+
+          // Handle variant documents if specified
+          const variantDocuments = Array.isArray(variant.documents) ? variant.documents : [];
+          if (variantDocuments.length) {
+            await tx.productDocument.createMany({
+              data: variantDocuments.map((doc) => ({
+                productId: id,
+                variantId: createdVariant.id,
+                title: doc.title,
+                url: doc.url,
+                key: doc.key || null,
+                mimeType: doc.mimeType || null,
+              })),
+            });
+          }
         }
       }
 
@@ -443,9 +474,12 @@ export const productService = {
         });
       }
 
-      // Cleanup removed documents from R2
+      // Cleanup removed documents from R2 (both product and variant docs)
       try {
-        const newDocUrls = new Set(documents.map(d => d.url).filter(Boolean));
+        const newDocUrls = new Set([
+          ...documents.map(d => d.url).filter(Boolean),
+          ...variants.flatMap(v => v.documents || []).map(d => d.url).filter(Boolean)
+        ]);
         const currentDocs = await tx.productDocument.findMany({ where: { productId: id } });
         for (const doc of currentDocs) {
           if (!newDocUrls.has(doc.url) && doc.key) {
@@ -456,7 +490,8 @@ export const productService = {
         console.warn("Failed R2 doc cleanup during product update:", err.message);
       }
 
-      await tx.productDocument.deleteMany({ where: { productId: id } });
+      // Delete only parent product documents; variant documents were deleted as part of variant.deleteMany cascade
+      await tx.productDocument.deleteMany({ where: { productId: id, variantId: null } });
       if (documents.length) {
         await tx.productDocument.createMany({
           data: documents.map((doc) => ({
@@ -508,6 +543,7 @@ export const productService = {
           include: {
             images: true,
             attributes: true,
+            documents: true,
           },
         },
         images: true,
@@ -579,6 +615,18 @@ export const productService = {
               data: variant.attributes.map((attr) => ({
                 variantId: createdVariant.id,
                 attributeValueId: attr.attributeValueId,
+              })),
+            });
+          }
+
+          if (variant.documents && variant.documents.length) {
+            await tx.productDocument.createMany({
+              data: variant.documents.map((doc) => ({
+                productId: created.id,
+                variantId: createdVariant.id,
+                title: doc.title,
+                url: doc.url,
+                mimeType: doc.mimeType,
               })),
             });
           }

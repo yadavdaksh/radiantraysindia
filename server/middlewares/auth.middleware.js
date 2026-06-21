@@ -9,9 +9,15 @@ const isAdminRequest = (req) => {
   
   if (
     referer.includes("5173") || 
-    referer.includes("admin.radiantraysindia.com") || 
+    referer.includes("5174") || 
+    referer.includes("4175") || 
+    referer.includes("admin") || 
     origin.includes("5173") || 
-    origin.includes("admin.radiantraysindia.com")
+    origin.includes("5174") || 
+    origin.includes("4175") || 
+    origin.includes("admin") ||
+    req.cookies?.adminAccessToken ||
+    req.cookies?.adminRefreshToken
   ) {
     return true;
   }

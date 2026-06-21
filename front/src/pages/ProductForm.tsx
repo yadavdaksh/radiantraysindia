@@ -27,6 +27,7 @@ interface Variant {
   attributeValueIds: string[];
   imageUrl: string;
   images: Array<{ url: string; altText?: string; isPrimary?: boolean; sortOrder?: number }>;
+  documents: Array<{ title: string; url: string; key?: string; mimeType?: string }>;
   specification: Record<string, string>;
   isDefault: boolean;
   isActive: boolean;
@@ -40,6 +41,7 @@ interface Variant {
 
 const emptyVariant = (): Variant => ({
   name: "", sku: "", price: "", salePrice: "", stock: 0, imageUrl: "", images: [], attributeValueIds: [],
+  documents: [],
   specification: {}, isDefault: false, isActive: true,
   weight: "1.0", length: "10.0", width: "10.0", height: "10.0",
   hsn: "9403", packageDetails: "",
@@ -128,6 +130,7 @@ export default function ProductForm({ showToast }: {
           stock: v.stock ?? 0,
           imageUrl: v.imageUrl || "",
           images: v.images || [],
+          documents: v.documents || [],
           specification: v.specification || {},
           isDefault: v.isDefault,
           isActive: v.isActive !== false,
@@ -258,6 +261,7 @@ export default function ProductForm({ showToast }: {
         stock: v.stock,
         imageUrl: v.imageUrl || null,
         images: v.images,
+        documents: v.documents || [],
         specification: v.specification,
         isDefault: v.isDefault,
         isActive: v.isActive,
@@ -1065,7 +1069,7 @@ export default function ProductForm({ showToast }: {
                                           </button>
                                         );
                                       })}
-                                      {(attr.values || []).length === 0 && (
+                              {(attr.values || []).length === 0 && (
                                         <span className="text-[10px] text-slate-400 italic">No values</span>
                                       )}
                                     </div>
@@ -1084,6 +1088,15 @@ export default function ProductForm({ showToast }: {
                             <ProductImageUploader
                               images={(v.images || []).slice(0, 5)}
                               onChange={imgs => updateVariant(i, "images", imgs.slice(0, 5))}
+                              showToast={showToast}
+                            />
+                          </div>
+
+                          {/* Variant documents */}
+                          <div className="pt-4 border-t border-slate-100">
+                            <ProductDocUploader
+                              documents={v.documents || []}
+                              onChange={docs => updateVariant(i, "documents", docs)}
                               showToast={showToast}
                             />
                           </div>

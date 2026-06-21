@@ -786,29 +786,36 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
           })()}
 
           {/* Documents */}
-          {product.documents?.length > 0 && (
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm space-y-2">
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
-                <span className="h-1.5 w-5 bg-brand rounded-full" /> Technical Data Sheets
-              </h3>
-              {product.documents.map((doc: any) => (
-                <a
-                  key={doc.id}
-                  href={doc.url}
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-2xl bg-white border border-slate-200 p-4 hover:border-brand hover:shadow-sm transition duration-150 group"
-                >
-                  <span className="text-sm font-bold flex items-center gap-2.5 text-slate-800 group-hover:text-brand">
-                    <FileText className="h-5 w-5 text-brand shrink-0" />
-                    {doc.title}
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-brand bg-brand/10 px-3 py-1 rounded-lg">
-                    Download
-                  </span>
-                </a>
-              ))}
-            </div>
-          )}
+          {(() => {
+            const combinedDocs = [
+              ...(product.documents || []),
+              ...(selectedVariant?.documents || [])
+            ];
+            if (combinedDocs.length === 0) return null;
+            return (
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm space-y-2">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
+                  <span className="h-1.5 w-5 bg-brand rounded-full" /> Technical Data Sheets
+                </h3>
+                {combinedDocs.map((doc: any) => (
+                  <a
+                    key={doc.id || doc.url}
+                    href={doc.url}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-between rounded-2xl bg-white border border-slate-200 p-4 hover:border-brand hover:shadow-sm transition duration-150 group"
+                  >
+                    <span className="text-sm font-bold flex items-center gap-2.5 text-slate-800 group-hover:text-brand">
+                      <FileText className="h-5 w-5 text-brand shrink-0" />
+                      {doc.title}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-brand bg-brand/10 px-3 py-1 rounded-lg">
+                      Download
+                    </span>
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
