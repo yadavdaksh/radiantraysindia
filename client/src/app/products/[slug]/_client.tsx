@@ -557,7 +557,7 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
             {isB2C ? (
               <div className="space-y-4 pt-1 border-t border-slate-100">
                 <div className="flex flex-wrap items-end gap-3">
-                  <span className={`text-3xl font-extrabold ${salePrice ? "text-rose-600" : "text-slate-900"}`}>
+                  <span className={`text-3xl font-extrabold ${salePrice ? "text-emerald-600" : "text-slate-900"}`}>
                     ₹{displayPrice.toLocaleString("en-IN")}
                   </span>
                   {salePrice && basePrice > 0 && (
@@ -630,28 +630,45 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
                 )}
 
                 {/* Qty + CTA */}
-                <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-3 pt-1">
-                  <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">−</button>
-                    <span className="px-4 py-2.5 text-sm font-bold text-slate-900 border-x border-slate-200 min-w-12 text-center">{qty}</span>
-                    <button onClick={() => setQty(qty + 1)} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">+</button>
+                <div className="space-y-3 pt-1">
+                  <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-3">
+                    <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden">
+                      <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">−</button>
+                      <span className="px-4 py-2.5 text-sm font-bold text-slate-900 border-x border-slate-200 min-w-12 text-center">{qty}</span>
+                      <button onClick={() => setQty(qty + 1)} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">+</button>
+                    </div>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={selectedVariant?.stock === 0}
+                      className={`flex-1 min-w-36 inline-flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-bold transition shadow-sm disabled:opacity-40 ${
+                        addedToCart ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-brand bg-white text-brand hover:bg-brand/5"
+                      }`}
+                    >
+                      {addedToCart ? <><CheckCircle2 className="h-4 w-4" /> Added!</> : <><ShoppingCart className="h-4 w-4" /> Add to Cart</>}
+                    </button>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={selectedVariant?.stock === 0}
+                      className="flex-1 min-w-36 inline-flex items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-bold text-white hover:bg-brand-dark transition shadow shadow-brand/20 disabled:opacity-40"
+                    >
+                      <Zap className="h-4 w-4" /> Buy Now
+                    </button>
                   </div>
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={selectedVariant?.stock === 0}
-                    className={`flex-1 min-w-36 inline-flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-bold transition shadow-sm disabled:opacity-40 ${
-                      addedToCart ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-brand bg-white text-brand hover:bg-brand/5"
-                    }`}
-                  >
-                    {addedToCart ? <><CheckCircle2 className="h-4 w-4" /> Added!</> : <><ShoppingCart className="h-4 w-4" /> Add to Cart</>}
-                  </button>
-                  <button
-                    onClick={handleBuyNow}
-                    disabled={selectedVariant?.stock === 0}
-                    className="flex-1 min-w-36 inline-flex items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-bold text-white hover:bg-brand-dark transition shadow shadow-brand/20 disabled:opacity-40"
-                  >
-                    <Zap className="h-4 w-4" /> Buy Now
-                  </button>
+                  <div className="flex items-center justify-between gap-4 text-xs font-bold px-1 py-0.5 border-t border-slate-100 pt-2.5">
+                    <a
+                      href="#quote-form"
+                      className="text-brand hover:underline inline-flex items-center gap-1.5"
+                    >
+                      <FileText className="h-3.5 w-3.5 text-brand" /> Buying in bulk? Request custom quote
+                    </a>
+                    <a
+                      href={`https://wa.me/919211781378?text=Hi%2C%20I%27m%20interested%20in%20bulk%20pricing%20for%20${encodeURIComponent(product.name)}.%20Please%20share%20details.`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-emerald-600 hover:underline inline-flex items-center gap-1"
+                    >
+                      Discuss Bulk on WhatsApp →
+                    </a>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -855,93 +872,97 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
         </div>
       )}
 
-      {/* ── B2B Quote Form ── */}
-      {!isB2C && (
-        <section id="quote-form" className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm mb-8">
-          <div className="flex border-b border-slate-100 mb-6">
-            <button
-              type="button"
-              onClick={() => { setInquiryType("QUOTE"); setLeadSuccess(false); }}
-              className={`flex-1 pb-3 text-sm font-bold border-b-2 transition ${inquiryType === "QUOTE" ? "border-brand text-brand" : "border-transparent text-slate-400 hover:text-slate-600"}`}
-            >
-              Request Commercial Quotation
-            </button>
-            <button
-              type="button"
-              onClick={() => { setInquiryType("CUSTOMIZE"); setLeadSuccess(false); }}
-              className={`flex-1 pb-3 text-sm font-bold border-b-2 transition ${inquiryType === "CUSTOMIZE" ? "border-brand text-brand" : "border-transparent text-slate-400 hover:text-slate-600"}`}
-            >
-              Request Customization
-            </button>
-          </div>
+      {/* ── Bulk Quote / B2B Quote Form ── */}
+      <section id="quote-form" className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm mb-8">
+        <div className="flex border-b border-slate-100 mb-6">
+          <button
+            type="button"
+            onClick={() => { setInquiryType("QUOTE"); setLeadSuccess(false); }}
+            className={`flex-1 pb-3 text-sm font-bold border-b-2 transition ${inquiryType === "QUOTE" ? "border-brand text-brand" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+          >
+            {isB2C ? "Request Bulk / Volume Quotation" : "Request Commercial Quotation"}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setInquiryType("CUSTOMIZE"); setLeadSuccess(false); }}
+            className={`flex-1 pb-3 text-sm font-bold border-b-2 transition ${inquiryType === "CUSTOMIZE" ? "border-brand text-brand" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+          >
+            Request Customization
+          </button>
+        </div>
 
-          <div className="flex items-start gap-4 mb-6">
-            <div className="h-10 w-10 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
-              {inquiryType === "QUOTE" ? <FileText className="h-5 w-5 text-brand" /> : <Zap className="h-5 w-5 text-brand" />}
-            </div>
+        <div className="flex items-start gap-4 mb-6">
+          <div className="h-10 w-10 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
+            {inquiryType === "QUOTE" ? <FileText className="h-5 w-5 text-brand" /> : <Zap className="h-5 w-5 text-brand" />}
+          </div>
+          <div>
+            <h3 className="text-xl font-extrabold text-slate-950">
+              {inquiryType === "QUOTE" 
+                ? (isB2C ? "Request Bulk Pricing Quote" : "Request Quotation & Drawings") 
+                : "Customization Specifications Request"}
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              {inquiryType === "QUOTE" 
+                ? (isB2C 
+                    ? "Submit bulk quantity specifications. Engineers respond within 24 hours with volume-discount pricing." 
+                    : "Submit specifications. Engineers respond within 24 hours with a detailed proposal.")
+                : "Submit custom requirements. Our technical drawing team will prepare layout plans."}
+            </p>
+          </div>
+        </div>
+
+        {leadSuccess ? (
+          <div className="flex items-center gap-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-6">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600 shrink-0" />
             <div>
-              <h3 className="text-xl font-extrabold text-slate-950">
-                {inquiryType === "QUOTE" ? "Request Quotation & Drawings" : "Customization Specifications Request"}
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                {inquiryType === "QUOTE" 
-                  ? "Submit specifications. Engineers respond within 24 hours with a detailed proposal."
-                  : "Submit custom requirements. Our technical drawing team will prepare layout plans."}
-              </p>
+              <p className="font-extrabold text-emerald-800">Inquiry Registered!</p>
+              <p className="text-xs text-emerald-600 mt-1">Our sales engineers will contact you shortly via email and phone.</p>
             </div>
           </div>
-
-          {leadSuccess ? (
-            <div className="flex items-center gap-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-6">
-              <CheckCircle2 className="h-8 w-8 text-emerald-600 shrink-0" />
-              <div>
-                <p className="font-extrabold text-emerald-800">Inquiry Registered!</p>
-                <p className="text-xs text-emerald-600 mt-1">Our sales engineers will contact you shortly via email and phone.</p>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleLeadSubmit} className="grid gap-4 sm:grid-cols-2">
-              {([
-                { label: "Your Name *", type: "text", val: leadName, set: setLeadName, ph: "Full Name" },
-                { label: "Phone Number *", type: "tel", val: leadPhone, set: setLeadPhone, ph: "+91 92117 81378" },
-                { label: "Email Address *", type: "email", val: leadEmail, set: setLeadEmail, ph: "work@company.com" },
-                { label: "Company Name *", type: "text", val: leadCompany, set: setLeadCompany, ph: "Company Pvt Ltd" },
-              ] as any[]).map(({ label, type, val, set, ph }) => (
-                <div key={label} className="space-y-1">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">{label}</label>
-                  <input
-                    type={type} required value={val} onChange={(e) => set(e.target.value)} placeholder={ph}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:border-brand focus:bg-white transition"
-                  />
-                </div>
-              ))}
-              <div className="sm:col-span-2 space-y-1">
-                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
-                  {inquiryType === "QUOTE" ? "Requirements & Specifications *" : "Customization Requirements *"}
-                </label>
-                <textarea
-                  required rows={4} value={leadMessage} onChange={(e) => setLeadMessage(e.target.value)}
-                  placeholder={inquiryType === "QUOTE" 
-                    ? "Specify: ISO class, dimensions (LxWxH), material (SS 304/316), airflow type, UV fixtures, quantity, installation site..."
-                    : "Specify custom size, non-standard dimensions, airflow velocity tolerances, double-skin partitioning, pre-filter preferences, etc."}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:border-brand focus:bg-white transition resize-none"
+        ) : (
+          <form onSubmit={handleLeadSubmit} className="grid gap-4 sm:grid-cols-2">
+            {([
+              { label: "Your Name *", type: "text", val: leadName, set: setLeadName, ph: "Full Name" },
+              { label: "Phone Number *", type: "tel", val: leadPhone, set: setLeadPhone, ph: "+91 92117 81378" },
+              { label: "Email Address *", type: "email", val: leadEmail, set: setLeadEmail, ph: "work@company.com" },
+              { label: "Company Name *", type: "text", val: leadCompany, set: setLeadCompany, ph: "Company Pvt Ltd" },
+            ] as any[]).map(({ label, type, val, set, ph }) => (
+              <div key={label} className="space-y-1">
+                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">{label}</label>
+                <input
+                  type={type} required value={val} onChange={(e) => set(e.target.value)} placeholder={ph}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:border-brand focus:bg-white transition"
                 />
               </div>
-              <div className="sm:col-span-2 space-y-3">
-                {leadError && (
-                  <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700">{leadError}</div>
-                )}
-                <button
-                  type="submit" disabled={leadLoading}
-                  className="inline-flex items-center gap-2.5 rounded-2xl bg-brand px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-brand/20 hover:bg-brand-dark transition disabled:opacity-70"
-                >
-                  {leadLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : <><Send className="h-4 w-4" /> Submit {inquiryType === "QUOTE" ? "Quotation" : "Customization"} Request</>}
-                </button>
-              </div>
-            </form>
-          )}
-        </section>
-      )}
+            ))}
+            <div className="sm:col-span-2 space-y-1">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                {inquiryType === "QUOTE" ? "Requirements & Specifications *" : "Customization Requirements *"}
+              </label>
+              <textarea
+                required rows={4} value={leadMessage} onChange={(e) => setLeadMessage(e.target.value)}
+                placeholder={inquiryType === "QUOTE" 
+                  ? (isB2C 
+                      ? "Specify: required quantity for bulk order, customization requirements, preferred delivery timeline, company details..." 
+                      : "Specify: ISO class, dimensions (LxWxH), material (SS 304/316), airflow type, UV fixtures, quantity, installation site...")
+                  : "Specify custom size, non-standard dimensions, airflow velocity tolerances, double-skin partitioning, pre-filter preferences, etc."}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:border-brand focus:bg-white transition resize-none"
+              />
+            </div>
+            <div className="sm:col-span-2 space-y-3">
+              {leadError && (
+                <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700">{leadError}</div>
+              )}
+              <button
+                type="submit" disabled={leadLoading}
+                className="inline-flex items-center gap-2.5 rounded-2xl bg-brand px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-brand/20 hover:bg-brand-dark transition disabled:opacity-70"
+              >
+                {leadLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : <><Send className="h-4 w-4" /> Submit {inquiryType === "QUOTE" ? "Quotation" : "Customization"} Request</>}
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
 
       {/* ── Reviews Section ── */}
       <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm mb-8 space-y-7">
