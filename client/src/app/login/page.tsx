@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
@@ -11,7 +11,13 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/account";
-  const { login } = useAuth();
+  const { login, customer, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && customer) {
+      router.replace(redirectTo);
+    }
+  }, [customer, isLoading, router, redirectTo]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

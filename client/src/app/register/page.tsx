@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
@@ -11,7 +11,14 @@ type Errs = { name?: string; email?: string; phone?: string; password?: string; 
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { register, customer, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && customer) {
+      router.replace("/account");
+    }
+  }, [customer, isLoading, router]);
+
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);

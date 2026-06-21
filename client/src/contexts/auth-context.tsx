@@ -55,9 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const activeToken = localTok || "cookie-auth";
         setToken(activeToken);
         setSession(fresh, activeToken);
-      } catch {
-        // Fallback to local storage if API call fails
-        if (localCust && localTok) {
+      } catch (err: any) {
+        // Clear session if unauthorized (unauthorized or expired tokens)
+        if (err.response?.status === 401) {
+          clearSession();
+          setCustomer(null);
+          setToken(null);
+        } else if (localCust && localTok) {
+          // Fallback to local storage only for network/other errors
           try {
             setCustomer(JSON.parse(localCust));
             setToken(localTok);
