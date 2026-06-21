@@ -15,9 +15,7 @@ const isAdminRequest = (req) => {
     origin.includes("5173") || 
     origin.includes("5174") || 
     origin.includes("4175") || 
-    origin.includes("admin") ||
-    req.cookies?.adminAccessToken ||
-    req.cookies?.adminRefreshToken
+    origin.includes("admin")
   ) {
     return true;
   }

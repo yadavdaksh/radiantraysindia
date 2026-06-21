@@ -215,12 +215,12 @@ export default function AccountPage() {
     { id: "orders",    label: "Order History",   icon: Package },
     { id: "addresses", label: "Addresses",       icon: MapPin },
     { id: "wishlist",  label: "Wishlist",        icon: Heart },
-    { id: "inquiries", label: "B2B Inquiries",   icon: Star },
+    { id: "inquiries", label: "My Inquiries",    icon: Star },
     { id: "security",  label: "Security",        icon: Shield },
   ] as { id: Tab; label: string; icon: any }[];
 
   return (
-    <SiteShell title="My Account" subtitle="Manage your profile, orders, addresses and B2B inquiries.">
+    <SiteShell title="My Account" subtitle="Manage your profile, orders, addresses and inquiries.">
       <div className="grid gap-6 lg:grid-cols-[220px_1fr] my-6">
 
         {/* Sidebar */}
@@ -517,19 +517,19 @@ export default function AccountPage() {
             </div>
           )}
 
-          {/* ── B2B INQUIRIES ── */}
+          {/* ── MY INQUIRIES ── */}
           {tab === "inquiries" && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="text-base font-extrabold text-slate-950">B2B Inquiries</h2>
+                <h2 className="text-base font-extrabold text-slate-950">My Inquiries</h2>
                 <span className="text-xs text-slate-400">{inquiries.length} total</span>
               </div>
               <div className="p-6">
                 {inquiriesLoading ? <Skeleton rows={4} /> : inquiries.length === 0 ? (
                   <div className="text-center py-14">
                     <Star className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                    <p className="text-sm font-semibold text-slate-500">No B2B inquiries yet</p>
-                    <p className="text-xs text-slate-400 mt-1">Visit any B2B product page and submit a quote request</p>
+                    <p className="text-sm font-semibold text-slate-500">No inquiries yet</p>
+                    <p className="text-xs text-slate-400 mt-1">Visit any product page and submit a quote or inquiry request</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -571,11 +571,18 @@ export default function AccountPage() {
               <h2 className="text-base font-extrabold text-slate-950">Change Password</h2>
               <form onSubmit={changePassword} className="space-y-4 max-w-md">
                 {[
-                  { label: "Current Password", key: "old" as const, show: showPw.old, toggle: () => setShowPw(p => ({ ...p, old: !p.old })) },
-                  { label: "New Password (min 6 chars)", key: "newPw" as const, show: showPw.new, toggle: () => setShowPw(p => ({ ...p, new: !p.new })) },
+                  { label: "Current Password", key: "old" as const, show: showPw.old, toggle: () => setShowPw(p => ({ ...p, old: !p.old })), forgotLink: true },
+                  { label: "New Password (min 6 chars)", key: "newPw" as const, show: showPw.new, toggle: () => setShowPw(p => ({ ...p, new: !p.new })), forgotLink: false },
                 ].map(f => (
                   <div key={f.key} className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">{f.label}</label>
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">{f.label}</label>
+                      {f.forgotLink && (
+                        <Link href="/auth/forgot-password" className="text-[10px] font-bold text-brand hover:underline">
+                          Forgot password?
+                        </Link>
+                      )}
+                    </div>
                     <div className="relative">
                       <input type={f.show ? "text" : "password"} value={pwForm[f.key]}
                         onChange={e => setPwForm(p => ({ ...p, [f.key]: e.target.value }))}
