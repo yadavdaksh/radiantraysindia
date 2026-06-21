@@ -494,9 +494,6 @@ export default function AccountPage() {
                                 )}
                               </div>
                             )}
-                            <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase mt-1 inline-block ${isB2C ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
-                              {isB2C ? "B2C" : "B2B Quote"}
-                            </span>
                           </div>
                           <div className="flex gap-2 shrink-0">
                             <Link href={`/products/${prod.slug}`}

@@ -49,13 +49,6 @@ export function ProductCard({ prod, size = "md" }: ProductCardProps) {
           className="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300"
         />
 
-        {/* B2B/B2C badge */}
-        <span className={`absolute top-2.5 left-2.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-          isB2C ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-        }`}>
-          {isB2C ? "B2C" : "B2B"}
-        </span>
-
         {/* NEW/SALE/HOT badge */}
         {prod.badge && (
           <span className={`absolute top-2.5 right-2.5 rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${
@@ -94,7 +87,7 @@ export function ProductCard({ prod, size = "md" }: ProductCardProps) {
             <div className="flex items-center gap-1.5 min-w-0">
               {salePrice ? (
                 <>
-                  <span className="text-sm font-extrabold text-rose-600">
+                  <span className="text-sm font-extrabold text-emerald-600">
                     ₹{salePrice.toLocaleString("en-IN")}
                   </span>
                   <span className="text-[10px] text-slate-400 line-through">

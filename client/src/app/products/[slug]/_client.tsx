@@ -10,6 +10,7 @@ import { getProductBySlug, getProductImage } from "@/lib/site-data";
 import { expandToVariantCards } from "@/lib/variant-cards";
 import { useCart } from "@/contexts/cart-context";
 import { useWishlist } from "@/contexts/wishlist-context";
+import { useAuth } from "@/contexts/auth-context";
 import { placeholderStore, Review } from "@/lib/placeholder-store";
 import {
   FileText, MessageSquare, ShoppingCart, Send, Loader2,
@@ -65,6 +66,7 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
   const variantParam = searchParams.get("variant");
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { customer } = useAuth();
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -168,10 +170,17 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
       || getProductImage(product.slug, product.images, product.variants);
     setActiveImage(img);
   }, [product, variantParam]);
-
   useEffect(() => {
     if (product) setReviews(placeholderStore.getReviews(product.slug || product.id));
   }, [product]);
+
+  useEffect(() => {
+    if (customer) {
+      if (customer.name) setLeadName(customer.name);
+      if (customer.phone) setLeadPhone(customer.phone);
+      if (customer.email) setLeadEmail(customer.email);
+    }
+  }, [customer]);
 
   if (loading) {
     return (
@@ -376,12 +385,6 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
                 Cleanroom System Image
               </div>
             )}
-            {/* Type badge */}
-            <span className={`absolute top-4 left-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-              isB2C ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-            }`}>
-              {isB2C ? "B2C" : "B2B"}
-            </span>
             {/* badge */}
             {product.badge && (
               <span className={`absolute top-4 right-4 rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider shadow-md ${

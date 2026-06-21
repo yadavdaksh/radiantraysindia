@@ -124,9 +124,6 @@ export default function WishlistPage() {
                         </span>
                       )}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase ${isB2C ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
-                          {isB2C ? "B2C" : "B2B"}
-                        </span>
                         {isB2C && price > 0 && (
                           <span className="text-sm font-extrabold text-brand-dark">
                             ₹{price.toLocaleString("en-IN")}
