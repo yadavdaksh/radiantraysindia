@@ -745,6 +745,22 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
                     WhatsApp: +91 92117 81378
                   </a>
                 </div>
+                <div className="flex items-center justify-between gap-4 text-xs font-bold px-1 py-0.5 border-t border-slate-100 pt-2.5 mt-2">
+                  <a
+                    href="#quote-form"
+                    onClick={() => setInquiryType("QUOTE")}
+                    className="text-brand hover:underline inline-flex items-center gap-1.5"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-brand" /> Buying in bulk? Request custom quote
+                  </a>
+                  <a
+                    href={`https://wa.me/919211781378?text=Hi%2C%20I%27m%20interested%20in%20bulk%20pricing%20for%20${encodeURIComponent(product.name)}.%20Please%20share%20details.`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-emerald-600 hover:underline inline-flex items-center gap-1"
+                  >
+                    Discuss Bulk on WhatsApp →
+                  </a>
+                </div>
               </div>
             )}
           </div>
