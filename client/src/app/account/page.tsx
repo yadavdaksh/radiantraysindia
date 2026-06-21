@@ -31,6 +31,21 @@ function statusBadge(s: string) {
   return map[s] || "bg-amber-100 text-amber-800";
 }
 
+function stripHtml(html: string) {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 type Tab = "profile" | "orders" | "addresses" | "wishlist" | "inquiries" | "security";
 
 export default function AccountPage() {
@@ -480,7 +495,7 @@ export default function AccountPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <Link href={`/products/${prod.slug}`} className="font-bold text-sm text-slate-900 hover:text-brand transition truncate block">{prod.name}</Link>
-                            <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{prod.shortDescription}</p>
+                            <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{stripHtml(prod.shortDescription)}</p>
                             {variant && (
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {variantChips.length > 0 ? variantChips.map((chip: any, idx: number) => (
