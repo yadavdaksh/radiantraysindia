@@ -615,7 +615,7 @@ function App() {
 
   useEffect(() => { loadSession(); }, []);
 
-  // Auto-logout after 15 min inactivity
+  // Auto-logout after 1 hour inactivity
   useEffect(() => {
     if (!session) return;
     let timer: number;
@@ -624,7 +624,7 @@ function App() {
       timer = window.setTimeout(() => {
         showToast("Logged out due to inactivity.");
         logout();
-      }, 15 * 60 * 1000);
+      }, 60 * 60 * 1000);
     };
     const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
     events.forEach(name => window.addEventListener(name, reset));

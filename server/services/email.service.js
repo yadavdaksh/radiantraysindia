@@ -22,7 +22,7 @@ const BASE_STYLES = `
 const getFooter = () => `
   <div class="footer">
     © ${new Date().getFullYear()} Radiant Rays | Cleanroom Equipment Manufacturer<br>
-    <a href="mailto:info@radiantraysindia.com">info@radiantraysindia.com</a> &nbsp;·&nbsp; +91 731 815 8417 / +91 92117 81378<br>
+    <a href="mailto:info@radiantraysindia.com">info@radiantraysindia.com</a> &nbsp;·&nbsp; +91 92117 81378<br>
     This is an automated message. Please do not reply directly.
   </div>
 `;
@@ -196,7 +196,7 @@ export const emailService = {
               ${details.productName ? `<p><strong>Product:</strong> ${details.productName}</p>` : ""}
               ${details.company ? `<p><strong>Company:</strong> ${details.company}</p>` : ""}
             </div>
-            <p>For immediate assistance, feel free to contact us via WhatsApp on +91 731 815 8417 or +91 92117 81378.</p>
+            <p>For immediate assistance, feel free to contact us via WhatsApp on +91 92117 81378.</p>
           </div>
           ${getFooter()}
         </div>
