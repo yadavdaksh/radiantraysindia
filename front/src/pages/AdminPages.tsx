@@ -162,6 +162,7 @@ export function CustomersPage({ showToast }: { showToast: (m: string, t?: "succe
         <div className="relative">
           <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email…"
+            autoComplete="off"
             className="pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 bg-white outline-none focus:border-sky-500 w-52 transition" />
         </div>
       </PageHeader>
@@ -268,6 +269,8 @@ export function CustomersPage({ showToast }: { showToast: (m: string, t?: "succe
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <IconLock size={11} /> Reset Password
                   </p>
+                  {/* Dummy fields to prevent browser autofill on page search box */}
+                  <input type="text" name="username" autoComplete="username" style={{ display: "none" }} />
                   <div className="flex gap-2">
                     <input
                       type="password"
@@ -275,6 +278,7 @@ export function CustomersPage({ showToast }: { showToast: (m: string, t?: "succe
                       onChange={e => setResetPw(e.target.value)}
                       placeholder="New password (min 6)"
                       className={`${inp} flex-1 text-xs py-2`}
+                      autoComplete="new-password"
                     />
                     <button onClick={resetPassword} disabled={saving || !resetPw}
                       className="px-3 py-2 rounded-xl bg-sky-700 text-white text-xs font-bold hover:bg-sky-800 transition disabled:opacity-50">
@@ -414,7 +418,8 @@ export function WishlistPage({ showToast }: { showToast: (m: string, t?: any) =>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-semibold text-slate-800">{w.customer?.name || "—"}</p>
-                        <p className="text-[10px] text-slate-400">{w.customer?.email}</p>
+                        <p className="text-[10px] text-slate-400">{w.customer?.email || ""}</p>
+                        {w.customer?.phone && <p className="text-[10px] text-slate-500">{w.customer.phone}</p>}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-400 hidden sm:table-cell">
                         {new Date(w.createdAt).toLocaleDateString("en-IN")}

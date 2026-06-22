@@ -14,6 +14,7 @@ import {
   IconBuildingFactory, IconPhoto, IconFlag,
   IconUser, IconShieldHalf, IconKey,
   IconSettings, IconActivity, IconBriefcase,
+  IconEye, IconEyeOff,
 } from "@tabler/icons-react";
 import { ModuleView } from "./components/Views";
 import ProductsPage from "./pages/Products";
@@ -250,8 +251,10 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
-  const go = (m: typeof mode) => { setMode(m); setError(""); setMessage(""); };
+  const go = (m: typeof mode) => { setMode(m); setError(""); setMessage(""); setShowPassword(false); setShowNewPassword(false); };
 
   const postJson = async (path: string, body: object) => {
     const r = await fetch(`${API_BASE}${path}`, {
@@ -383,15 +386,24 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
                 />
               </AuthField>
               <AuthField label="Password">
-                <input
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className={inputCls}
-                  autoComplete="current-password"
-                />
+                <div className="relative">
+                  <input
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    className={`${inputCls} pr-12`}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                  </button>
+                </div>
               </AuthField>
               {error && <AuthMsg type="err" text={error} />}
               {message && <AuthMsg type="ok" text={message} />}
@@ -469,27 +481,45 @@ function LoginScreen({ onLogin }: { onLogin: (user: SessionUser) => void }) {
           {mode === "reset" && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <AuthField label="New Password">
-                <input
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  type="password"
-                  required
-                  placeholder="Min 8 characters"
-                  className={inputCls}
-                  autoFocus
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <input
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    placeholder="Min 8 characters"
+                    className={`${inputCls} pr-12`}
+                    autoFocus
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showNewPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                  </button>
+                </div>
               </AuthField>
               <AuthField label="Confirm Password">
-                <input
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  type="password"
-                  required
-                  placeholder="Repeat new password"
-                  className={inputCls}
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <input
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    placeholder="Repeat new password"
+                    className={`${inputCls} pr-12`}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showNewPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                  </button>
+                </div>
               </AuthField>
               {error && <AuthMsg type="err" text={error} />}
               <AuthBtn loading={loading} label="Save New Password" loadLabel="Saving..." />
@@ -746,7 +776,12 @@ function App() {
     }
     return (
       <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-        <span>Home</span>
+        <button 
+          onClick={() => navigate("/dashboard")} 
+          className="hover:text-sky-600 hover:underline transition bg-transparent border-none p-0 cursor-pointer"
+        >
+          Home
+        </button>
         {sectionTitle && (
           <>
             <span className="text-[10px]">/</span>
@@ -936,6 +971,15 @@ function App() {
                 >
                   ☰
                 </button>
+                {active !== "dashboard" && (
+                  <button
+                    onClick={() => navigate("/dashboard")}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition shrink-0 font-bold"
+                    title="Back to Dashboard"
+                  >
+                    ←
+                  </button>
+                )}
                 <div>
                   {getBreadcrumbs()}
                   <h1 className="mt-1 text-xl font-bold text-slate-950 capitalize">

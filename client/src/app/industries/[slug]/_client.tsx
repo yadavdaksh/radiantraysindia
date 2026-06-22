@@ -17,19 +17,16 @@ export function IndustryDetailClient({ params }: { params: { slug: string } }) {
     async function loadData() {
       try {
         const [prodRes, indRes] = await Promise.all([
-          apiClient.get("/public/products"),
+          apiClient.get(`/public/products?industry=${params.slug}&limit=100`),
           apiClient.get("/public/industries"),
         ]);
 
-        const inds = indRes.data.data;
+        const inds = indRes.data.data || [];
         const foundInd = inds.find((i: any) => i.slug === params.slug);
         setIndustry(foundInd);
 
-        const allProds = prodRes.data.data;
-        const filtered = allProds.filter((p: any) =>
-          p.industries?.some((ind: any) => ind.industry?.slug === params.slug || ind.industry?.id === foundInd?.id)
-        );
-        setProducts(filtered);
+        const prods = prodRes.data.data || [];
+        setProducts(prods);
       } catch (error) {
         console.warn("Could not load industry products from API, using fallback:", error);
         const mockInd = getIndustryBySlug(params.slug);

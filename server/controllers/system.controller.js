@@ -253,7 +253,7 @@ export const deleteNewsletterSubscriber = asyncHandler(async (req, res) => {
 export const listAllWishlists = asyncHandler(async (req, res) => {
   const items = await prisma.wishlist.findMany({
     include: {
-      customer: { select: { name: true, email: true } },
+      customer: { select: { name: true, email: true, phone: true } },
       product: { select: { name: true, slug: true, images: true, productType: true } },
     },
     orderBy: { createdAt: "desc" },

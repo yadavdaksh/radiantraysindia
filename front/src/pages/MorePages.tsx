@@ -837,7 +837,11 @@ export function UsersPage({ showToast, can, session }: { showToast: (m: string, 
                               <IconEdit size={13} />
                             </button>
                             {can("user", "delete") && !isMe && (
-                              <button onClick={() => archive(u)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition">
+                              <button 
+                                onClick={() => archive(u)} 
+                                title="Archive User"
+                                className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition"
+                              >
                                 <IconTrash size={13} />
                               </button>
                             )}

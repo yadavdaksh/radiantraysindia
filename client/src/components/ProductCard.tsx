@@ -82,24 +82,24 @@ export function ProductCard({ prod, size = "md" }: ProductCardProps) {
         </p>
 
         {/* Price / CTA row */}
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
           {isB2C ? (
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 min-w-0">
               {salePrice ? (
                 <>
-                  <span className="text-sm font-extrabold text-emerald-600">
+                  <span className="text-sm font-extrabold text-emerald-600 whitespace-nowrap">
                     ₹{salePrice.toLocaleString("en-IN")}
                   </span>
-                  <span className="text-[10px] text-slate-400 line-through">
+                  <span className="text-[10px] text-slate-400 line-through whitespace-nowrap">
                     ₹{basePrice.toLocaleString("en-IN")}
                   </span>
                 </>
               ) : basePrice > 0 ? (
-                <span className="text-xs font-bold text-brand-dark">
+                <span className="text-xs font-bold text-brand-dark whitespace-nowrap">
                   ₹{basePrice.toLocaleString("en-IN")}
                 </span>
               ) : (
-                <span className="text-xs text-slate-400 font-semibold">Price on Request</span>
+                <span className="text-xs text-slate-400 font-semibold whitespace-nowrap">Price on Request</span>
               )}
             </div>
           ) : (
@@ -108,7 +108,7 @@ export function ProductCard({ prod, size = "md" }: ProductCardProps) {
             </span>
           )}
           <span className="inline-flex shrink-0 items-center text-xs font-bold text-brand">
-            Details <ArrowRight className="ml-0.5 h-3 w-3" />
+            <span className="hidden sm:inline mr-0.5">Details</span> <ArrowRight className="h-3 w-3" />
           </span>
         </div>
       </div>
