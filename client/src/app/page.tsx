@@ -1,5 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, PhoneCall, CheckCircle2, Zap, Globe, Tag } from "lucide-react";
+import { ArrowRight, PhoneCall, CheckCircle2, Zap, Globe } from "lucide-react";
+import {
+  IconPlant,
+  IconAtom,
+  IconBatteryCharging,
+  IconLeaf,
+  IconFlask,
+  IconSparkles,
+  IconFocus,
+  IconDroplet,
+  IconRocket,
+  IconCpu,
+  IconBuildingHospital,
+  IconPill,
+  IconTools
+} from "@tabler/icons-react";
 import { products as mockProducts, categories as mockCategories, industries as mockIndustries, testimonials as mockTestimonials, gallery as mockGallery } from "@/lib/site-data";
 import HeroCarousel from "@/components/HeroCarousel";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -209,31 +224,39 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="grid gap-2 sm:gap-3 grid-cols-3 sm:grid-cols-3 lg:grid-cols-6">
-              {industries.map((ind: any) => (
-                <Link
-                  key={ind.slug}
-                  href={`/products?industry=${ind.slug}`}
-                  className="group flex flex-col items-center justify-center text-center p-4 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-brand/20 hover:shadow-md duration-200"
-                >
-                  {ind.imageUrl ? (
-                    <div className="h-10 w-10 rounded-xl bg-brand/10 overflow-hidden flex items-center justify-center mb-3">
-                      <img
-                        src={ind.imageUrl}
-                        alt={ind.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+            <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {industries.map((ind: any) => {
+                const cleanSlug = ind.slug.toLowerCase().trim().replace(/:/g, "").replace(/\s+/g, "-");
+                const sectorIconMap: Record<string, React.ComponentType<any>> = {
+                  "high-tech-agriculture": IconPlant,
+                  "nanotechnology": IconAtom,
+                  "automotive-battery-manufacturing": IconBatteryCharging,
+                  "cannabis-industry": IconLeaf,
+                  "research-laboratory-science": IconFlask,
+                  "cosmetics-perfumes": IconSparkles,
+                  "optics-laser-technology": IconFocus,
+                  "food-beverage": IconDroplet,
+                  "aerospace-defense": IconRocket,
+                  "electronics-semiconductors": IconCpu,
+                  "healthcare-hospitals": IconBuildingHospital,
+                  "pharmaceutical-biotechnology": IconPill,
+                };
+                const SectorIcon = sectorIconMap[cleanSlug] || IconTools;
+                return (
+                  <Link
+                    key={ind.slug}
+                    href={`/products?industry=${ind.slug}`}
+                    className="group flex flex-col items-center justify-center text-center p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-brand/20 hover:shadow-md duration-200"
+                  >
+                    <div className="h-12 w-12 rounded-xl bg-brand/5 flex items-center justify-center mb-3 group-hover:bg-brand/10 transition">
+                      <SectorIcon className="h-6 w-6 text-brand" stroke={1.5} />
                     </div>
-                  ) : (
-                    <div className="h-10 w-10 rounded-xl bg-brand/5 flex items-center justify-center mb-3">
-                      <Tag className="h-5 w-5 text-brand" />
-                    </div>
-                  )}
-                  <span className="text-xs font-bold text-slate-800 group-hover:text-brand line-clamp-2 leading-tight">
-                    {ind.name}
-                  </span>
-                </Link>
-              ))}
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-brand line-clamp-2 leading-tight">
+                      {ind.name}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
