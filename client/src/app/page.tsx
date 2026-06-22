@@ -326,7 +326,7 @@ export default async function Home() {
             {[
               {
                 name: "Shiwakshi Singh",
-                title: "Co-Founder & Director and Technical Director",
+                title: "Co-Founder & Director ",
                 desc: "Leads business development, client relations, and quality assurance. Expert in GMP and ISO cleanroom standards.",
                 image: "/images/founders/shiwakshi-singh.jpeg",
                 initial: "S",

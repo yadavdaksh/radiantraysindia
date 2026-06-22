@@ -24,7 +24,7 @@ export const metadata = {
 const FOUNDERS = [
   {
     name: "Shiwakshi Singh",
-    title: "Co-Founder & Director and Technical Director",
+    title: "Co-Founder & Director ",
     initial: "S",
     image: "/images/founders/shiwakshi-singh.jpeg",
     bio: "He holds deep experience in the area of Product Design and Manufacturing development. Having earned a degree in Mechanical Engineering and practical experience in the field of machine design and production, he founded the Organization with the objective of ensuring a quality product with an optimum service experience to its valued clients. He opines that Quality Manufacturing is rooted with trust, constancy and commitment to excellence.",
