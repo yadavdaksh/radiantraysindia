@@ -12,6 +12,21 @@ import {
   MapPin, Mail, Phone, ChevronDown, Layers,
   ArrowRight, Tag, Home,
 } from "lucide-react";
+import {
+  IconPlant,
+  IconAtom,
+  IconBatteryCharging,
+  IconLeaf,
+  IconFlask,
+  IconSparkles,
+  IconFocus,
+  IconDroplet,
+  IconRocket,
+  IconCpu,
+  IconBuildingHospital,
+  IconPill,
+  IconTools
+} from "@tabler/icons-react";
 import { apiClient } from "@/lib/api-client";
 import { useCategoriesNav } from "@/lib/use-categories-nav";
 import { useIndustriesNav } from "@/lib/use-industries-nav";
@@ -272,7 +287,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.97 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full left-0 mt-2 w-64 rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 z-50 overflow-hidden"
+                      className="absolute top-full left-0 mt-2 w-[520px] rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 z-50 overflow-hidden"
                     >
                       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                         <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand">Industries</span>
@@ -280,22 +295,38 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                           View all <ArrowRight className="h-3 w-3" />
                         </Link>
                       </div>
-                      <div className="p-2">
-                        {navIndustries.map((ind) => (
-                          <Link
-                            key={ind.slug}
-                            href={`/industries/${ind.slug}`}
-                            onClick={() => setOpenDropdown(null)}
-                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-slate-50 transition group"
-                          >
-                            {ind.imageUrl ? (
-                              <img src={ind.imageUrl} alt={ind.name} className="h-5 w-5 rounded-md object-cover shrink-0 animate-fade-in" />
-                            ) : (
-                              <Tag className="h-3.5 w-3.5 text-brand shrink-0" />
-                            )}
-                            <span className="text-xs font-semibold text-slate-800 group-hover:text-brand transition">{ind.name}</span>
-                          </Link>
-                        ))}
+                      <div className="p-3 grid grid-cols-2 gap-1">
+                        {navIndustries.map((ind) => {
+                          const cleanSlug = ind.slug.toLowerCase().trim().replace(/:/g, "").replace(/\s+/g, "-");
+                          const sectorIconMap: Record<string, React.ComponentType<any>> = {
+                            "high-tech-agriculture": IconPlant,
+                            "nanotechnology": IconAtom,
+                            "automotive-battery-manufacturing": IconBatteryCharging,
+                            "cannabis-industry": IconLeaf,
+                            "research-laboratory-science": IconFlask,
+                            "cosmetics-perfumes": IconSparkles,
+                            "optics-laser-technology": IconFocus,
+                            "food-beverage": IconDroplet,
+                            "aerospace-defense": IconRocket,
+                            "electronics-semiconductors": IconCpu,
+                            "healthcare-hospitals": IconBuildingHospital,
+                            "pharmaceutical-biotechnology": IconPill,
+                          };
+                          const SectorIcon = sectorIconMap[cleanSlug] || IconTools;
+                          return (
+                            <Link
+                              key={ind.slug}
+                              href={`/industries/${ind.slug}`}
+                              onClick={() => setOpenDropdown(null)}
+                              className="flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50 transition group"
+                            >
+                              <div className="h-8 w-8 shrink-0 rounded-xl bg-brand/5 flex items-center justify-center group-hover:bg-brand/10 transition">
+                                <SectorIcon className="h-4.5 w-4.5 text-brand" stroke={1.5} />
+                              </div>
+                              <span className="text-xs font-semibold text-slate-800 group-hover:text-brand transition truncate">{ind.name}</span>
+                            </Link>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   )}

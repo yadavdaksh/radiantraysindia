@@ -69,21 +69,36 @@ function CategoryForm({ initial, onSave, onClose, showToast }: {
   showToast: (m: string, t?: "success" | "error") => void;
 }) {
   const [name, setName] = useState(initial?.name || "");
+  const [slug, setSlug] = useState(initial?.slug || "");
   const [desc, setDesc] = useState(initial?.description || "");
   const [img, setImg] = useState(initial?.imageUrl || "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (!initial) {
+      const slugified = val.toLowerCase().trim().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+      setSlug(slugified);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { setErr("Category name is required"); return; }
     setSaving(true); setErr("");
     try {
+      const payload = {
+        name: name.trim(),
+        slug: slug.trim() || undefined,
+        description: desc || null,
+        imageUrl: img || null
+      };
       if (initial) {
-        await api(`/categories/${initial.id}`, { method: "PUT", body: JSON.stringify({ name: name.trim(), description: desc || null, imageUrl: img || null }) });
+        await api(`/categories/${initial.id}`, { method: "PUT", body: JSON.stringify(payload) });
         showToast("Category updated successfully");
       } else {
-        await api("/categories", { method: "POST", body: JSON.stringify({ name: name.trim(), description: desc || null, imageUrl: img || null }) });
+        await api("/categories", { method: "POST", body: JSON.stringify(payload) });
         showToast("Category created successfully");
       }
       onSave();
@@ -98,8 +113,12 @@ function CategoryForm({ initial, onSave, onClose, showToast }: {
         </div>
       )}
       <F label="Category Name *">
-        <input value={name} onChange={e => setName(e.target.value)} required autoFocus
+        <input value={name} onChange={e => handleNameChange(e.target.value)} required autoFocus
           className={inp} placeholder="e.g. Biosafety Cabinets" />
+      </F>
+      <F label="Category Slug (URL Path) *">
+        <input value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-"))} required
+          className={`${inp} font-mono`} placeholder="e.g. biosafety-cabinets" />
       </F>
       <F label="Description">
         <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3}
@@ -133,10 +152,19 @@ function SubCategoryForm({ initial, categories, defaultCatId, onSave, onClose, s
 }) {
   const [catId, setCatId] = useState(initial?.categoryId || defaultCatId || (categories[0]?.id ?? ""));
   const [name, setName] = useState(initial?.name || "");
+  const [slug, setSlug] = useState(initial?.slug || "");
   const [desc, setDesc] = useState(initial?.description || "");
   const [img, setImg] = useState(initial?.imageUrl || "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (!initial) {
+      const slugified = val.toLowerCase().trim().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+      setSlug(slugified);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,16 +172,23 @@ function SubCategoryForm({ initial, categories, defaultCatId, onSave, onClose, s
     if (!name.trim()) { setErr("Sub-category name is required"); return; }
     setSaving(true); setErr("");
     try {
+      const payload = {
+        name: name.trim(),
+        slug: slug.trim() || undefined,
+        description: desc || null,
+        imageUrl: img || null,
+        categoryId: catId
+      };
       if (initial) {
         await api(`/categories/subcategories/${initial.id}`, {
           method: "PUT",
-          body: JSON.stringify({ name: name.trim(), description: desc || null, imageUrl: img || null, categoryId: catId }),
+          body: JSON.stringify(payload),
         });
         showToast("Sub-category updated successfully");
       } else {
         await api("/categories/subcategories", {
           method: "POST",
-          body: JSON.stringify({ name: name.trim(), description: desc || null, imageUrl: img || null, categoryId: catId }),
+          body: JSON.stringify(payload),
         });
         showToast("Sub-category created successfully");
       }
@@ -176,8 +211,12 @@ function SubCategoryForm({ initial, categories, defaultCatId, onSave, onClose, s
         </select>
       </F>
       <F label="Sub-Category Name *">
-        <input value={name} onChange={e => setName(e.target.value)} required autoFocus
+        <input value={name} onChange={e => handleNameChange(e.target.value)} required autoFocus
           className={inp} placeholder="e.g. Class II A2, Vertical LAF" />
+      </F>
+      <F label="Sub-Category Slug (URL Path) *">
+        <input value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-"))} required
+          className={`${inp} font-mono`} placeholder="e.g. class-ii-a2" />
       </F>
       <F label="Description">
         <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={2}

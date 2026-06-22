@@ -402,13 +402,31 @@ export function WishlistPage({ showToast }: { showToast: (m: string, t?: any) =>
             {loading ? <tr><td colSpan={4} className="p-6"><Skeleton /></td></tr>
               : items.length === 0 ? <tr><td colSpan={4}><Empty icon={IconHeart} msg="No wishlist items" /></td></tr>
                 : items.map((w: any) => {
-                  const img = w.product?.images?.find((i: any) => i.isPrimary)?.url || w.product?.images?.[0]?.url;
+                  const img = w.product?.images?.find((i: any) => i.isPrimary)?.url || 
+                              w.product?.images?.[0]?.url ||
+                              w.product?.variants?.find((v: any) => v.isDefault)?.imageUrl ||
+                              w.product?.variants?.[0]?.imageUrl ||
+                              w.product?.variants?.find((v: any) => v.isDefault)?.images?.find((i: any) => i.isPrimary)?.url ||
+                              w.product?.variants?.[0]?.images?.[0]?.url;
                   return (
                     <tr key={w.id} className="hover:bg-slate-50 transition">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          {img && <img src={img} alt="" className="h-10 w-10 rounded-lg object-contain bg-slate-50 border border-slate-100" />}
-                          <p className="font-semibold text-slate-900 max-w-48 truncate">{w.product?.name || "—"}</p>
+                          <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                            {img ? (
+                              <img src={img} alt="" className="h-full w-full object-contain" />
+                            ) : (
+                              <IconHeart size={16} className="text-slate-300" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-900 max-w-48 truncate">{w.product?.name || "—"}</p>
+                            {w.product?.variants?.length > 0 && (
+                              <p className="text-[10px] text-slate-400">
+                                Variants: {w.product.variants.map((v: any) => v.name).join(", ")}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
