@@ -5,19 +5,8 @@ import {
   IconTag, IconCategory, IconCategory2, IconAlertCircle,
 } from "@tabler/icons-react";
 import { ImageUploadField } from "../components/Views";
+import { apiFetch as api } from "../lib/api";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
-
-async function api(path: string, opts: RequestInit = {}) {
-  const r = await fetch(`${API_BASE}${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
-    ...opts,
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.message || `Error ${r.status}`);
-  return j;
-}
 
 interface SubCat {
   id: string; name: string; slug: string;
