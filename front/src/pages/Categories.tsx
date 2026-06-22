@@ -22,11 +22,13 @@ async function api(path: string, opts: RequestInit = {}) {
 interface SubCat {
   id: string; name: string; slug: string;
   description?: string; imageUrl?: string; categoryId: string;
+  _count?: { productLinks: number };
 }
 interface Cat {
   id: string; name: string; slug: string;
   description?: string; imageUrl?: string; order: number;
   subCategories: SubCat[];
+  _count?: { productLinks: number };
 }
 
 // ── Shared inputs ─────────────────────────────────────────────────────────────
@@ -384,7 +386,12 @@ export default function CategoriesPage({ showToast }: {
                           : <IconCategory size={20} className="text-slate-300" />}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-900 text-base leading-tight">{cat.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-slate-900 text-base leading-tight">{cat.name}</p>
+                          <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-extrabold text-sky-700 shrink-0">
+                            {cat._count?.productLinks ?? 0} products
+                          </span>
+                        </div>
                         <p className="text-xs text-slate-400 font-mono truncate mt-0.5">{cat.slug}</p>
                         {cat.description && <p className="text-xs text-slate-500 truncate mt-0.5 max-w-sm">{cat.description}</p>}
                         {/* Mobile sub count */}
@@ -438,7 +445,12 @@ export default function CategoriesPage({ showToast }: {
                                     : <IconCategory2 size={16} className="text-slate-300" />}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="font-semibold text-slate-800 text-sm">{sub.name}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-slate-800 text-sm">{sub.name}</p>
+                                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 shrink-0">
+                                      {sub._count?.productLinks ?? 0} products
+                                    </span>
+                                  </div>
                                   <p className="text-[11px] text-slate-400 font-mono truncate">{sub.slug}</p>
                                 </div>
                               </div>

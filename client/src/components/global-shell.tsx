@@ -25,7 +25,12 @@ import {
   IconCpu,
   IconBuildingHospital,
   IconPill,
-  IconTools
+  IconTools,
+  IconPackage,
+  IconTable,
+  IconWind,
+  IconHeart as IconTablerHeart,
+  IconShield
 } from "@tabler/icons-react";
 import { apiClient } from "@/lib/api-client";
 import { useCategoriesNav } from "@/lib/use-categories-nav";
@@ -85,7 +90,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
         const all: any[] = res.data.data || [];
         const ql = q.toLowerCase();
         const matched = all.filter((p: any) => {
-          const variantNames   = (p.variants || []).map((v: any) => v.name || "").join(" ");
+          const variantNames = (p.variants || []).map((v: any) => v.name || "").join(" ");
           const compositeNames = (p.variants || []).map((v: any) => `${p.name} — ${v.name}`).join(" ");
           return (
             p.name?.toLowerCase().includes(ql) ||
@@ -222,46 +227,59 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                       <div className="p-3 grid grid-cols-2 gap-1">
                         {navCategories.length === 0 ? (
                           <p className="col-span-2 text-xs text-slate-400 p-3">Loading categories…</p>
-                        ) : navCategories.map((cat) => (
-                          <div key={cat.id}>
-                            <Link
-                              href={`/categories/${cat.slug}`}
-                              onClick={() => setOpenDropdown(null)}
-                              className="flex items-start gap-3 rounded-xl p-3 hover:bg-slate-50 transition group"
-                            >
-                              <div className="h-8 w-8 shrink-0 rounded-xl bg-brand/10 overflow-hidden flex items-center justify-center mt-0.5">
-                                {cat.imageUrl ? (
-                                  <img src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover animate-fade-in" />
-                                ) : (
-                                  <Layers className="h-4 w-4 text-brand" />
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-slate-900 text-xs group-hover:text-brand transition">{cat.name}</p>
-                                {cat.subCategories?.length > 0 && (
-                                  <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                                    {cat.subCategories.slice(0, 3).map((s) => s.name).join(" · ")}
-                                  </p>
-                                )}
-                              </div>
-                            </Link>
-                            {/* Subcategory pills */}
-                            {cat.subCategories?.length > 0 && (
-                              <div className="flex flex-wrap gap-1 px-3 pb-2">
-                                {cat.subCategories.slice(0, 4).map((sub) => (
-                                  <Link
-                                    key={sub.id}
-                                    href={`/products?subcategory=${sub.slug}`}
-                                    onClick={() => setOpenDropdown(null)}
-                                    className="text-[9px] font-bold text-slate-500 bg-slate-100 hover:bg-brand/10 hover:text-brand px-2 py-0.5 rounded-full transition"
-                                  >
-                                    {sub.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                        ) : navCategories.map((cat) => {
+                          const catSlug = cat.slug.toLowerCase().trim();
+                          const categoryIconMap: Record<string, React.ComponentType<any>> = {
+                            "pass-box": IconPackage,
+                            "lab-furniture": IconTable,
+                            "laminar-air-flow": IconWind,
+                            "aed-box": IconTablerHeart,
+                            "air-shower": IconWind,
+                            "bio-safety-cabinate": IconShield,
+                            "safety-cabinates": IconShield,
+                          };
+                          const CategoryIcon = categoryIconMap[catSlug] || Layers;
+                          return (
+                            <div key={cat.id}>
+                              <Link
+                                href={`/categories/${cat.slug}`}
+                                onClick={() => setOpenDropdown(null)}
+                                className="flex items-start gap-3 rounded-xl p-3 hover:bg-slate-50 transition group"
+                              >
+                                <div className="h-8 w-8 shrink-0 rounded-xl bg-brand/5 flex items-center justify-center mt-0.5 group-hover:bg-brand/10 transition">
+                                  {cat.imageUrl ? (
+                                    <img src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover animate-fade-in" />
+                                  ) : (
+                                    <CategoryIcon className="h-4.5 w-4.5 text-brand" stroke={1.5} />
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-slate-900 text-xs group-hover:text-brand transition">{cat.name}</p>
+                                  {cat.subCategories?.length > 0 && (
+                                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+                                      {cat.subCategories.slice(0, 3).map((s) => s.name).join(" · ")}
+                                    </p>
+                                  )}
+                                </div>
+                              </Link>
+                              {/* Subcategory pills */}
+                              {cat.subCategories?.length > 0 && (
+                                <div className="flex flex-wrap gap-1 px-3 pb-2">
+                                  {cat.subCategories.slice(0, 4).map((sub) => (
+                                    <Link
+                                      key={sub.id}
+                                      href={`/products?subcategory=${sub.slug}`}
+                                      onClick={() => setOpenDropdown(null)}
+                                      className="text-[9px] font-bold text-slate-500 bg-slate-100 hover:bg-brand/10 hover:text-brand px-2 py-0.5 rounded-full transition"
+                                    >
+                                      {sub.name}
+                                    </Link>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   )}

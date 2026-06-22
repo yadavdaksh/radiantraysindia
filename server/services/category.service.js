@@ -6,7 +6,18 @@ import { deleteR2Image } from "../utils/r2.js";
 export const categoryService = {
   list: async () => {
     return prisma.category.findMany({
-      include: { subCategories: true },
+      include: {
+        subCategories: {
+          include: {
+            _count: {
+              select: { productLinks: true }
+            }
+          }
+        },
+        _count: {
+          select: { productLinks: true }
+        }
+      },
       orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
   },
