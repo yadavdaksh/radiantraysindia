@@ -11,7 +11,8 @@
     "migrate": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "studio": "prisma studio",
-    "seed": "node -r dotenv/config prisma/seed.js"
+    "seed": "node -r dotenv/config prisma/seed.js",
+    "cleanup-docs": "node cleanup-docs.js"
   },
   "prisma": {
     "seed": "node -r dotenv/config prisma/seed.js"

@@ -8,7 +8,7 @@ import { apiFetch } from "../lib/api";
 import {
   IconBuilding, IconMail, IconCloud, IconCreditCard, IconTruck,
   IconChartBar, IconEye, IconEyeOff,
-  IconAlertCircle, IconCircleCheck,
+  IconAlertCircle, IconCircleCheck, IconPlus, IconMapPin,
 } from "@tabler/icons-react";
 
 const inp = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-500 focus:bg-white transition";
@@ -98,6 +98,33 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
   const [razorpay, setRazorpay] = useState({ keyId: "", keySecret: "", webhookSecret: "" });
   const [shiprocket, setShiprocket] = useState({ email: "", password: "" });
   const [analytics, setAnalytics] = useState({ gaId: "", metaPixelId: "", gtagId: "" });
+
+  // Pickup addresses
+  const emptyPickup = { nickname: "", name: "", email: "", phone: "", address: "", address2: "", city: "", state: "", country: "India", pincode: "", isDefault: true };
+  type PickupAddress = { id: string; nickname: string; name: string; email: string; phone: string; address: string; address2?: string; city: string; state: string; country: string; pincode: number; isDefault: boolean };
+  const [pickupAddresses, setPickupAddresses] = useState<PickupAddress[]>([]);
+  const [pickupForm, setPickupForm] = useState({ ...emptyPickup });
+  const [pickupSaving, setPickupSaving] = useState(false);
+  const [showPickupForm, setShowPickupForm] = useState(false);
+
+  const loadPickupAddresses = () => {
+    apiFetch("/shipments/pickup-addresses")
+      .then((j) => setPickupAddresses((j as { data: PickupAddress[] }).data || []))
+      .catch(() => { });
+  };
+
+  const savePickupAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPickupSaving(true);
+    try {
+      await apiFetch("/shipments/pickup-addresses", { method: "POST", body: JSON.stringify({ ...pickupForm, pincode: Number(pickupForm.pincode) }) });
+      showToast("Pickup address saved");
+      setPickupForm({ ...emptyPickup });
+      setShowPickupForm(false);
+      loadPickupAddresses();
+    } catch (err: any) { showToast(err.message || "Failed to save pickup address", "error"); }
+    finally { setPickupSaving(false); }
+  };
 
   // Test states
   const [smtpTest, setSmtpTest] = useState<"idle" | "testing" | "ok" | "fail">("idle");
@@ -290,30 +317,121 @@ export default function SettingsPage({ showToast }: { showToast: (m: string, t?:
 
         {/* ── SHIPROCKET ── */}
         {tab === "shiprocket" && (
-          <form onSubmit={e => { e.preventDefault(); save("shiprocket_config", shiprocket); }} className="space-y-5">
-            <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-xs text-emerald-700 space-y-1">
-              <p className="font-bold">Shiprocket credentials — same as your login at <a href="https://app.shiprocket.in" target="_blank" rel="noopener noreferrer" className="underline">app.shiprocket.in</a></p>
-              <p>These are used to auto-create AWB bookings and sync tracking for B2C orders.</p>
+          <div className="space-y-8">
+            {/* ── Credentials ── */}
+            <form onSubmit={e => { e.preventDefault(); save("shiprocket_config", shiprocket); }} className="space-y-5">
+              <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-xs text-emerald-700 space-y-1">
+                <p className="font-bold">Shiprocket credentials — same as your login at <a href="https://app.shiprocket.in" target="_blank" rel="noopener noreferrer" className="underline">app.shiprocket.in</a></p>
+                <p>These are used to auto-create AWB bookings and sync tracking for B2C orders.</p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <F label="Login Email">
+                  <input type="email" value={shiprocket.email} onChange={e => setShiprocket(p => ({ ...p, email: e.target.value }))} className={inp} placeholder="logistics@radiantraysindia.com" />
+                </F>
+                <F label="Login Password">
+                  <PwdInput value={shiprocket.password} onChange={v => setShiprocket(p => ({ ...p, password: v }))} />
+                </F>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="submit" disabled={saving} className="rounded-xl bg-sky-700 hover:bg-sky-800 px-6 py-3 text-sm font-bold text-white transition disabled:opacity-60">
+                  {saving ? "Saving…" : "Save Shiprocket Credentials"}
+                </button>
+                <button type="button" onClick={testShiprocket} disabled={srTest === "testing" || !shiprocket.email}
+                  className="rounded-xl border border-slate-200 hover:bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition disabled:opacity-60">
+                  Test Login
+                </button>
+                <TestResult status={srTest} msg={srTestMsg} />
+              </div>
+            </form>
+
+            {/* ── Pickup Addresses ── */}
+            <div className="space-y-4 border-t border-slate-100 pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-extrabold text-slate-900 flex items-center gap-2"><IconMapPin size={15} className="text-sky-600" /> Pickup / Warehouse Addresses</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Used for Shiprocket rate calculation and AWB creation. At least one required.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowPickupForm(s => !s); setPickupForm({ ...emptyPickup }); loadPickupAddresses(); }}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-sky-700 hover:bg-sky-800 px-4 py-2 text-xs font-bold text-white transition"
+                >
+                  <IconPlus size={13} /> Add Address
+                </button>
+              </div>
+
+              {/* Existing list */}
+              {pickupAddresses.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-4 text-xs text-rose-700 font-semibold flex items-center gap-2">
+                  <IconAlertCircle size={14} /> No pickup address configured — add one below to enable logistics rate checks.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {pickupAddresses.map((pa) => (
+                    <div key={pa.id} className={`rounded-xl border px-4 py-3 text-xs flex items-start justify-between gap-3 ${pa.isDefault ? "border-sky-300 bg-sky-50" : "border-slate-200 bg-white"}`}>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <p className="font-extrabold text-slate-900">{pa.nickname}</p>
+                          {pa.isDefault && <span className="text-[9px] font-extrabold bg-sky-600 text-white px-1.5 py-0.5 rounded-full uppercase">Default</span>}
+                        </div>
+                        <p className="text-slate-600">{pa.name} · {pa.phone} · {pa.email}</p>
+                        <p className="text-slate-500">{pa.address}{pa.address2 ? `, ${pa.address2}` : ""}, {pa.city}, {pa.state} — {pa.pincode}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add form */}
+              {showPickupForm && (
+                <form onSubmit={savePickupAddress} className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">New Pickup Address</p>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <F label="Nickname *" hint="Short label e.g. HQ Warehouse">
+                      <input required value={pickupForm.nickname} onChange={e => setPickupForm(p => ({ ...p, nickname: e.target.value }))} className={inp} placeholder="HQ Warehouse" />
+                    </F>
+                    <F label="Contact Name *">
+                      <input required value={pickupForm.name} onChange={e => setPickupForm(p => ({ ...p, name: e.target.value }))} className={inp} placeholder="Daksh Yadav" />
+                    </F>
+                    <F label="Contact Email *">
+                      <input required type="email" value={pickupForm.email} onChange={e => setPickupForm(p => ({ ...p, email: e.target.value }))} className={inp} placeholder="logistics@radiantraysindia.com" />
+                    </F>
+                    <F label="Contact Phone *">
+                      <input required value={pickupForm.phone} onChange={e => setPickupForm(p => ({ ...p, phone: e.target.value }))} className={inp} placeholder="+91 92117 81378" />
+                    </F>
+                    <F label="Address Line 1 *">
+                      <input required value={pickupForm.address} onChange={e => setPickupForm(p => ({ ...p, address: e.target.value }))} className={inp} placeholder="Plot 42, Sector II" />
+                    </F>
+                    <F label="Address Line 2">
+                      <input value={pickupForm.address2} onChange={e => setPickupForm(p => ({ ...p, address2: e.target.value }))} className={inp} placeholder="Tech Park" />
+                    </F>
+                    <F label="City *">
+                      <input required value={pickupForm.city} onChange={e => setPickupForm(p => ({ ...p, city: e.target.value }))} className={inp} placeholder="Hyderabad" />
+                    </F>
+                    <F label="State *">
+                      <input required value={pickupForm.state} onChange={e => setPickupForm(p => ({ ...p, state: e.target.value }))} className={inp} placeholder="Telangana" />
+                    </F>
+                    <F label="Pincode *">
+                      <input required type="number" value={pickupForm.pincode} onChange={e => setPickupForm(p => ({ ...p, pincode: e.target.value }))} className={inp} placeholder="500032" />
+                    </F>
+                    <F label="Country">
+                      <input value={pickupForm.country} onChange={e => setPickupForm(p => ({ ...p, country: e.target.value }))} className={inp} />
+                    </F>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                    <input type="checkbox" checked={pickupForm.isDefault} onChange={e => setPickupForm(p => ({ ...p, isDefault: e.target.checked }))} className="h-4 w-4 rounded border-slate-300 text-sky-600" />
+                    Set as default pickup address
+                  </label>
+                  <div className="flex gap-3 pt-1">
+                    <button type="button" onClick={() => setShowPickupForm(false)} className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+                    <button type="submit" disabled={pickupSaving} className="rounded-xl bg-sky-700 hover:bg-sky-800 px-6 py-2.5 text-sm font-bold text-white transition disabled:opacity-60">
+                      {pickupSaving ? "Saving…" : "Save Pickup Address"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <F label="Login Email">
-                <input type="email" value={shiprocket.email} onChange={e => setShiprocket(p => ({ ...p, email: e.target.value }))} className={inp} placeholder="logistics@radiantraysindia.com" />
-              </F>
-              <F label="Login Password">
-                <PwdInput value={shiprocket.password} onChange={v => setShiprocket(p => ({ ...p, password: v }))} />
-              </F>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <button type="submit" disabled={saving} className="rounded-xl bg-sky-700 hover:bg-sky-800 px-6 py-3 text-sm font-bold text-white transition disabled:opacity-60">
-                {saving ? "Saving…" : "Save Shiprocket Credentials"}
-              </button>
-              <button type="button" onClick={testShiprocket} disabled={srTest === "testing" || !shiprocket.email}
-                className="rounded-xl border border-slate-200 hover:bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition disabled:opacity-60">
-                Test Login
-              </button>
-              <TestResult status={srTest} msg={srTestMsg} />
-            </div>
-          </form>
+          </div>
         )}
 
         {/* ── ANALYTICS ── */}

@@ -130,11 +130,11 @@ export default function ProductsPage({ showToast }: { showToast: (msg: string, t
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Archive product "${name}"?`)) return;
+    if (!confirm(`Permanently delete product "${name}"? This cannot be undone.`)) return;
     setDeleting(id);
     try {
       await apiFetch(`/products/${id}`, { method: "DELETE" });
-      showToast("Product archived");
+      showToast("Product deleted");
       load();
     } catch (e: any) { showToast(e.message || "Delete failed", "error"); }
     finally { setDeleting(null); }

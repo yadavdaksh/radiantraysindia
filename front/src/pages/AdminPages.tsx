@@ -980,17 +980,20 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [rates, setRates] = useState<Record<string, any[]>>({});
+  const [ratesError, setRatesError] = useState<Record<string, string>>({});
   const [loadingRates, setLoadingRates] = useState<Record<string, boolean>>({});
   const [selectedCourier, setSelectedCourier] = useState<Record<string, any>>({});
   const [exportOpen, setExportOpen] = useState(false);
 
   const fetchRates = async (orderId: string) => {
     setLoadingRates(prev => ({ ...prev, [orderId]: true }));
+    setRatesError(prev => ({ ...prev, [orderId]: "" }));
     try {
       const res = await apiFetch(`/shipments/rates/${orderId}`);
-      setRates(prev => ({ ...prev, [orderId]: res.data?.available_courier_companies || [] }));
+      const data = res.data || res;
+      setRates(prev => ({ ...prev, [orderId]: data?.available_courier_companies || [] }));
     } catch (err: any) {
-      showToast(err.message, "error");
+      setRatesError(prev => ({ ...prev, [orderId]: err.message || "Failed to fetch rates" }));
     } finally {
       setLoadingRates(prev => ({ ...prev, [orderId]: false }));
     }
@@ -1291,6 +1294,12 @@ export function OrdersPage({ showToast }: { showToast: (m: string, t?: any) => v
                             Calculates Shiprocket real-time rates based on pickup coordinates, order dimensions, weight, and delivery pincode.
                           </p>
                         </div>
+
+                        {ratesError[order.id] && (
+                          <div className="rounded-lg bg-rose-50 border border-rose-200 px-3 py-2 text-[10px] text-rose-800 font-semibold">
+                            ⚠ {ratesError[order.id]}
+                          </div>
+                        )}
 
                         {rates[order.id] && rates[order.id].length > 0 && (
                           <div className="space-y-2.5">

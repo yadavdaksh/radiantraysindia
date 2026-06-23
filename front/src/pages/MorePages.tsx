@@ -483,11 +483,18 @@ export function BannersPage({ showToast }: { showToast: (m: string, t?: any) => 
             </div>
             <ImageUploadField label="Desktop Image (1920×600px) *" value={form.desktopImageUrl} onChange={url => setForm(p => ({ ...p, desktopImageUrl: url }))} showToast={showToast} dimensions="1920 × 600 px" />
             <ImageUploadField label="Mobile Image (600×800px) — optional" value={form.mobileImageUrl} onChange={url => setForm(p => ({ ...p, mobileImageUrl: url }))} showToast={showToast} dimensions="600 × 800 px" />
-            <div className="flex gap-3 pt-1">
-              <button onClick={() => setModal(null)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button onClick={save} disabled={saving} className="flex-1 rounded-xl bg-sky-700 hover:bg-sky-800 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition">
-                {saving ? "Saving…" : modal === "create" ? "Create" : "Update"}
-              </button>
+            <div className="flex flex-col gap-2 pt-1">
+              {!form.desktopImageUrl && (
+                <p className="text-[10px] text-rose-500 font-bold text-center bg-rose-50 border border-rose-200 rounded-lg py-1.5">
+                  ⚠ Upload desktop image before saving
+                </p>
+              )}
+              <div className="flex gap-3">
+                <button onClick={() => setModal(null)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button onClick={save} disabled={saving || !form.desktopImageUrl} className="flex-1 rounded-xl bg-sky-700 hover:bg-sky-800 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition">
+                  {saving ? "Saving…" : modal === "create" ? "Create" : "Update"}
+                </button>
+              </div>
             </div>
           </div>
         </Modal>

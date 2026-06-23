@@ -42,7 +42,9 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const variant =
       item.variantId && product.variants.find((entry) => entry.id === item.variantId);
-    const unitPrice = Number(variant?.price ?? product.basePrice ?? 0);
+    const unitPrice = variant
+      ? Number(variant.salePrice || variant.price || product.salePrice || product.basePrice || 0)
+      : Number(product.salePrice || product.basePrice || 0);
     const quantity = Math.max(Number(item.quantity || 1), 1);
     subtotal += unitPrice * quantity;
 

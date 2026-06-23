@@ -514,20 +514,32 @@ export const productService = {
   delete: async (id) => {
     const existing = await prisma.product.findUnique({
       where: { id },
-      include: { documents: true },
+      include: {
+        images: true,
+        documents: true,
+        variants: { include: { images: true, documents: true } },
+      },
     });
     if (!existing) throw new ApiError(404, "Product not found");
 
-    // Delete associated document files from R2
+    // Delete all R2 files: product images, product docs, variant images, variant docs
+    for (const img of existing.images || []) {
+      if (img.key) deleteR2Image(img.key).catch(() => {});
+    }
     for (const doc of existing.documents || []) {
       if (doc.key) deleteObjectFromR2(doc.key).catch(() => {});
     }
+    for (const variant of existing.variants || []) {
+      for (const img of variant.images || []) {
+        if (img.key) deleteR2Image(img.key).catch(() => {});
+      }
+      for (const doc of variant.documents || []) {
+        if (doc.key) deleteObjectFromR2(doc.key).catch(() => {});
+      }
+    }
 
-    // Soft delete/archive
-    await prisma.product.update({
-      where: { id },
-      data: { isActive: false },
-    });
+    // Hard delete — cascades to variants, images, documents via Prisma schema
+    await prisma.product.delete({ where: { id } });
 
     return { success: true };
   },

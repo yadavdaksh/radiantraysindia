@@ -38,8 +38,8 @@ export const duplicateProduct = asyncHandler(async (req, res) => {
 
 export const deleteProduct = asyncHandler(async (req, res) => {
   await productService.delete(req.params.id);
-  logActivity({ type: "DELETE", title: `Product archived: ${req.params.id}`, entityType: "product", entityId: req.params.id, actorId: req.user?.id });
-  res.json(new ApiResponsive(200, null, "Product archived successfully"));
+  logActivity({ type: "DELETE", title: `Product deleted: ${req.params.id}`, entityType: "product", entityId: req.params.id, actorId: req.user?.id });
+  res.json(new ApiResponsive(200, null, "Product deleted successfully"));
 });
 
 export const bulkProductActions = asyncHandler(async (req, res) => {

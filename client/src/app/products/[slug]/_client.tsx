@@ -821,12 +821,18 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
             );
           })()}
 
-          {/* Documents */}
           {(() => {
-            const combinedDocs = [
-              ...(product.documents || []),
-              ...(selectedVariant?.documents || [])
-            ];
+            const seenUrls = new Set<string>();
+            // If a variant is selected, show its own docs; fall back to product-level docs.
+            // Never merge both — backend may nest variant docs inside product.documents too.
+            const variantDocs: any[] = selectedVariant?.documents || [];
+            const sourceDocs = variantDocs.length > 0 ? variantDocs : (product.documents || []);
+            const combinedDocs = sourceDocs.filter((doc: any) => {
+              if (!doc || !doc.url || !doc.title) return false;
+              if (seenUrls.has(doc.url)) return false;
+              seenUrls.add(doc.url);
+              return true;
+            });
             if (combinedDocs.length === 0) return null;
             return (
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm space-y-2">

@@ -5,8 +5,8 @@ import { imageUpload } from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
-router.post("/", requireAuth, requirePermission("gallery", "create"), imageUpload, uploadAsset);
-router.delete("/", requireAuth, requirePermission("gallery", "delete"), deleteAsset);
+router.post("/", requireAuth, requirePermission("gallery:create", "product:create", "product:update"), imageUpload, uploadAsset);
+router.delete("/", requireAuth, requirePermission("gallery:delete", "product:update"), deleteAsset);
 
 export default router;
 

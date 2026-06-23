@@ -142,17 +142,23 @@ export const requireRole = (...roles) =>
     next();
   });
 
-export const requirePermission = (resource, action) =>
-  asyncHandler(async (req, _res, next) => {
+export const requirePermission = (...perms) => {
+  // Support both (resource, action) and ([resource, action], ...) forms
+  const required = perms.length === 2 && typeof perms[0] === "string" && typeof perms[1] === "string"
+    ? [`${perms[0]}:${perms[1]}`]
+    : perms.map(p => Array.isArray(p) ? `${p[0]}:${p[1]}` : p);
+
+  return asyncHandler(async (req, _res, next) => {
     if (!req.user) throw new ApiError(401, "Authentication required");
     if (req.user.role === "SUPER_ADMIN") return next();
 
-    const permission = `${resource}:${action}`;
-    if (!req.user.permissions.has(permission)) {
+    const hasAny = required.some(p => req.user.permissions.has(p));
+    if (!hasAny) {
       throw new ApiError(403, "Insufficient permissions");
     }
     next();
   });
+};
 
 export const optionalAuth = asyncHandler(async (req, _res, next) => {
   const token = resolveToken(req, ACCESS_COOKIE);

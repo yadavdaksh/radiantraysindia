@@ -351,7 +351,9 @@ export const orderService = {
     const itemsData = [];
 
     for (const item of customer.cart.items) {
-      const price = item.variant ? (item.variant.price || item.product.basePrice) : item.product.basePrice;
+      const price = item.variant
+        ? (item.variant.salePrice || item.variant.price || item.product.salePrice || item.product.basePrice)
+        : (item.product.salePrice || item.product.basePrice);
       if (!price) {
         throw new ApiError(400, `Product ${item.product.name} is missing a base price`);
       }

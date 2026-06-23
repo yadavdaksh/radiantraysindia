@@ -23,7 +23,7 @@ const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4002/api/v1";
 async function uploadToR2(file: File): Promise<{ url: string; key: string }> {
   const formData = new FormData();
   formData.append("image", file);
-  formData.append("folder", "admin");
+  formData.append("folder", "products");
   const res = await fetch(`${API_BASE}/uploads`, {
     method: "POST",
     credentials: "include",
@@ -119,6 +119,7 @@ interface ImageUploadFieldProps {
 export function ImageUploadField({ label, value, onChange, showToast, dimensions }: ImageUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const r2KeyRef = React.useRef<string>("");
 
   const onDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -128,18 +129,18 @@ export function ImageUploadField({ label, value, onChange, showToast, dimensions
     setError("");
     try {
       // Delete existing R2 image before uploading replacement
-      if (value && !value.startsWith("blob:")) {
-        const oldKey = value.split("/").pop() || "";
-        if (oldKey) deleteFromR2(oldKey).catch(() => { }); // non-blocking
+      if (r2KeyRef.current) {
+        deleteFromR2(r2KeyRef.current).catch(() => { });
       }
       const data = await uploadToR2(file);
+      r2KeyRef.current = data.key;
       onChange(data.url);
-      showToast("Image uploaded to Cloudflare R2 successfully.");
+      showToast("Image uploaded successfully.");
     } catch (err) {
-      console.warn("R2 Endpoint failed, triggering sandbox mock fallback", err);
+      console.warn("R2 upload failed, using local preview", err);
       const fakeUrl = URL.createObjectURL(file);
       onChange(fakeUrl);
-      showToast("Image uploaded (Sandbox Offline Fallback).");
+      showToast("Image uploaded (offline preview).");
     } finally {
       setUploading(false);
     }
@@ -155,16 +156,16 @@ export function ImageUploadField({ label, value, onChange, showToast, dimensions
     if (!value) return;
     setUploading(true);
     try {
-      if (!value.startsWith("blob:")) {
-        const key = value.split("/").pop() || "";
-        if (key) await deleteFromR2(key);
+      if (r2KeyRef.current) {
+        await deleteFromR2(r2KeyRef.current);
+        r2KeyRef.current = "";
       }
       onChange("");
-      showToast("Image deleted from Cloudflare R2.");
+      showToast("Image removed.");
     } catch (err) {
       console.warn("Delete asset failed:", err);
       onChange("");
-      showToast("Image cleared from database record.");
+      showToast("Image cleared.");
     } finally {
       setUploading(false);
     }
@@ -227,6 +228,7 @@ export function ImageUploadField({ label, value, onChange, showToast, dimensions
 // --- Product Image Uploader with Drag-Drop Reorder ---
 interface ProductImage {
   url: string;
+  key?: string;
   altText?: string;
   isPrimary?: boolean;
   sortOrder?: number;
@@ -253,7 +255,7 @@ export function ProductImageUploader({ images, onChange, showToast }: ProductIma
     for (const file of files) {
       try {
         const data = await uploadToR2(file);
-        newImgs.push({ url: data.url, altText: file.name, isPrimary: false, sortOrder: images.length + newImgs.length });
+        newImgs.push({ url: data.url, key: data.key, altText: file.name, isPrimary: false, sortOrder: images.length + newImgs.length });
         showToast(`Uploaded: ${file.name}`);
       } catch {
         const fakeUrl = URL.createObjectURL(file);
@@ -275,7 +277,7 @@ export function ProductImageUploader({ images, onChange, showToast }: ProductIma
     for (const file of files) {
       try {
         const data = await uploadToR2(file);
-        newImgs.push({ url: data.url, altText: file.name, isPrimary: false, sortOrder: images.length + newImgs.length });
+        newImgs.push({ url: data.url, key: data.key, altText: file.name, isPrimary: false, sortOrder: images.length + newImgs.length });
       } catch {
         const fakeUrl = URL.createObjectURL(file);
         newImgs.push({ url: fakeUrl, altText: file.name, isPrimary: false, sortOrder: images.length + newImgs.length });
@@ -300,9 +302,8 @@ export function ProductImageUploader({ images, onChange, showToast }: ProductIma
 
   const removeImage = async (idx: number) => {
     const img = images[idx];
-    if (!img.url.startsWith("blob:")) {
-      const key = img.url.split("/").pop() || "";
-      if (key) deleteFromR2(key).catch(() => { });
+    if (img.key) {
+      deleteFromR2(img.key).catch(() => { });
     }
     const updated = images.filter((_, i) => i !== idx);
     updated.forEach((img, i) => { img.sortOrder = i; img.isPrimary = i === 0; });
@@ -389,7 +390,7 @@ export function ProductImageUploader({ images, onChange, showToast }: ProductIma
 async function uploadPdfToR2(file: File): Promise<{ url: string; key: string; originalName: string }> {
   const formData = new FormData();
   formData.append("document", file);
-  formData.append("folder", "documents");
+  formData.append("folder", "products/documents");
   const res = await fetch(`${API_BASE}/uploads`, {
     method: "POST",
     credentials: "include",

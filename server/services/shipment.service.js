@@ -73,11 +73,10 @@ export const shipmentService = {
       throw new ApiError(400, "Order is missing delivery postal code");
     }
 
-    // Calculate weight
+    // Calculate total weight — use variant.weight, fallback to defaultWeight from settings
     let totalWeight = 0;
     for (const item of order.items) {
-      const variant = item.variant;
-      const weight = variant?.shippingWeight || settings.defaultWeight || 0.5;
+      const weight = item.variant?.weight || settings.defaultWeight || 0.5;
       totalWeight += weight * item.quantity;
     }
 
@@ -91,15 +90,8 @@ export const shipmentService = {
 
       return response.data || response;
     } catch (error) {
-      console.error("Failed to check courier rates with Shiprocket:", error.message);
-      // Return a simulated mock logistics list for development/sandbox fallback
-      return {
-        available_courier_companies: [
-          { courier_company_id: 10001, courier_name: "Delhivery Direct", rate: 120.00, expected_delivery_date: "3-4 Days" },
-          { courier_company_id: 10002, courier_name: "Blue Dart Express", rate: 250.00, expected_delivery_date: "1-2 Days" },
-          { courier_company_id: 10003, courier_name: "ExpressBees", rate: 95.00, expected_delivery_date: "4-5 Days" },
-        ]
-      };
+      const isCreds = error.message?.includes("credentials not configured") || error.message?.includes("401");
+      throw new ApiError(503, isCreds ? "Shiprocket not configured — add credentials in Settings → Shiprocket tab" : `Shiprocket error: ${error.message}`);
     }
   },
 

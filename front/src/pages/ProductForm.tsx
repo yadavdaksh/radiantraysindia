@@ -261,7 +261,7 @@ export default function ProductForm({ showToast }: {
         stock: v.stock,
         imageUrl: v.imageUrl || null,
         images: v.images,
-        documents: v.documents || [],
+        documents: (v.documents || []).filter((d: any) => d.title && d.url),
         specification: v.specification,
         isDefault: v.isDefault,
         isActive: v.isActive,
@@ -311,7 +311,7 @@ export default function ProductForm({ showToast }: {
       metaDescription: form.metaDescription || null,
       canonicalUrl: form.canonicalUrl || null,
       images: form.images,
-      documents: form.documents,
+      documents: form.documents.filter((d: any) => d.title && d.url),
       variants,
     };
 
