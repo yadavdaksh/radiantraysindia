@@ -114,7 +114,7 @@ export default async function Home() {
               </Link>
             </div>
 
-            <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {categories.map((cat: any) => (
                 <Link
                   key={cat.slug}
@@ -224,7 +224,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
               {industries.map((ind: any) => {
                 const cleanSlug = ind.slug.toLowerCase().trim().replace(/:/g, "").replace(/\s+/g, "-");
                 const sectorIconMap: Record<string, React.ComponentType<any>> = {

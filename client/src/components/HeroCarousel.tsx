@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import EmblaCarousel from "embla-carousel";
 
 interface Banner {
   id: string;
@@ -19,7 +19,6 @@ interface Banner {
 interface HeroCarouselProps {
   banners: Banner[];
 }
-
 
 const FALLBACK_BANNERS: Banner[] = [
   {
@@ -57,159 +56,180 @@ const FALLBACK_GRADIENTS = [
 
 export default function HeroCarousel({ banners }: HeroCarouselProps) {
   const slides = banners && banners.length > 0 ? banners : FALLBACK_BANNERS;
+  const emblaRef = useRef<HTMLDivElement>(null);
+  const [emblaApi, setEmblaApi] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const timer = useRef<NodeJS.Timeout | null>(null);
+  const isDragging = useRef(false);
 
-  const next = useCallback(() => { setDirection(1); setCurrentIndex((p) => (p + 1) % slides.length); }, [slides.length]);
-  const prev = () => { setDirection(-1); setCurrentIndex((p) => (p - 1 + slides.length) % slides.length); };
-  const dot = (i: number) => { setDirection(i > currentIndex ? 1 : -1); setCurrentIndex(i); };
+  useEffect(() => {
+    if (!emblaRef.current) return;
 
-  const stop = useCallback(() => { if (timer.current) clearInterval(timer.current); }, []);
-  const start = useCallback(() => { stop(); timer.current = setInterval(next, 5000); }, [next, stop]);
+    const api = EmblaCarousel(emblaRef.current, {
+      loop: true,
+      align: "start",
+      slidesToScroll: 1,
+    });
 
-  useEffect(() => { if (!isHovered) start(); else stop(); return stop; }, [currentIndex, isHovered, start, stop]);
+    setEmblaApi(api);
 
-  const variants = {
-    enter: (d: number) => ({ x: d > 0 ? "100%" : "-100%", opacity: 0 }),
-    center: {
-      x: 0, opacity: 1,
-      transition: { x: { type: "spring" as const, stiffness: 280, damping: 28 }, opacity: { duration: 0.35 } },
-    },
-    exit: (d: number) => ({
-      x: d < 0 ? "100%" : "-100%", opacity: 0,
-      transition: { x: { type: "spring" as const, stiffness: 280, damping: 28 }, opacity: { duration: 0.3 } },
-    }),
-  };
+    const onSelect = () => {
+      setCurrentIndex(api.selectedScrollSnap());
+    };
 
-  const slide = slides[currentIndex];
-  const hasDesktop = !!slide.desktopImageUrl;
-  const hasMobile = !!slide.mobileImageUrl;
-  const gradClass = FALLBACK_GRADIENTS[currentIndex % FALLBACK_GRADIENTS.length];
+    api.on("select", onSelect);
+    api.on("pointerDown", () => {
+      isDragging.current = false;
+    });
+    api.on("pointerUp", () => {
+      // Small delay to prevent link click if it was a drag
+      setTimeout(() => {
+        isDragging.current = false;
+      }, 50);
+    });
+
+    let interval: NodeJS.Timeout;
+
+    const startAutoplay = () => {
+      interval = setInterval(() => {
+        api.scrollNext();
+      }, 5000);
+    };
+
+    const stopAutoplay = () => {
+      clearInterval(interval);
+    };
+
+    startAutoplay();
+
+    // Pause on hover
+    emblaRef.current.addEventListener("mouseenter", stopAutoplay);
+    emblaRef.current.addEventListener("mouseleave", startAutoplay);
+
+    return () => {
+      stopAutoplay();
+      api.destroy();
+    };
+  }, [slides.length]);
 
   return (
-    /* Outer wrapper — same max-width/padding as page content so card sits inside page margins */
     <div className="w-full bg-white py-4 sm:py-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Card — aspect matches 1600:560 on desktop, 768:400 on mobile */}
         <div
-          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl aspect-[4/5] sm:aspect-[16/7] md:aspect-[1920/600]"
+          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl aspect-[4/5] sm:aspect-[16/7] md:aspect-[1920/600] group/carousel"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Fallback gradient base (always under the image) */}
-          <div className={`absolute inset-0 bg-gradient-to-r ${gradClass}`} />
+          {/* Embla Viewport */}
+          <div className="overflow-hidden h-full w-full" ref={emblaRef}>
+            {/* Embla Container */}
+            <div className="flex h-full w-full">
+              {slides.map((slide, index) => {
+                const hasDesktop = !!slide.desktopImageUrl;
+                const hasMobile = !!slide.mobileImageUrl;
+                const gradClass = FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length];
 
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="absolute inset-0"
-            >
-              {(() => {
-                const SlideContent = () => (
-                  <>
-                    {/* ── With image: fill card ── */}
+                return (
+                  <div
+                    key={slide.id || index}
+                    className="flex-[0_0_100%] min-w-0 h-full w-full relative select-none"
+                  >
+                    {/* Fallback gradient base */}
+                    <div className={`absolute inset-0 bg-gradient-to-r ${gradClass}`} />
+
+                    {/* Image handling */}
                     {(hasDesktop || hasMobile) ? (
                       <>
-                        {/* Desktop image */}
                         {hasDesktop && (
                           <img
                             src={slide.desktopImageUrl}
                             alt={slide.title}
-                            className="hidden md:block absolute inset-0 w-full h-full object-cover object-center select-none"
+                            className="hidden md:block absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
                           />
                         )}
-                        {/* Mobile image */}
                         {hasMobile && (
                           <img
                             src={slide.mobileImageUrl}
                             alt={slide.title}
-                            className="block md:hidden absolute inset-0 w-full h-full object-cover object-center select-none"
+                            className="block md:hidden absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
                           />
                         )}
-                        {/* Fallback to desktop on mobile if no mobile image */}
                         {hasDesktop && !hasMobile && (
                           <img
                             src={slide.desktopImageUrl}
                             alt={slide.title}
-                            className="block md:hidden absolute inset-0 w-full h-full object-cover object-center select-none"
+                            className="block md:hidden absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
                           />
                         )}
-
-
                       </>
                     ) : (
-                      /* ── No image: styled gradient card like screenshot ── */
                       <>
                         {/* Subtle pattern */}
-                        <div className="absolute inset-0 opacity-10"
-                          style={{ backgroundImage: "radial-gradient(circle at 25% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 75% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)" }}
+                        <div
+                          className="absolute inset-0 opacity-10"
+                          style={{
+                            backgroundImage:
+                              "radial-gradient(circle at 25% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 75% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)",
+                          }}
                         />
                         {/* Dot grid */}
-                        <div className="absolute inset-0 opacity-[0.06]"
-                          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+                        <div
+                          className="absolute inset-0 opacity-[0.06]"
+                          style={{
+                            backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+                            backgroundSize: "28px 28px",
+                          }}
                         />
 
                         {/* Centered content */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 sm:px-20 space-y-3 sm:space-y-4">
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
-                            className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white/90 uppercase tracking-widest"
-                          >
+                          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] sm:text-xs font-bold text-white/90 uppercase tracking-widest">
                             <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
                             Radiant Rays Pvt. Ltd.
-                          </motion.div>
-                          <motion.h2
-                            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45 }}
-                            className="text-xl sm:text-3xl lg:text-[2.6rem] font-extrabold text-white tracking-tight leading-tight max-w-3xl"
-                          >
+                          </div>
+                          <h2 className="text-xl sm:text-3xl lg:text-[2.6rem] font-extrabold text-white tracking-tight leading-tight max-w-3xl">
                             {slide.title}
-                          </motion.h2>
+                          </h2>
                           {slide.subtitle && (
-                            <motion.p
-                              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.45 }}
-                              className="text-[11px] sm:text-sm text-white/75 max-w-xl leading-relaxed"
-                            >
+                            <p className="text-[11px] sm:text-sm text-white/75 max-w-xl leading-relaxed">
                               {slide.subtitle}
-                            </motion.p>
+                            </p>
                           )}
                         </div>
                       </>
                     )}
-                  </>
-                );
 
-                return (
-                  <div className="absolute inset-0">
+                    {/* Link overlay */}
                     {slide.linkUrl && (
-                      <Link href={slide.linkUrl} className="absolute inset-0 z-10 cursor-pointer" />
+                      <Link
+                        href={slide.linkUrl}
+                        onClick={(e) => {
+                          if (isDragging.current) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className="absolute inset-0 z-10 cursor-pointer"
+                      />
                     )}
-                    <SlideContent />
                   </div>
                 );
-              })()}
-            </motion.div>
-          </AnimatePresence>
+              })}
+            </div>
+          </div>
 
           {/* Prev / Next arrows */}
           {slides.length > 1 && (
             <>
               <button
-                onClick={prev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/25 hover:bg-black/45 text-white transition z-20 backdrop-blur-sm"
+                onClick={() => emblaApi && emblaApi.scrollPrev()}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/25 hover:bg-black/45 text-white transition z-20 backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 duration-200"
                 aria-label="Previous"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
-                onClick={next}
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/25 hover:bg-black/45 text-white transition z-20 backdrop-blur-sm"
+                onClick={() => emblaApi && emblaApi.scrollNext()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/25 hover:bg-black/45 text-white transition z-20 backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 duration-200"
                 aria-label="Next"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -223,9 +243,10 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
               {slides.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => dot(i)}
-                  className={`rounded-full transition-all duration-300 ${i === currentIndex ? "w-7 h-2 bg-white" : "w-2 h-2 bg-white/40 hover:bg-white/70"
-                    }`}
+                  onClick={() => emblaApi && emblaApi.scrollTo(i)}
+                  className={`rounded-full transition-all duration-300 ${
+                    i === currentIndex ? "w-7 h-2 bg-white" : "w-2 h-2 bg-white/40 hover:bg-white/70"
+                  }`}
                   aria-label={`Slide ${i + 1}`}
                 />
               ))}

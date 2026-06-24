@@ -107,53 +107,62 @@ export default function CartPage() {
             return (
               <div
                 key={item.id}
-                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow flex gap-5 items-start"
+                className="group rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow grid grid-cols-[80px_1fr] sm:flex gap-4 sm:gap-5 items-start sm:items-center"
               >
                 {/* Image */}
                 <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden flex items-center justify-center p-2 shrink-0">
                   <img src={imageUrl} alt={name} className="max-h-full max-w-full object-contain" />
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <h4 className="font-bold text-slate-900 text-sm leading-snug">{name}</h4>
-                  {variantName && (
-                    <span className="inline-block text-[9px] font-extrabold text-brand uppercase tracking-widest bg-brand/10 px-2 py-0.5 rounded-full">
-                      {variantName}
-                    </span>
-                  )}
-                  <p className="text-[10px] text-slate-400 font-mono">SKU: {sku}</p>
-                  <p className="text-sm font-extrabold text-slate-800">₹{price.toLocaleString("en-IN")}</p>
-                </div>
+                {/* Info + Controls container */}
+                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  {/* Info */}
+                  <div className="space-y-1 min-w-0">
+                    <h4 className="font-bold text-slate-900 text-sm leading-snug truncate sm:whitespace-normal">{name}</h4>
+                    {variantName && (
+                      <span className="inline-block text-[9px] font-extrabold text-brand uppercase tracking-widest bg-brand/10 px-2 py-0.5 rounded-full">
+                        {variantName}
+                      </span>
+                    )}
+                    <p className="text-[10px] text-slate-400 font-mono">SKU: {sku}</p>
+                    <p className="text-sm font-extrabold text-slate-800 sm:hidden">₹{price.toLocaleString("en-IN")}</p>
+                  </div>
 
-                {/* Qty stepper */}
-                <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="px-3 py-2.5 text-slate-500 hover:bg-white hover:text-slate-900 transition"
-                  >
-                    <Minus className="h-3.5 w-3.5" />
-                  </button>
-                  <span className="w-10 text-center text-sm font-extrabold text-slate-900 border-x border-slate-200">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="px-3 py-2.5 text-slate-500 hover:bg-white hover:text-slate-900 transition"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                  {/* Controls (Qty Stepper & Price/Remove) */}
+                  <div className="flex items-center justify-between sm:gap-6 mt-1 sm:mt-0">
+                    {/* Qty stepper */}
+                    <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="px-2.5 py-2 text-slate-500 hover:bg-white hover:text-slate-900 transition"
+                      >
+                        <Minus className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="w-8 text-center text-xs font-extrabold text-slate-900 border-x border-slate-200">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="px-2.5 py-2 text-slate-500 hover:bg-white hover:text-slate-900 transition"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
 
-                {/* Total + remove */}
-                <div className="text-right space-y-2 shrink-0">
-                  <p className="font-extrabold text-slate-950">₹{total.toLocaleString("en-IN")}</p>
-                  <button
-                    onClick={() => handleRemove(item.id, name)}
-                    className="text-slate-300 hover:text-rose-500 transition"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                    {/* Total + remove */}
+                    <div className="text-right flex items-center gap-4">
+                      <div>
+                        <p className="text-[10px] text-slate-400 sm:hidden">Total</p>
+                        <p className="font-extrabold text-slate-950 text-sm sm:text-base">₹{total.toLocaleString("en-IN")}</p>
+                      </div>
+                      <button
+                        onClick={() => handleRemove(item.id, name)}
+                        className="text-slate-300 hover:text-rose-500 transition p-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             );

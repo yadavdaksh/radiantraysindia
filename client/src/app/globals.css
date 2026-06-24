@@ -3,8 +3,6 @@
 @tailwind utilities;
 
 :root {
-  --background: #f7fbff;
-  --foreground: #0f172a;
   --brand: #035f96;
   --brand-dark: #024d79;
   --brand-light: #dff0fb;
@@ -20,7 +18,6 @@ html {
 
 body {
   margin: 0;
-  color: var(--foreground);
   background:
     radial-gradient(circle at top, rgba(3, 95, 150, 0.08), transparent 28%),
     linear-gradient(180deg, #f8fbff 0%, #ffffff 45%, #f7fbff 100%);

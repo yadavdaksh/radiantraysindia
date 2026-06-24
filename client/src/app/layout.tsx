@@ -57,6 +57,7 @@ import { WishlistProvider } from "@/contexts/wishlist-context";
 import { GlobalShell } from "@/components/global-shell";
 import { Toaster } from "sonner";
 
+
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -6,7 +6,7 @@ import { SiteShell } from "@/components/site-shell";
 import { ProductCard } from "@/components/ProductCard";
 import { apiClient } from "@/lib/api-client";
 import { products as mockProducts, categories as mockCategories } from "@/lib/site-data";
-import { Search, SlidersHorizontal, CircleAlert, X, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, SlidersHorizontal, CircleAlert, X, ChevronDown, ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react";
 import { expandToVariantCards } from "@/lib/variant-cards";
 
 interface ExtractedAttribute {
@@ -260,6 +260,7 @@ export default function ProductsPage() {
   }, [sorted, currentPage]);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<"grid" | "list">("grid");
 
   // Active filters tracker
   const activeFilters = useMemo(() => {
@@ -445,15 +446,43 @@ export default function ProductsPage() {
           {/* Results count & page summary */}
           {!loading && (
             <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-0.5">
-              <p>
-                {sorted.length === 0 ? "No products found" : `${sorted.length} product${sorted.length !== 1 ? "s" : ""}`}
-                {activeFilters.length > 0 && " matching filters"}
-              </p>
-              {sorted.length > 0 && (
+              <div className="flex items-center gap-4">
                 <p>
-                  Showing {Math.min(sorted.length, (currentPage - 1) * ITEMS_PER_PAGE + 1)}-
-                  {Math.min(sorted.length, currentPage * ITEMS_PER_PAGE)} of {sorted.length}
+                  {sorted.length === 0 ? "No products found" : `${sorted.length} product${sorted.length !== 1 ? "s" : ""}`}
+                  {activeFilters.length > 0 && " matching filters"}
                 </p>
+                {sorted.length > 0 && (
+                  <p className="hidden sm:block">
+                    Showing {Math.min(sorted.length, (currentPage - 1) * ITEMS_PER_PAGE + 1)}-
+                    {Math.min(sorted.length, currentPage * ITEMS_PER_PAGE)} of {sorted.length}
+                  </p>
+                )}
+              </div>
+              {sorted.length > 0 && (
+                <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-0.5 border border-slate-200">
+                  <button
+                    onClick={() => setLayoutMode("grid")}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      layoutMode === "grid"
+                        ? "bg-white text-brand shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    }`}
+                    title="Grid View"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setLayoutMode("list")}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      layoutMode === "list"
+                        ? "bg-white text-brand shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    }`}
+                    title="List View"
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -484,11 +513,12 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className={layoutMode === "grid" ? "grid gap-3 sm:gap-5 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-4"}>
                 {paginatedProducts.map((prod, i) => (
                   <ProductCard
                     key={`${prod._productSlug || prod.slug}-${prod._variantSlug || i}`}
                     prod={prod}
+                    layout={layoutMode}
                   />
                 ))}
               </div>

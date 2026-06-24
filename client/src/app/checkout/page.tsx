@@ -302,16 +302,18 @@ export default function CheckoutPage() {
                     const price = Number(item.variant?.price || item.product.basePrice || 0);
                     const img = getProductImage(item.product.slug, item.product.images, item.product.variants);
                     return (
-                      <div key={item.id} className="py-4 flex items-center gap-4">
-                        <div className="h-14 w-14 shrink-0 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5">
-                          <img src={img} alt={item.product.name} className="max-h-full object-contain" />
+                      <div key={item.id} className="py-4 flex flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-12 w-12 shrink-0 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5">
+                            <img src={img} alt={item.product.name} className="max-h-full object-contain" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-xs sm:text-sm text-slate-900 truncate">{item.product.name}</p>
+                            {item.variant?.name && <p className="text-[9px] text-brand font-bold uppercase tracking-wider">{item.variant.name}</p>}
+                            <p className="text-[10px] sm:text-xs text-slate-500">Qty: {item.quantity} × ₹{price.toLocaleString("en-IN")}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-slate-900 truncate">{item.product.name}</p>
-                          {item.variant?.name && <p className="text-[10px] text-brand font-bold">{item.variant.name}</p>}
-                          <p className="text-xs text-slate-500">Qty: {item.quantity} × ₹{price.toLocaleString("en-IN")}</p>
-                        </div>
-                        <p className="font-extrabold text-slate-950 shrink-0">₹{(price * item.quantity).toLocaleString("en-IN")}</p>
+                        <p className="font-extrabold text-slate-950 text-xs sm:text-sm shrink-0">₹{(price * item.quantity).toLocaleString("en-IN")}</p>
                       </div>
                     );
                   })}

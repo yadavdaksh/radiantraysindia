@@ -634,16 +634,16 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
 
                 {/* Qty + CTA */}
                 <div className="space-y-3 pt-1">
-                  <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-3">
-                    <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden">
-                      <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">−</button>
-                      <span className="px-4 py-2.5 text-sm font-bold text-slate-900 border-x border-slate-200 min-w-12 text-center">{qty}</span>
-                      <button onClick={() => setQty(qty + 1)} className="px-3.5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">+</button>
+                  <div className="flex flex-col sm:grid sm:grid-cols-[auto_1fr_1fr] items-center gap-3">
+                    <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden w-full sm:w-auto justify-between">
+                      <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">−</button>
+                      <span className="px-5 py-2.5 text-sm font-bold text-slate-900 border-x border-slate-200 min-w-12 text-center">{qty}</span>
+                      <button onClick={() => setQty(qty + 1)} className="px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">+</button>
                     </div>
                     <button
                       onClick={handleAddToCart}
                       disabled={selectedVariant?.stock === 0}
-                      className={`flex-1 min-w-36 inline-flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-bold transition shadow-sm disabled:opacity-40 ${
+                      className={`w-full sm:flex-1 inline-flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-bold transition shadow-sm disabled:opacity-40 ${
                         addedToCart ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-brand bg-white text-brand hover:bg-brand/5"
                       }`}
                     >
@@ -652,7 +652,7 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
                     <button
                       onClick={handleBuyNow}
                       disabled={selectedVariant?.stock === 0}
-                      className="flex-1 min-w-36 inline-flex items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-bold text-white hover:bg-brand-dark transition shadow shadow-brand/20 disabled:opacity-40"
+                      className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-bold text-white hover:bg-brand-dark transition shadow shadow-brand/20 disabled:opacity-40"
                     >
                       <Zap className="h-4 w-4" /> Buy Now
                     </button>

@@ -80,15 +80,30 @@ export default function TestimonialsCarousel({ testimonials }: TestimonialsCarou
       {/* Slider viewport */}
       <div className="overflow-hidden">
         <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(e, { offset }) => {
+            const swipeThreshold = 50;
+            if (offset.x < -swipeThreshold) {
+              if (currentIndex < maxIndex) {
+                setCurrentIndex((prev) => prev + 1);
+              }
+            } else if (offset.x > swipeThreshold) {
+              if (currentIndex > 0) {
+                setCurrentIndex((prev) => prev - 1);
+              }
+            }
+          }}
           animate={{ x: `-${currentIndex * (100 / itemsPerPage)}%` }}
           transition={{ type: "spring", stiffness: 180, damping: 24 }}
-          className="flex gap-5"
+          className="flex gap-5 cursor-grab active:cursor-grabbing touch-pan-y"
           style={{ width: `${(totalItems / itemsPerPage) * 100}%` }}
         >
           {testimonials.map((t, i) => (
             <div
               key={i}
-              className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-brand/20 transition-all duration-300"
+              className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-brand/20 transition-all duration-300 select-none"
               style={{ width: `calc(${100 / totalItems}% - ${(20 * (totalItems - 1)) / totalItems}px)` }}
             >
               <div>
