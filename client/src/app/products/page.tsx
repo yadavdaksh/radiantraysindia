@@ -286,6 +286,7 @@ export default function ProductsPage() {
       });
     });
     return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, sortOrder, maxPrice, search, selectedAttributes]);
 
   return (

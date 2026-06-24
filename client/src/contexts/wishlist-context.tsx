@@ -139,7 +139,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     syncLocal(next);
   };
 
-  const isInWishlist = (productSlugOrId: string, _variantId: string | null = null) => {
+  const isInWishlist = (productSlugOrId: string) => {
     return wishlist.some((item) => keyMatches(item, productSlugOrId));
   };
 

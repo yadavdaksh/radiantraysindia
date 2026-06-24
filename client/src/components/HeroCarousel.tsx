@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import EmblaCarousel from "embla-carousel";
@@ -59,7 +59,6 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
   const emblaRef = useRef<HTMLDivElement>(null);
   const [emblaApi, setEmblaApi] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
   const isDragging = useRef(false);
 
   useEffect(() => {
@@ -117,8 +116,6 @@ export default function HeroCarousel({ banners }: HeroCarouselProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl aspect-[4/5] sm:aspect-[16/7] md:aspect-[1920/600] group/carousel"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
           {/* Embla Viewport */}
           <div className="overflow-hidden h-full w-full" ref={emblaRef}>

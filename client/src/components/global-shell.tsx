@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ShoppingBag, User, Heart, Search, LogOut,
   MapPin, Mail, Phone, ChevronDown, Layers,
-  ArrowRight, Tag, Home,
+  ArrowRight, Home,
 } from "lucide-react";
 import {
   IconPlant,

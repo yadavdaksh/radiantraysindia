@@ -12,7 +12,6 @@ interface FeaturedProductsProps {
 
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
   const cards = expandToVariantCards(products);
-  if (!cards.length) return null;
 
   const emblaRef = useRef<HTMLDivElement>(null);
   const [emblaApi, setEmblaApi] = useState<any>(null);
@@ -54,6 +53,8 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
       api.destroy();
     };
   }, [cards.length]);
+
+  if (!cards.length) return null;
 
   return (
     <div className="relative w-full py-4 group/carousel">
