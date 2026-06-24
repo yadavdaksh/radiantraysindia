@@ -707,26 +707,38 @@ export function GlobalShell({ children }: { children: ReactNode }) {
                     All Cleanroom Catalog
                   </Link>
                 </li>
-                <li>
-                  <Link href="/categories/biosafety-cabinets" className="transition hover:text-brand">
-                    Biosafety Cabinets
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/categories/laminar-air-flow" className="transition hover:text-brand">
-                    Laminar Air Flow Workstations
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/categories/pass-boxes" className="transition hover:text-brand">
-                    Dynamic Pass Boxes
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/categories/cleanroom-furniture" className="transition hover:text-brand">
-                    B2C Stainless Steel Furniture
-                  </Link>
-                </li>
+                {navCategories.length > 0 ? (
+                  navCategories.slice(0, 6).map((cat) => (
+                    <li key={cat.id}>
+                      <Link href={`/categories/${cat.slug}`} className="transition hover:text-brand">
+                        {cat.name}
+                      </Link>
+                    </li>
+                  ))
+                ) : (
+                  <>
+                    <li>
+                      <Link href="/categories/bio-safety-cabinate" className="transition hover:text-brand">
+                        Bio Safety Cabinets
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/categories/laminar-air-flow" className="transition hover:text-brand">
+                        Laminar Air Flow
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/categories/pass-box" className="transition hover:text-brand">
+                        Pass Boxes
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/categories/lab-furniture" className="transition hover:text-brand">
+                        Lab Furniture
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
 

@@ -105,8 +105,8 @@ export const products: ProductRecord[] = [
 
 export const categories = [
   {
-    name: "Biosafety Cabinets",
-    slug: "biosafety-cabinets",
+    name: "Bio Safety Cabinate",
+    slug: "bio-safety-cabinate",
     summary: "Containment systems for safe sample handling and aerosol protection.",
   },
   {
@@ -115,13 +115,13 @@ export const categories = [
     summary: "HEPA filtered clean workstations for controlled environments.",
   },
   {
-    name: "Pass Boxes",
-    slug: "pass-boxes",
+    name: "Pass Box",
+    slug: "pass-box",
     summary: "Transfer chambers for controlled material movement.",
   },
   {
-    name: "Cleanroom Furniture",
-    slug: "cleanroom-furniture",
+    name: "Lab Furniture",
+    slug: "lab-furniture",
     summary: "Storage, benches and garment support solutions.",
   },
 ];
