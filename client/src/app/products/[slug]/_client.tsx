@@ -823,14 +823,21 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
 
           {(() => {
             const seenUrls = new Set<string>();
+            const seenTitles = new Set<string>();
             // If a variant is selected, show its own docs; fall back to product-level docs.
             // Never merge both — backend may nest variant docs inside product.documents too.
             const variantDocs: any[] = selectedVariant?.documents || [];
             const sourceDocs = variantDocs.length > 0 ? variantDocs : (product.documents || []);
             const combinedDocs = sourceDocs.filter((doc: any) => {
               if (!doc || !doc.url || !doc.title) return false;
-              if (seenUrls.has(doc.url)) return false;
-              seenUrls.add(doc.url);
+              
+              const cleanUrl = doc.url.trim().toLowerCase();
+              const cleanTitle = doc.title.trim().toLowerCase().replace("catalogue", "catalog");
+              
+              if (seenUrls.has(cleanUrl) || seenTitles.has(cleanTitle)) return false;
+              
+              seenUrls.add(cleanUrl);
+              seenTitles.add(cleanTitle);
               return true;
             });
             if (combinedDocs.length === 0) return null;
