@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     null;
   const image = rawImage
     ? rawImage.startsWith("http") ? rawImage : `${BASE_URL}${rawImage}`
-    : `${BASE_URL}/logo.png`;
+    : `${BASE_URL}/logo.jpeg`;
 
   const url = `${BASE_URL}/products/${params.slug}`;
 

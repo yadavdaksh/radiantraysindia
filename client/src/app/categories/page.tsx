@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     url: "https://radiantraysindia.com/categories",
     type: "website",
     siteName: "Radiant Rays Pvt. Ltd.",
-    images: [{ url: "https://radiantraysindia.com/logo.png", width: 2024, height: 777, alt: "Radiant Rays Pvt. Ltd." }],
+    images: [{ url: "https://radiantraysindia.com/logo.jpeg", width: 2024, height: 777, alt: "Radiant Rays Pvt. Ltd." }],
   },
 };
 

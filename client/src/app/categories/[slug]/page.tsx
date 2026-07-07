@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const rawImage = category?.imageUrl;
   const image = rawImage
     ? rawImage.startsWith("http") ? rawImage : `${BASE_URL}${rawImage}`
-    : `${BASE_URL}/logo.png`;
+    : `${BASE_URL}/logo.jpeg`;
 
   return {
     title,

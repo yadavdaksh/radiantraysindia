@@ -9,7 +9,7 @@ export type ProductRecord = {
   description: string;
   features: string[];
   specifications: { label: string; value: string }[];
-  variants: string[];
+  variants: any[];
   applications: string[];
 };
 
@@ -18,7 +18,7 @@ export const products: ProductRecord[] = [
     name: "Biosafety Cabinet Class II A2",
     slug: "biosafety-cabinet-class-ii-a2",
     type: "B2B",
-    category: "Biosafety Cabinets",
+    category: "Bio Safety Cabinate",
     summary:
       "HEPA filtered containment cabinet for laboratory and pharmaceutical workflows.",
     description:
@@ -34,7 +34,11 @@ export const products: ProductRecord[] = [
       { label: "Installation", value: "Bench top or floor standing" },
       { label: "Sash", value: "Manual or automatic" },
     ],
-    variants: ["Class I", "Class II A2", "Class III"],
+    variants: [
+      { id: "class-i", name: "Class I", slug: "class-i", price: 45000, isActive: true },
+      { id: "class-ii-a2", name: "Class II A2", slug: "class-ii-a2", price: 65000, isActive: true },
+      { id: "class-iii", name: "Class III", slug: "class-iii", price: 95000, isActive: true }
+    ],
     applications: ["Pharmaceutical labs", "Biotech R&D", "Hospital pathology"],
   },
   {
@@ -57,14 +61,17 @@ export const products: ProductRecord[] = [
       { label: "Material", value: "SS 304 / powder coated mild steel" },
       { label: "Power", value: "Single phase industrial supply" },
     ],
-    variants: ["Vertical", "Horizontal"],
+    variants: [
+      { id: "vertical", name: "Vertical", slug: "vertical", price: 35000, isActive: true },
+      { id: "horizontal", name: "Horizontal", slug: "horizontal", price: 38000, isActive: true }
+    ],
     applications: ["Sterile compounding", "Electronics assembly", "Research labs"],
   },
   {
     name: "Pass Box System",
     slug: "pass-box-system",
     type: "B2B",
-    category: "Pass Boxes",
+    category: "Pass Box",
     summary:
       "Material transfer chamber for reducing contamination between cleanroom zones.",
     description:
@@ -80,14 +87,17 @@ export const products: ProductRecord[] = [
       { label: "Interlock", value: "Mechanical or electromagnetic" },
       { label: "Finish", value: "SS 304" },
     ],
-    variants: ["Static", "Dynamic"],
+    variants: [
+      { id: "static", name: "Static", slug: "static", price: 25000, isActive: true },
+      { id: "dynamic", name: "Dynamic", slug: "dynamic", price: 45000, isActive: true }
+    ],
     applications: ["Pharmaceutical plants", "Microelectronics", "Aseptic transfer"],
   },
   {
     name: "Cleanroom Storage Cabinet",
     slug: "cleanroom-storage-cabinet",
     type: "B2C",
-    category: "Cleanroom Furniture",
+    category: "Lab Furniture",
     summary:
       "Practical storage cabinet for cleanroom accessories, garments and consumables.",
     description:
@@ -98,7 +108,10 @@ export const products: ProductRecord[] = [
       { label: "Material", value: "Industrial grade metal" },
       { label: "Commerce", value: "Price, cart and checkout enabled" },
     ],
-    variants: ["Single door", "Double door"],
+    variants: [
+      { id: "single-door", name: "Single door", slug: "single-door", price: 15000, isActive: true },
+      { id: "double-door", name: "Double door", slug: "double-door", price: 22000, isActive: true }
+    ],
     applications: ["Production areas", "Lab support rooms", "Healthcare facilities"],
   },
 ];

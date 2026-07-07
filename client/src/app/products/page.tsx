@@ -14,7 +14,7 @@ interface ExtractedAttribute {
   values: string[];
 }
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 6;
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -219,7 +219,12 @@ export default function ProductsPage() {
       // Category match
       const matchCat = selectedCategory === "all" ||
         p.categories?.some((c: any) => c.category?.slug === selectedCategory || c.category?.id === selectedCategory) ||
-        p.category === selectedCategory;
+        p.category === selectedCategory ||
+        p.category?.toLowerCase().replace(/\s+/g, "-") === selectedCategory ||
+        (selectedCategory === "bio-safety-cabinate" && p.category === "Biosafety Cabinets") ||
+        (selectedCategory === "laminar-air-flow" && p.category === "Laminar Air Flow") ||
+        (selectedCategory === "pass-box" && p.category === "Pass Boxes") ||
+        (selectedCategory === "lab-furniture" && p.category === "Cleanroom Furniture");
 
       // Price match (only B2C / products with defined prices are filtered by max price; B2B / Price on Request are preserved)
       const price = Number(p.basePrice || 0);
