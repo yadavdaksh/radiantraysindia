@@ -42,13 +42,6 @@ const FOUNDERS = [
   },
 ];
 
-const MILESTONES = [
-  { year: "2009", label: "Founded", desc: "Company established in Gurugram, Haryana with focus on cleanroom containment systems." },
-  { year: "2017", label: "500 Clients", desc: "Crossed 500 active facility partnerships across pharma, biotech, and hospital sectors." },
-  { year: "2020", label: "B2C Launch", desc: "Launched direct e-commerce channel for stainless steel cleanroom furniture." },
-  { year: "2024", label: "Pan-India", desc: "Expanded delivery network to all 28 states via Shiprocket logistics." },
-];
-
 const VALUES = [
   { icon: Target, title: "Safety First", desc: "Every dimension, weld, and filter tolerance is engineered to spec — not approximated." },
   { icon: Award, title: "Quality Standards", desc: "Products comply with industry safety standards and precise cleanroom requirements." },
@@ -174,41 +167,24 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── Story + Timeline ── */}
-        <section className="grid gap-12 lg:grid-cols-2 items-start">
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Our Story</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
-                From a Workshop to<br />500+ Facilities Served
-              </h2>
-            </div>
-            <p className="text-slate-600 text-sm leading-relaxed">
-              Radiant Rays Pvt. Ltd. was founded in 2009 in Gurugram, Haryana with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop at Jagaram 406/21, Shanti Nagar, Gurugram grew into a full-scale manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
-            </p>
-            <p className="text-slate-600 text-sm leading-relaxed">
-              Today we manufacture and deliver across all 28 Indian states, serving pharmaceutical manufacturers, biotech R&D centres, hospital operation theatres, electronics assembly plants, and food processing facilities that require clean, controlled working environments.
-            </p>
-            <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-bold text-brand hover:underline">
+        {/* ── Story ── */}
+        <section className="max-w-3xl mx-auto space-y-6 text-center py-4">
+          <div className="space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Our Story</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
+              From a Workshop to 500+ Facilities Served
+            </h2>
+          </div>
+          <p className="text-slate-600 text-sm leading-relaxed max-w-2xl mx-auto">
+            Radiant Rays Pvt. Ltd. was founded in 2009 in Gurugram, Haryana with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop at Jagaram 406/21, Shanti Nagar, Gurugram grew into a full-scale manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
+          </p>
+          <p className="text-slate-600 text-sm leading-relaxed max-w-2xl mx-auto">
+            Today we manufacture and deliver across all 28 Indian states, serving pharmaceutical manufacturers, biotech R&D centres, hospital operation theatres, electronics assembly plants, and food processing facilities that require clean, controlled working environments.
+          </p>
+          <div className="pt-2">
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-3 text-sm font-bold text-white hover:bg-brand-dark transition shadow-lg shadow-brand/20">
               Work with us <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-
-          <div className="space-y-3">
-            {MILESTONES.map((m, i) => (
-              <div key={m.year} className="flex gap-4 items-start">
-                <div className="shrink-0 flex flex-col items-center">
-                  <div className="h-10 w-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
-                    <span className="text-[10px] font-extrabold text-brand">{m.year}</span>
-                  </div>
-                  {i < MILESTONES.length - 1 && <div className="w-px h-5 bg-brand/15 mt-1" />}
-                </div>
-                <div className="pb-1 pt-2">
-                  <p className="font-bold text-slate-900 text-sm">{m.label}</p>
-                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{m.desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 
