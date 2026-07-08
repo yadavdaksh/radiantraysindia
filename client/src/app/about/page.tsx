@@ -64,14 +64,14 @@ export default function AboutPage() {
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md px-5 py-2 text-xs font-bold uppercase tracking-widest text-brand-light shadow-md">
             <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
-            Est. 2009 — Gurugram, India
+            Est. 2026 — Gurugram, India
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight max-w-4xl mx-auto">
             Engineering Cleaner, Safer<br />
             <span className="bg-gradient-to-r from-brand-light via-sky-300 to-white bg-clip-text text-transparent">Controlled Environments</span>
           </h1>
           <p className="text-slate-300 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed">
-            Radiant Rays Pvt. Ltd. manufactures high-specification, compliance-driven cleanroom equipment trusted by over 500+ pharmaceutical, biotechnology, and healthcare facilities nationwide.
+            Radiant Rays Pvt. Ltd. is a highly motivated and enthusiastic startup manufacturing high-specification, compliance-driven cleanroom equipment for pharmaceutical, biotechnology, and healthcare facilities.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <Link href="/products" className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 text-xs font-bold text-white hover:bg-brand-dark transition shadow-lg shadow-brand/20 hover:-translate-y-0.5 duration-200">
@@ -89,8 +89,8 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/20">
             {[
-              { n: "15+", l: "Years Experience" },
-              { n: "500+", l: "Facilities Served" },
+              { n: "2026", l: "Founded" },
+              { n: "100%", l: "Motivated Team" },
               { n: "28", l: "States Delivered" },
               { n: "24h", l: "Quote Response" },
             ].map(({ n, l }) => (
@@ -172,14 +172,14 @@ export default function AboutPage() {
           <div className="space-y-2">
             <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Our Story</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
-              From a Workshop to 500+ Facilities Served
+              An Ambitious Startup Focused on Precision
             </h2>
           </div>
           <p className="text-slate-600 text-sm leading-relaxed max-w-2xl mx-auto">
-            Radiant Rays Pvt. Ltd. was founded in 2009 in Gurugram, Haryana with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop at Jagaram 406/21, Shanti Nagar, Gurugram grew into a full-scale manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
+            Radiant Rays Pvt. Ltd. was founded in 2026 in Gurugram, Haryana as an ambitious startup driven by a highly motivated and enthusiastic team. Our single mission is to build cleanroom equipment that works exactly as specified, every time. Starting with a focus on innovation and precision engineering, we design and assemble high-quality biosafety cabinets, laminar air flow workstations, and specialized cleanroom systems.
           </p>
           <p className="text-slate-600 text-sm leading-relaxed max-w-2xl mx-auto">
-            Today we manufacture and deliver across all 28 Indian states, serving pharmaceutical manufacturers, biotech R&D centres, hospital operation theatres, electronics assembly plants, and food processing facilities that require clean, controlled working environments.
+            Today, our energetic team is committed to delivering state-of-the-art controlled environment solutions across all 28 Indian states, serving pharmaceutical manufacturers, biotech R&D centers, hospital operation theaters, electronics assembly plants, and food processing facilities.
           </p>
           <div className="pt-2">
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-3 text-sm font-bold text-white hover:bg-brand-dark transition shadow-lg shadow-brand/20">
