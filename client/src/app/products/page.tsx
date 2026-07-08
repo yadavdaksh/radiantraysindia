@@ -140,6 +140,7 @@ export default function ProductsPage() {
   const setPageAndSync = (v: number) => {
     setCurrentPage(v);
     syncUrl({ page: String(v) });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleAttributeChange = (attrName: string, value: string, checked: boolean) => {
