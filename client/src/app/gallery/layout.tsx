@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Gallery | Radiant Rays Pvt. Ltd.",
-  description: "View our cleanroom installations, ISO-certified biosafety cabinets, laminar air flow workstations, and modular cleanroom projects across India.",
+  description: "View our cleanroom installations, premium-grade biosafety cabinets, laminar air flow workstations, and modular cleanroom projects across India.",
   alternates: { canonical: "https://radiantraysindia.com/gallery" },
   openGraph: {
     title: "Cleanroom Project Gallery | Radiant Rays Pvt. Ltd.",

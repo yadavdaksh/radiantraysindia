@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://radiantraysindia.com/categories" },
   openGraph: {
     title: "Cleanroom Equipment Categories | Radiant Rays Pvt. Ltd.",
-    description: "Browse all cleanroom equipment categories from Radiant Rays — ISO 9001:2015 certified manufacturer.",
+    description: "Browse all cleanroom equipment categories from Radiant Rays — premium cleanroom equipment manufacturer.",
     url: "https://radiantraysindia.com/categories",
     type: "website",
     siteName: "Radiant Rays Pvt. Ltd.",

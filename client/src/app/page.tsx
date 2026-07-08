@@ -48,11 +48,11 @@ async function getHomeData() {
 
 export const metadata = {
   title: "Precision Cleanroom Equipment & Containment Systems",
-  description: "Radiant Rays manufactures ISO-compliant biosafety cabinets, laminar air flow workstations, pass boxes, air showers, and cleanroom modular furniture.",
+  description: "Radiant Rays manufactures premium-grade biosafety cabinets, laminar air flow workstations, pass boxes, air showers, and cleanroom modular furniture.",
 };
 
 const TRUST_BADGES = [
-  { icon: CheckCircle2, label: "ISO 9001:2015 Certified" },
+  { icon: CheckCircle2, label: "Premium Build Quality" },
   { icon: Zap, label: "15+ Years Experience" },
   { icon: Globe, label: "Pan-India Delivery" },
   { icon: CheckCircle2, label: "500+ Facilities Served" },
@@ -220,7 +220,7 @@ export default async function Home() {
                 Compliance-Driven Industrial Environments
               </h2>
               <p className="text-xs text-slate-500 max-w-xl">
-                Components engineered for ISO Class 1–9 cleanroom classifications.
+                Components engineered for high-performance and dust-free environments.
               </p>
             </div>
 
@@ -327,7 +327,7 @@ export default async function Home() {
               {
                 name: "Shiwakshi Singh",
                 title: "Co-Founder & Director ",
-                desc: "Leads business development, client relations, and quality assurance. Expert in GMP and ISO cleanroom standards.",
+                desc: "Leads business development, client relations, and quality assurance. Expert in cleanroom standards and sterile environments.",
                 image: "/images/founders/shiwakshi-singh.jpeg",
                 initial: "S",
               },

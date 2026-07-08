@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const category = await getCategory(params.slug);
   const name = category?.name || params.slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
   const description = category?.description ||
-    `Browse ${name} cleanroom systems from Radiant Rays Pvt. Ltd. — ISO certified biosafety cabinets, laminar flow units, and containment solutions.`;
+    `Browse ${name} cleanroom systems from Radiant Rays Pvt. Ltd. — premium-grade biosafety cabinets, laminar flow units, and containment solutions.`;
 
   const title = `${name} | Cleanroom Equipment | Radiant Rays Pvt. Ltd.`;
   const url = `${BASE_URL}/categories/${params.slug}`;

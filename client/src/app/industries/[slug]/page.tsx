@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const industry = await getIndustry(params.slug);
   const name = industry?.name || params.slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
   const description = industry?.description || industry?.summary ||
-    `Radiant Rays supplies ISO-certified cleanroom containment systems for ${name}. Custom biosafety cabinets, pass boxes, air showers and more.`;
+    `Radiant Rays supplies premium cleanroom containment systems for ${name}. Custom biosafety cabinets, pass boxes, air showers and more.`;
 
   const title = `${name} Cleanroom Solutions | Radiant Rays Pvt. Ltd.`;
   const url = `${BASE_URL}/industries/${params.slug}`;

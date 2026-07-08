@@ -54,7 +54,7 @@ export default function CareersPage() {
       {/* Why join */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-12">
         {[
-          { icon: "🏭", title: "Manufacturing Excellence", desc: "ISO-certified factory" },
+          { icon: "🏭", title: "Manufacturing Excellence", desc: "Modern fabrication facility" },
           { icon: "🌍", title: "Pan-India Impact", desc: "28 states served" },
           { icon: "🚀", title: "Fast Growth", desc: "500+ clients & growing" },
           { icon: "🤝", title: "Great Culture", desc: "Engineering-first team" },

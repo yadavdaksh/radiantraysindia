@@ -32,14 +32,14 @@ const FALLBACK_BANNERS: Banner[] = [
   {
     id: "fallback-2",
     title: "GMP Compliant Cleanroom Furniture & Access Systems",
-    subtitle: "ISO Class 1–9 compliant air showers, pass boxes, cross-over benches, and dynamic containment chambers.",
+    subtitle: "High-performance air showers, pass boxes, cross-over benches, and dynamic containment chambers.",
     desktopImageUrl: "",
     mobileImageUrl: "",
     linkUrl: "/categories",
   },
   {
     id: "fallback-3",
-    title: "ISO 9001:2015 Certified · Factory Direct · Pan-India",
+    title: "Precision Containment · Factory Direct · Pan-India",
     subtitle: "15+ years of engineering expertise. Trusted by 500+ pharmaceutical, biotech, and hospital facilities.",
     desktopImageUrl: "",
     mobileImageUrl: "",

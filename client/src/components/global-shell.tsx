@@ -676,7 +676,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
               </Link>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Precision-engineered cleanroom cabinets, containment boxes, air flow benches,
-                and SS modular furniture. ISO 9001 and CE compliant manufacturing.
+                and SS modular furniture. High-quality and custom manufacturing.
               </p>
               <div className="flex flex-col gap-2.5 text-xs text-slate-500 pt-2">
                 <span className="flex items-start gap-2">

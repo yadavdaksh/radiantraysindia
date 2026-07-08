@@ -44,16 +44,14 @@ const FOUNDERS = [
 
 const MILESTONES = [
   { year: "2009", label: "Founded", desc: "Company established in Gurugram, Haryana with focus on cleanroom containment systems." },
-  { year: "2013", label: "ISO Certified", desc: "Achieved ISO 9001 certification for manufacturing excellence." },
   { year: "2017", label: "500 Clients", desc: "Crossed 500 active facility partnerships across pharma, biotech, and hospital sectors." },
   { year: "2020", label: "B2C Launch", desc: "Launched direct e-commerce channel for stainless steel cleanroom furniture." },
-  { year: "2023", label: "CE Certified", desc: "Received CE marking for biosafety cabinets and LAF workstations." },
   { year: "2024", label: "Pan-India", desc: "Expanded delivery network to all 28 states via Shiprocket logistics." },
 ];
 
 const VALUES = [
   { icon: Target, title: "Safety First", desc: "Every dimension, weld, and filter tolerance is engineered to spec — not approximated." },
-  { icon: Award, title: "Compliance Ready", desc: "Products comply with WHO GMP, ISO Class 1–9, and CE safety directives." },
+  { icon: Award, title: "Quality Standards", desc: "Products comply with industry safety standards and precise cleanroom requirements." },
   { icon: Zap, title: "Fast Turnaround", desc: "Standard configs ship in 7–14 days. Custom builds quoted within 24 hours." },
   { icon: Users, title: "Client-Led Design", desc: "Non-standard sizes, materials, and integrations welcomed. We build what you spec." },
   { icon: Factory, title: "Factory Direct", desc: "No middlemen. Direct pricing, technical warranty, and engineer support." },
@@ -186,7 +184,7 @@ export default function AboutPage() {
               </h2>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed">
-              Radiant Rays Pvt. Ltd. was founded in 2009 in Gurugram, Haryana with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop at Jagaram 406/21, Shanti Nagar, Gurugram grew into a full-scale ISO-certified manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
+              Radiant Rays Pvt. Ltd. was founded in 2009 in Gurugram, Haryana with a single mission — build cleanroom equipment that works exactly as specified, every time. What started as a small fabrication workshop at Jagaram 406/21, Shanti Nagar, Gurugram grew into a full-scale manufacturing facility after early success supplying biosafety cabinets and laminar air flow workstations to Delhi-NCR pharmaceutical companies.
             </p>
             <p className="text-slate-600 text-sm leading-relaxed">
               Today we manufacture and deliver across all 28 Indian states, serving pharmaceutical manufacturers, biotech R&D centres, hospital operation theatres, electronics assembly plants, and food processing facilities that require clean, controlled working environments.
@@ -233,27 +231,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── Certifications ── */}
-        <section className="rounded-3xl bg-slate-50 border border-slate-200 p-8 sm:p-10 space-y-6">
-          <div className="space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-brand">Compliance</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950">Certifications & Standards</h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { badge: "ISO", title: "ISO 9001:2015", desc: "Quality Management System — manufacturing and delivery processes." },
-              { badge: "CE", title: "CE Marking", desc: "European conformity for biosafety cabinets and LAF workstations." },
-              { badge: "GMP", title: "WHO GMP", desc: "Equipment designed to meet WHO GMP guidelines for pharma environments." },
-              { badge: "ISO", title: "ISO Class 1–9", desc: "Products tested and verified for all cleanroom classification grades." },
-            ].map((cert) => (
-              <div key={cert.title} className="rounded-2xl bg-white border border-slate-200 p-5 space-y-2 shadow-sm">
-                <span className="inline-block font-extrabold text-brand bg-brand/10 rounded-xl px-3 py-1 text-sm">{cert.badge}</span>
-                <h4 className="font-bold text-slate-900 text-sm">{cert.title}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">{cert.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* ── CTA ── */}
         <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-14 text-center shadow-2xl">

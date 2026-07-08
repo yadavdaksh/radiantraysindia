@@ -508,7 +508,7 @@ export function ProductDetailClient({ params }: { params: { slug: string } }) {
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
               { icon: Truck, label: "Pan-India Delivery" },
-              { icon: Award, label: "ISO 9001:2015" },
+              { icon: Award, label: "Premium Build" },
               { icon: Package, label: "Factory Direct" },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-100 px-3 py-2.5 text-xs font-semibold text-slate-600">
